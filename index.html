@@ -860,110 +860,162 @@ function setAnalysisTab(t){
   renderPanel();
 }
 
-// ── Analysis calculations ──
+// ── Analysis layout ──
 function renderAnalysis(){
-  const fs=RAW.features;
   const tabs=[
-    {id:'oppo',label:'🔍 機會里'},
-    {id:'flow',label:'📉 票源流向'},
-    {id:'priority',label:'⭐ 重點里'},
-    {id:'calc',label:'🧮 試算器'}
+    {id:'personal', label:'🧑 個人票估算'},
+    {id:'thirdforce',label:'🌊 第三勢力票倉'},
+    {id:'priority',  label:'⭐ 重點里標記'},
+    {id:'calc',      label:'🧮 試算器'}
   ];
   const tabHtml=tabs.map(t=>`<button class="atab${curAnalysisTab===t.id?' active':''}" onclick="setAnalysisTab('${t.id}')">${t.label}</button>`).join('');
-
   let body='';
-  if(curAnalysisTab==='oppo') body=renderOppo(fs);
-  else if(curAnalysisTab==='flow') body=renderFlow(fs);
-  else if(curAnalysisTab==='priority') body=renderPriority(fs);
-  else if(curAnalysisTab==='calc') body=renderCalc(fs);
-
+  if(curAnalysisTab==='personal')   body=renderPersonalVotes(RAW.features);
+  else if(curAnalysisTab==='thirdforce') body=renderThirdForce(RAW.features);
+  else if(curAnalysisTab==='priority')  body=renderPriority(RAW.features);
+  else if(curAnalysisTab==='calc')      body=renderCalc(RAW.features);
   return`<div class="sidebar-section">
-    <div class="sidebar-title">🎯 選情分析</div>
+    <div class="sidebar-title">🎯 選情分析（無黨籍連任）</div>
     <div class="atab-bar">${tabHtml}</div>
     ${body}
   </div>`;
 }
 
-// ── 機會里：催票潛力分析 ──
-function renderOppo(fs){
-  const tRates=fs.map(f=>f.properties['tsp22_t%']||0);
-  const vRates=fs.map(f=>f.properties['tsp22_v%']||0);
-  const medT=tRates.slice().sort((a,b)=>a-b)[Math.floor(tRates.length*0.75)]; // top quartile target
-  const avgV=vRates.reduce((a,b)=>a+b,0)/vRates.length;
-
-  // For each village: if we boosted tRate to medT (where it's below), how many extra votes?
-  const oppos=fs.map(f=>{
-    const p=f.properties;
-    const cur_t=p['tsp22_t%']||0;
-    const cur_v=p['tsp22_v%']||avgV;
-    const vpop=p.vpop22||0;
-    const gap=medT-cur_t;
-    const extra=gap>0?Math.round(vpop*gap*cur_v):0;
-    return{village:p.village,area:p.area,cur_t,cur_v,vpop,extra,tRk:p['tsp22_t%rk']};
-  }).filter(o=>o.extra>0).sort((a,b)=>b.extra-a.extra).slice(0,12);
-
-  const maxExtra=oppos[0]?.extra||1;
-  const rows=oppos.map((o,i)=>{
-    const w=(o.extra/maxExtra*100).toFixed(0);
-    const isPriority=priorityVillages.has(o.village);
-    return`<div class="oppo-item" onclick="goToVillage('${o.village}')">
-      <span class="oppo-rank">${i+1}</span>
-      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}<span>${o.village}</span><span style="font-size:10px;color:var(--muted);margin-left:4px">${o.area}</span></span>
-      <span class="oppo-val" style="color:var(--green)">+${o.extra}票</span>
-    </div>`;
-  }).join('');
-
-  const target_pct=(medT*100).toFixed(1);
-  return`<div class="analysis-intro">若各里催票率提升至全區前25%水準（${target_pct}%），估計可額外獲得的票數。</div>
-  <div class="section-subtitle">最有潛力的里（催票率成長空間最大）</div>
-  ${rows}
-  <div style="font-size:10px;color:var(--muted);margin-top:8px">點擊里名可定位地圖</div>`;
-}
-
-// ── 票源流向：2022議員 vs 2024基進不分區 ──
-function renderFlow(fs){
+// ── 個人票估算：2022議員 - 2024基進不分區 ──
+// 2022 = 個人票+黨票混合；2024基進 = 退黨後純黨票
+// 差值大 → 這些票跟著人，不跟著黨，是朋友的「個人票」
+function renderPersonalVotes(fs){
   const data=fs.map(f=>{
     const p=f.properties;
-    const v22=p.tsp22||0;
-    const v24=p.tsp24_P||0;
-    const diff=v22-v24;
-    return{village:p.village,area:p.area,v22,v24,diff};
-  }).sort((a,b)=>a.diff-b.diff); // 流失最多排前面
+    const v22=p.tsp22||0;          // 2022 議員票
+    const v24tsp=p.tsp24_P||0;     // 2024 基進不分區
+    const personal=v22-v24tsp;     // 估計個人票（正 = 跟著人走）
+    const personalPct=v22>0?(personal/v22*100):0;
+    return{village:p.village,area:p.area,v22,v24tsp,personal,personalPct,
+           tRate:p['tsp22_t%']||0};
+  });
 
-  const lost=data.filter(d=>d.diff<0).sort((a,b)=>a.diff-b.diff).slice(0,8);
-  const gained=data.filter(d=>d.diff>0).sort((a,b)=>b.diff-a.diff).slice(0,8);
-  const maxAbs=Math.max(...data.map(d=>Math.abs(d.diff)),1);
+  const totV22=data.reduce((a,d)=>a+d.v22,0);
+  const totV24=data.reduce((a,d)=>a+d.v24tsp,0);
+  const totPersonal=data.reduce((a,d)=>a+Math.max(d.personal,0),0);
 
-  const mkRow=(d)=>{
-    const isPos=d.diff>0;
-    const w=(Math.abs(d.diff)/maxAbs*100).toFixed(0);
-    const col=isPos?'var(--green)':'var(--red)';
+  // 正值：個人票強的里（可能跟著朋友走）
+  const positives=[...data].filter(d=>d.personal>0)
+    .sort((a,b)=>b.personal-a.personal).slice(0,10);
+  // 負值：黨票重的里（朋友退黨後反而更多人投基進）⚠️
+  const negatives=[...data].filter(d=>d.personal<0)
+    .sort((a,b)=>a.personal-b.personal).slice(0,6);
+
+  const mkRow=(d,i,showPct)=>{
+    const isPos=d.personal>=0;
     const isPriority=priorityVillages.has(d.village);
-    return`<div class="flow-item" onclick="goToVillage('${d.village}')">
-      <span style="font-size:11px;color:var(--muted);width:18px;flex-shrink:0">${isPriority?'⭐':''}</span>
-      <span class="oppo-village" style="font-size:11px">${d.village}</span>
-      <span style="font-size:10px;color:var(--muted);width:28px;text-align:right;flex-shrink:0">${d.v22}</span>
-      <span style="font-size:10px;color:var(--muted);margin:0 2px">→</span>
-      <span style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0">${d.v24}</span>
-      <span class="flow-val" style="color:${col}">${d.diff>0?'+':''}${d.diff}</span>
+    return`<div class="oppo-item" onclick="goToVillage('${d.village}')">
+      <span class="oppo-rank">${i+1}</span>
+      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}${d.village}
+        <span style="font-size:10px;color:var(--muted);margin-left:3px">${d.area}</span></span>
+      <span style="font-size:10px;color:var(--muted);margin-right:4px">${d.v22}→${d.v24tsp}</span>
+      <span class="oppo-val" style="color:${isPos?'var(--green)':'var(--red)'}">
+        ${d.personal>0?'+':''}${d.personal}
+        ${showPct?`<span style="font-size:10px;opacity:0.7">(${d.personalPct.toFixed(0)}%)</span>`:''}
+      </span>
     </div>`;
   };
 
-  const totV22=data.reduce((a,d)=>a+d.v22,0);
-  const totV24=data.reduce((a,d)=>a+d.v24,0);
-  const totDiff=totV22-totV24;
-
-  return`<div class="analysis-intro">比較2022年議員票數與2024年基進不分區票數，觀察各里票源變化趨勢。</div>
-  <div class="calc-strategy"><div class="calc-strategy-title">全區總計</div>
-    <div class="calc-strategy-row"><span>2022 議員票</span><span>${totV22.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>2024 基進不分區</span><span>${totV24.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>差異</span><span style="color:${totDiff>=0?'var(--green)':'var(--red)'}">${totDiff>0?'+':''}${totDiff}</span></div>
+  return`
+  <div class="analysis-intro">
+    <b style="color:var(--text)">解讀方式</b><br>
+    2022議員票（基進黨籍） − 2024基進不分區票 = 估計個人票。<br>
+    差值越大 → 這些票可能是個人支持者，無黨籍連任時較可能跟著走。<br>
+    <span style="color:var(--red)">差值為負 → 退黨後基進反而獲得更多票，這些是黨的鐵票，不確定會否轉移。</span>
   </div>
-  <div class="section-subtitle" style="margin-top:10px">票數增加的里（個人品牌 > 黨品牌）</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">2022議員 → 2024不分區</div>
-  ${gained.map(mkRow).join('')}
-  <div class="section-subtitle" style="margin-top:10px">票數減少的里（需重點耕耘）</div>
-  ${lost.map(mkRow).join('')}`;
+  <div class="calc-strategy">
+    <div class="calc-strategy-title">全區概覽</div>
+    <div class="calc-strategy-row"><span>2022 議員總票數</span><span>${totV22.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>2024 基進不分區</span><span>${totV24.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>差值（樂觀個人票估計）</span>
+      <span style="color:${(totV22-totV24)>=0?'var(--green)':'var(--red)'}">
+        ${(totV22-totV24)>0?'+':''}${(totV22-totV24).toLocaleString()} 票
+      </span></div>
+  </div>
+  <div class="section-subtitle" style="margin-top:10px">🟢 個人票強勢里（較安全）</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">2022議員→2024基進 · 差值=估計個人票</div>
+  ${positives.map((d,i)=>mkRow(d,i,true)).join('')}
+  <div class="section-subtitle" style="margin-top:10px">🔴 須注意：黨票重的里</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">退黨後基進反而比2022更多票，這些里的票源忠誠度偏向黨</div>
+  ${negatives.map((d,i)=>mkRow(d,i,false)).join('')}`;
+}
+
+// ── 第三勢力票倉 ──
+// 2024年「非藍非綠」票(基進+時力+綠黨+歐巴桑) = 第三勢力潛在票倉
+// 以無黨籍身分可嘗試爭取，但有不確定性（部分是黨鐵票）
+function renderThirdForce(fs){
+  const data=fs.map(f=>{
+    const p=f.properties;
+    const tsp=p.tsp24_P||0;
+    const npp=p.npp24_p||0;
+    const gp=p.gp24_p||0;
+    const obs=p.obs24_P||0;
+    const third=tsp+npp+gp+obs;
+    const tot24=p._total24p||0;
+    const thirdPct=tot24>0?(third/tot24*100):0;
+    const v22=p.tsp22||0;
+    const gain=third-v22; // 第三勢力票倉 vs 朋友2022基準
+    return{village:p.village,area:p.area,tsp,npp,gp,obs,third,thirdPct,v22,gain,tot24};
+  });
+
+  const totThird=data.reduce((a,d)=>a+d.third,0);
+  const totV22=data.reduce((a,d)=>a+d.v22,0);
+
+  // 第三勢力大 且 高於2022基準 的里 = 有上升空間
+  const potential=[...data].sort((a,b)=>b.gain-a.gain).slice(0,12);
+
+  const maxThird=Math.max(...data.map(d=>d.third));
+
+  const mkRow=(d,i)=>{
+    const isPriority=priorityVillages.has(d.village);
+    const w=(d.third/maxThird*80).toFixed(0);
+    const pct=d.thirdPct.toFixed(1);
+    return`<div class="oppo-item" onclick="goToVillage('${d.village}')">
+      <span class="oppo-rank">${i+1}</span>
+      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}${d.village}
+        <span style="font-size:10px;color:var(--muted);margin-left:3px">${d.area}</span></span>
+      <span style="font-size:10px;color:var(--muted);text-align:right;min-width:55px">
+        第三${d.third}票<br><span style="color:var(--muted)">${pct}%</span></span>
+      <span class="oppo-val" style="color:${d.gain>=0?'var(--accent)':'var(--muted)'}">
+        ${d.gain>0?'+':''}${d.gain}
+      </span>
+    </div>`;
+  };
+
+  // breakdown by party
+  const totTSP=data.reduce((a,d)=>a+d.tsp,0);
+  const totNPP=data.reduce((a,d)=>a+d.npp,0);
+  const totGP=data.reduce((a,d)=>a+d.gp,0);
+  const totOBS=data.reduce((a,d)=>a+d.obs,0);
+
+  return`
+  <div class="analysis-intro">
+    <b style="color:var(--text)">第三勢力票倉</b> = 2024年基進＋時力＋綠黨＋歐巴桑不分區<br>
+    以無黨籍身分參選，<span style="color:var(--green)">有機會爭取</span>這批選票，
+    但基進鐵票是否認同退黨仍有<span style="color:var(--red)">不確定性</span>。
+  </div>
+  <div class="calc-strategy">
+    <div class="calc-strategy-title">2024 第三勢力全區概覽</div>
+    <div class="calc-strategy-row"><span>🔴 基進</span><span>${totTSP.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>🟡 時代力量</span><span>${totNPP.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>🟢 綠黨</span><span>${totGP.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>🩷 歐巴桑</span><span>${totOBS.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:6px">
+      <span><b>合計</b></span><span style="color:var(--accent)"><b>${totThird.toLocaleString()} 票</b></span></div>
+    <div class="calc-strategy-row"><span>朋友2022議員票</span><span>${totV22.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>理論增幅（若全部爭取）</span>
+      <span style="color:${(totThird-totV22)>=0?'var(--green)':'var(--red)'}">
+        ${(totThird-totV22)>0?'+':''}${(totThird-totV22).toLocaleString()} 票
+      </span></div>
+  </div>
+  <div class="section-subtitle" style="margin-top:10px">第三勢力潛力最大的里</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">第三勢力票數 vs 2022議員基準，正值=有成長空間</div>
+  ${potential.map((d,i)=>mkRow(d,i)).join('')}`;
 }
 
 // ── 重點里標記 ──
@@ -971,11 +1023,15 @@ function renderPriority(fs){
   const count=priorityVillages.size;
   const rows=fs.map(f=>{
     const p=f.properties;
+    const v22=p.tsp22||0;
+    const v24tsp=p.tsp24_P||0;
+    const third=(p.tsp24_P||0)+(p.npp24_p||0)+(p.gp24_p||0)+(p.obs24_P||0);
     const chk=priorityVillages.has(p.village)?'checked':'';
     return`<div class="priority-item">
       <input type="checkbox" class="priority-check" ${chk} onchange="togglePriority('${p.village}')">
       <span class="priority-vname" onclick="goToVillage('${p.village}')">${p.village}</span>
-      <span class="priority-sub">${p.area}<br>${(p.tsp22||0)}票 · 催${((p['tsp22_t%']||0)*100).toFixed(1)}%</span>
+      <span class="priority-sub">${p.area}<br>
+        22議員${v22}票 · 24第三${third}票</span>
     </div>`;
   }).join('');
 
@@ -984,68 +1040,71 @@ function renderPriority(fs){
     ${count>0?`<button class="priority-clear" onclick="clearPriority()">清除全部</button>`:''}
   </div>
   ${count>0?`<div class="analysis-intro">⭐ 標記的里會在地圖上顯示黃色虛線邊框</div>`:''}
-  <div class="section-subtitle">全部里（點名稱可定位）</div>
-  <div style="max-height:none">${rows}</div>`;
+  <div class="section-subtitle">全部86里（點名稱可定位）</div>
+  <div>${rows}</div>`;
 }
 
 // ── 試算器 ──
 function renderCalc(fs){
   const tsp22Total=fs.reduce((a,f)=>a+(f.properties.tsp22||0),0);
-  const target=window._calcTarget||Math.round(tsp22Total*1.2);
-  if(!window._calcTarget) window._calcTarget=target;
+  // 估計可爭取的票：個人票(樂觀) + 部分第三勢力增幅
+  const personalPool=fs.reduce((a,f)=>{
+    const diff=(f.properties.tsp22||0)-(f.properties.tsp24_P||0);
+    return a+Math.max(diff,0);
+  },0);
+  const thirdPool=fs.reduce((a,f)=>{
+    const t=(f.properties.tsp24_P||0)+(f.properties.npp24_p||0)+(f.properties.gp24_p||0)+(f.properties.obs24_P||0);
+    return a+t;
+  },0);
+
+  if(!window._calcTarget) window._calcTarget=tsp22Total;
+  const target=window._calcTarget;
   const gap=target-tsp22Total;
-
-  // Strategy A: uniform tRate improvement
-  const avgT=fs.reduce((a,f)=>a+(f.properties['tsp22_t%']||0),0)/fs.length;
-  // How much extra tRate needed to fill gap?
-  const totalVpop=fs.reduce((a,f)=>a+(f.properties.vpop22||0),0);
-  const avgV=fs.reduce((a,f)=>a+(f.properties['tsp22_v%']||0),0)/fs.length;
-  const neededTrate=gap/(totalVpop*avgV);
-
-  // Strategy B: focus on top opportunity villages
-  const oppoVillages=fs.map(f=>{
-    const p=f.properties;
-    const cur_t=p['tsp22_t%']||0;
-    const medT=0.065; // ~median trate
-    const gapT=medT-cur_t;
-    return{village:p.village,vpop:p.vpop22||0,cur_t,cur_v:p['tsp22_v%']||avgV,extra:gapT>0?Math.round((p.vpop22||0)*gapT*(p['tsp22_v%']||avgV)):0};
-  }).filter(o=>o.extra>0).sort((a,b)=>b.extra-a.extra);
-
-  let cumExtra=0;let topN=0;
-  for(const o of oppoVillages){cumExtra+=o.extra;topN++;if(cumExtra>=gap)break;}
-
-  const pctStr=((neededTrate)*100).toFixed(1);
-  const isDoable=neededTrate<0.03;
+  const neededFromThird=Math.max(gap,0);
+  const thirdCoverage=thirdPool>0?(neededFromThird/thirdPool*100).toFixed(0):0;
+  const personalCoverage=personalPool>0?(Math.min(neededFromThird,personalPool)/personalPool*100).toFixed(0):0;
 
   return`<div class="calc-row">
-    <span class="calc-label">2022 基準票數</span>
+    <span class="calc-label">2022 基準票數（議員）</span>
     <span class="calc-value">${tsp22Total.toLocaleString()} 票</span>
   </div>
   <div class="calc-row">
-    <span class="calc-label">目標票數</span>
+    <span class="calc-label" style="flex:0.7">目標票數</span>
     <div class="calc-input-wrap">
+      <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer" onclick="window._calcTarget=Math.max(0,(window._calcTarget||${tsp22Total})-50);renderPanel()">−</button>
       <input class="calc-input" type="number" value="${target}" min="0" max="9999" step="50"
         oninput="window._calcTarget=+this.value||${tsp22Total};renderPanel()">
+      <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer" onclick="window._calcTarget=(window._calcTarget||${tsp22Total})+50;renderPanel()">＋</button>
     </div>
   </div>
   <div class="calc-row">
     <span class="calc-label">需增加</span>
-    <span class="calc-value" style="color:${gap<=0?'var(--green)':'var(--accent)'}">${gap<=0?'已達標':'+'+gap.toLocaleString()+' 票'}</span>
+    <span class="calc-value" style="color:${gap<=0?'var(--green)':'var(--accent)'}">${gap<=0?'已達標 ✓':'+'+gap.toLocaleString()+' 票'}</span>
+  </div>
+  <div class="calc-strategy" style="margin-top:8px">
+    <div class="calc-strategy-title">票源估算</div>
+    <div class="calc-strategy-row"><span>個人票池（樂觀估計）</span><span style="color:var(--green)">${personalPool.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>第三勢力總池</span><span style="color:var(--accent)">${thirdPool.toLocaleString()} 票</span></div>
   </div>
   ${gap>0?`
-  <div class="calc-strategy">
-    <div class="calc-strategy-title">策略一：全面提升催票率</div>
-    <div class="calc-strategy-row"><span>每里平均催票率需提升</span><span style="color:${isDoable?'var(--green)':'var(--red)'}">+${pctStr}%</span></div>
-    <div class="calc-strategy-row"><span>目前平均催票率</span><span>${(avgT*100).toFixed(1)}%</span></div>
-    <div class="calc-strategy-row"><span>達成難度</span><span>${isDoable?'🟢 可行':'🔴 較難'}</span></div>
-  </div>
   <div class="calc-strategy" style="margin-top:6px">
-    <div class="calc-strategy-title">策略二：攻頂機會里</div>
-    <div class="calc-strategy-row"><span>需重點耕耘</span><span>${topN} 個里</span></div>
-    <div class="calc-strategy-row"><span>目標里催票率提升至 6.5%</span><span>可增 ${Math.min(cumExtra,gap).toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>建議</span><span>切換至「機會里」查看名單</span></div>
-  </div>
-  `:'<div style="font-size:13px;color:var(--green);padding:12px 0;text-align:center">🎉 已超過目標票數！</div>'}`;
+    <div class="calc-strategy-title">需求分析</div>
+    <div class="calc-strategy-row">
+      <span>需爭取第三勢力的比例</span>
+      <span style="color:${+thirdCoverage<30?'var(--green)':+thirdCoverage<60?'#fbbf24':'var(--red)'}">
+        ${thirdCoverage}%
+      </span>
+    </div>
+    <div class="calc-strategy-row">
+      <span>個人票池是否足夠</span>
+      <span style="color:${personalPool>=gap?'var(--green)':'var(--red)'}">
+        ${personalPool>=gap?'✓ 個人票估計足夠':'需額外爭取第三勢力'}
+      </span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">
+      ⚠️ 個人票池為樂觀估計，實際轉移率取決於朋友與選民的連結強度
+    </div>
+  </div>`:'<div style="font-size:13px;color:var(--green);padding:12px 0;text-align:center">🎉 以現有基準已達目標！</div>'}`;
 }
 
 </script>
