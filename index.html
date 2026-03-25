@@ -39,7 +39,7 @@
     .fbtn.active.p-tsp{background:var(--tsp);border-color:var(--tsp);}
     .fbtn.active.p-gp{background:var(--gp);border-color:var(--gp);color:#0f1117;}
     .fbtn.active.p-obs{background:var(--obs);border-color:var(--obs);}
-    .fbtn.active.p-pop,.fbtn.active.p-all,.fbtn.active.y-btn,.fbtn.active.t-btn{background:var(--accent);border-color:var(--accent);}
+    .fbtn.active.p-pop,.fbtn.active.p-all,.fbtn.active.y-btn,.fbtn.active.t-btn,.fbtn.active.m-btn{background:var(--accent);border-color:var(--accent);}
 
     .main{display:flex;flex:1;overflow:hidden;min-height:0;}
     #map{flex:1;background:#151820;min-width:0;position:relative;}
@@ -47,12 +47,15 @@
     #legend-overlay{
       position:absolute;bottom:36px;right:10px;z-index:900;
       background:rgba(15,17,23,0.93);border:1px solid var(--border);
-      border-radius:6px;padding:10px 12px;min-width:150px;max-width:180px;
+      border-radius:8px;padding:9px 12px;width:200px;
       backdrop-filter:blur(4px);pointer-events:none;
     }
-    .legend-title{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:6px;}
-    .legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;color:var(--muted);}
-    .legend-swatch{width:14px;height:9px;border-radius:2px;flex-shrink:0;}
+    .lg-title{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .lg-bar-wrap{position:relative;margin-bottom:4px;}
+    .lg-bar{height:10px;border-radius:4px;width:100%;}
+    .lg-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px;}
+    .lg-needle{position:absolute;top:-4px;width:2px;height:18px;background:#fff;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.8);transform:translateX(-50%);transition:left 0.3s;}
+    .lg-needle-tip{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;white-space:nowrap;background:rgba(0,0,0,.7);border-radius:2px;padding:1px 4px;font-weight:600;}
 
     .sidebar{
       width:38%;max-width:480px;min-width:270px;
@@ -235,6 +238,12 @@
     <button class="fbtn p-pop" data-party="pop" onclick="setParty('pop',this)">人口資訊</button>
     <button class="fbtn p-ana" data-party="ana" onclick="setParty('ana',this)" style="background:rgba(255,229,0,0.12);border-color:rgba(255,229,0,0.35);color:#ffe500;">🎯 選情分析</button>
   </div>
+  <div class="filter-row" id="row-metric">
+    <span class="filter-label">熱力</span>
+    <button class="fbtn m-btn active" data-metric="V" onclick="setMetric('V',this)">得票數</button>
+    <button class="fbtn m-btn" data-metric="R" onclick="setMetric('R',this)">得票率</button>
+    <button class="fbtn m-btn" data-metric="T" onclick="setMetric('T',this)">催票率</button>
+  </div>
 </div>
 
 <div class="main">
@@ -278,7 +287,7 @@ const PARTIES={
   obs:{name:'歐巴桑',color:'#E91E8C',dc:'#f472b6',fieldP:'obs24_P',fieldL:'obs24_L',fieldC:null},
 };
 
-let curParty='tsp',curYear='2022',curType='C';
+let curParty='tsp',curYear='2022',curType='C',curMetric='V'; // V=得票數,R=得票率,T=催票率
 let curVillageProps=null,curScale=null,geojsonLayer=null;
 let chatOpen=false,chatHistory=[],chatLoading=false;
 
@@ -326,8 +335,11 @@ function buildScale(party,year,type){
     label=`${p.name} 2022 議員`;
   }else return null;
 
-  // 地圖著色欄位：2022議員用催票率（tsp）或票數（其他）
-  const displayField = (year==='2022'&&type==='C'&&party==='tsp') ? 'tsp22_t%' : vField;
+  // 地圖著色欄位：根據 curMetric + 可用性決定
+  let displayField;
+  if(curMetric==='R'&&rField) displayField=rField;
+  else if(curMetric==='T'&&tField) displayField=tField;
+  else displayField=vField;  // 預設：得票數
 
   const vals=RAW.features.map(f=>f.properties[displayField]||0).sort((a,b)=>a-b);
   const n=vals.length;
@@ -353,7 +365,8 @@ function buildScale(party,year,type){
     vRkField,rRkField,tRkField,displayField,
     breaks:q.slice(1,5),colors:colorsFwd,
     legendColors:colorsRev,legendLabels:labelsRev,
-    fmt,party:p,year,type};
+    fmt,party:p,year,type,isRate,
+    metricLabel:curMetric==='V'?'得票數':curMetric==='R'?'得票率':'催票率'};
 }
 
 const POP_SCALE={
@@ -401,19 +414,19 @@ function tooltipHTML(props){
       if(sc.vField&&props[sc.vField]!=null){
         const v=props[sc.vField]||0;
         const vRk=getRank(sc.vField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${v.toLocaleString()}(第${vRk}名)</span>`;
+        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${v.toLocaleString()}(${vRk}/86)</span>`;
       }
       // 得票率（只有 tsp 2022 有）
       if(sc.rField&&props[sc.rField]!=null){
         const rt=((props[sc.rField]||0)*100).toFixed(1);
         const rRk=getRank(sc.rField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${rt}%(第${rRk}名)</span>`;
+        lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${rt}%(${rRk}/86)</span>`;
       }
       // 催票率
       if(sc.tField&&props[sc.tField]!=null){
         const tt=((props[sc.tField]||0)*100).toFixed(1);
         const tRk=getRank(sc.tField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${tt}%(第${tRk}名)</span>`;
+        lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${tt}%(${tRk}/86)</span>`;
       }
     }
   }
@@ -426,17 +439,57 @@ function updateAllTooltips(){
 map.on('zoomend',updateAllTooltips);
 
 // ── Legend ──
-function updateLegend(scale){
+function updateLegend(scale,villageProps){
   const el=document.getElementById('legend-overlay');
-  if(!scale||scale.isOverview||!scale.legendLabels?.length){el.innerHTML='';return;}
-  el.innerHTML=`<div class="legend-title">${scale.label}</div>`+
-    scale.legendLabels.map((l,i)=>`<div class="legend-item"><div class="legend-swatch" style="background:${scale.legendColors[i]}"></div>${l}</div>`).join('');
+  if(!scale||scale.isOverview||!scale.gradMin==null){el.innerHTML='';return;}
+  if(scale.isPop){
+    // 人口增減：固定段落色帶
+    const bars=scale.legendColors.slice().reverse().map(c=>`<span style="flex:1;background:${c};height:100%;display:inline-block"></span>`).join('');
+    const vmin=scale.legendLabels[scale.legendLabels.length-1].replace('< ','< ');
+    const vmax=scale.legendLabels[0].replace('> ','> ');
+    el.innerHTML=`<div class="lg-title">${scale.label}</div>
+      <div class="lg-bar-wrap">
+        <div class="lg-bar" style="display:flex;overflow:hidden">${bars}</div>
+        <div class="lg-labels"><span>減少最多</span><span>增加最多</span></div>
+      </div>`;
+    return;
+  }
+  if(!scale.gradMin==null&&scale.gradMin==null){el.innerHTML='';return;}
+  // 取得目前 displayField 的全域 min/max
+  const allVals=RAW.features.map(f=>f.properties[scale.displayField]||0);
+  const gMin=Math.min(...allVals),gMax=Math.max(...allVals);
+  const partyColor=scale.party?.color||'#4f7cff';
+  // 漸層：左邊淡(白往黨色)，右邊深
+  const grad=`linear-gradient(to right, rgba(255,255,255,0.15), ${partyColor})`;
+  const isRate=scale.isRate;
+  const fmtV=v=>isRate?((v)*100).toFixed(1)+'%':v.toLocaleString();
+  // 當前里的指針位置
+  let needleHTML='';
+  if(villageProps&&scale.displayField){
+    const val=villageProps[scale.displayField]||0;
+    const pct=gMax>gMin?Math.max(0,Math.min(100,((val-gMin)/(gMax-gMin))*100)):0;
+    const label=fmtV(val);
+    needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%">
+      <div class="lg-needle-tip">${label}</div>
+    </div>`;
+  }
+  el.innerHTML=`<div class="lg-title">${scale.label}（${scale.metricLabel||'得票數'}）</div>
+    <div class="lg-bar-wrap">
+      <div class="lg-bar" style="background:${grad}"></div>
+      ${needleHTML}
+      <div class="lg-labels"><span>${fmtV(gMin)}</span><span>${fmtV(gMax)}</span></div>
+    </div>`;
 }
 
 // ── Panel ──
 function renderPanel(){
   const el=document.getElementById('main-panel');
-  if(curVillageProps){el.innerHTML=renderVillage(curVillageProps);return;}
+  if(curVillageProps){
+    el.innerHTML=renderVillage(curVillageProps);
+    updateLegend(curScale,curVillageProps);
+    return;
+  }
+  updateLegend(curScale,null);
   if(curParty==='all'){el.innerHTML=renderOverview();return;}
   if(curParty==='pop'){el.innerHTML=renderPopPanel();return;}
   if(curParty==='ana'){el.innerHTML=renderAnalysis();return;}
@@ -682,12 +735,12 @@ function renderVillage(props){
       <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
         <div style="font-size:16px;font-weight:700;color:var(--text)">${pop26}</div>
         <div style="font-size:10px;color:var(--muted)">最新人口</div>
-        <div style="font-size:10px;color:var(--accent)">第 ${pop26rk} 名</div>
+        <div style="font-size:10px;color:var(--accent)">${pop26rk}/86</div>
       </div>
       <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
         <div style="font-size:16px;font-weight:700;color:${pd>0?'var(--green)':pd<0?'var(--red)':'var(--text)'}">${pdStr}</div>
         <div style="font-size:10px;color:var(--muted)">增減人口</div>
-        <div style="font-size:10px;color:var(--accent)">第 ${getRank('_pop_diff',props.village,true)} 名</div>
+        <div style="font-size:10px;color:var(--accent)">${getRank('_pop_diff',props.village,true)}/86</div>
       </div>
     </div>
   </div>
@@ -697,21 +750,21 @@ function renderVillage(props){
       <span class="stat-label">得票數</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22v} 票</span>
-        <span class="stat-sub rank-badge">(第 ${tsp22rk2} 名 / 86)</span>
+        <span class="stat-sub rank-badge">(${tsp22rk2}/86)</span>
       </span>
     </div>
     <div class="stat-row">
       <span class="stat-label">得票率</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22vr}</span>
-        <span class="stat-sub rank-badge">(第 ${tsp22vrk2} 名 / 86)</span>
+        <span class="stat-sub rank-badge">(${tsp22vrk2}/86)</span>
       </span>
     </div>
     <div class="stat-row">
       <span class="stat-label">催票率</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22t}</span>
-        <span class="stat-sub rank-badge">(第 ${tsp22trk2} 名 / 86)</span>
+        <span class="stat-sub rank-badge">(${tsp22trk2}/86)</span>
       </span>
     </div>
   </div>
@@ -721,7 +774,7 @@ function renderVillage(props){
       <span class="stat-label">得票數</span>
       <span class="stat-val-block">
         <span class="stat-value">${(props.npp22||0).toLocaleString()} 票</span>
-        <span class="stat-sub rank-badge">(第 ${npp22rk2} 名 / 86)</span>
+        <span class="stat-sub rank-badge">(${npp22rk2}/86)</span>
       </span>
     </div>
   </div>
@@ -736,7 +789,13 @@ function renderVillage(props){
 // ── Controls ──
 function updateAvail(){
   const ybs=document.querySelectorAll('.y-btn'),tbs=document.querySelectorAll('.t-btn');
-  if(curParty==='all'||curParty==='pop'){ybs.forEach(b=>b.disabled=true);tbs.forEach(b=>b.disabled=true);return;}
+  const mbs=document.querySelectorAll('.m-btn');
+  if(curParty==='all'||curParty==='pop'||curParty==='ana'){
+    ybs.forEach(b=>b.disabled=true);
+    tbs.forEach(b=>b.disabled=true);
+    mbs.forEach(b=>b.disabled=true);
+    return;
+  }
   const p=PARTIES[curParty];
   ybs.forEach(b=>{
     const y=b.dataset?.year;if(!y){b.disabled=true;return;}
@@ -756,11 +815,25 @@ function updateAvail(){
 function syncActive(){
   document.querySelectorAll('.y-btn').forEach(b=>b.classList.toggle('active',b.dataset?.year===curYear));
   document.querySelectorAll('.t-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===curType));
+  // 熱力圖指標：沒有 rField/tField 時 disable
+  const sc2=buildScale(curParty,curYear,curType);
+  mbs.forEach(b=>{
+    const m=b.dataset.metric;
+    if(m==='R') b.disabled=!sc2?.rField;
+    else if(m==='T') b.disabled=!sc2?.tField;
+    else b.disabled=false;
+    b.classList.toggle('active',b.dataset.metric===curMetric&&!b.disabled);
+  });
+  // 若目前 metric 被 disable，回退到 V
+  if(!sc2?.[curMetric==='R'?'rField':curMetric==='T'?'tField':'vField']&&curMetric!=='V'){
+    curMetric='V';
+    document.querySelector('[data-metric="V"]')?.classList.add('active');
+  }
 }
 function applyUpdate(){
   curScale=getActiveScale();
   if(geojsonLayer)geojsonLayer.setStyle(styleFn);
-  updateLegend(curScale);updateAllTooltips();syncActive();
+  updateLegend(curScale,curVillageProps);updateAllTooltips();syncActive();
   curVillageProps=null;renderPanel();
 }
 function setParty(party,btn){
@@ -780,6 +853,17 @@ function setParty(party,btn){
   }
   updateAvail();applyUpdate();
 }
+function setMetric(metric,btn){
+  curMetric=metric;
+  document.querySelectorAll('.m-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  // 重新計算 displayField：根據 curMetric
+  curScale=getActiveScale();
+  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  updateLegend(curScale,curVillageProps);
+  updateAllTooltips();
+}
+
 function setYear(year,btn){
   if(btn.disabled)return;
   curYear=year;
@@ -902,7 +986,7 @@ function onEachFeature(feature,layer){
     curScale=getActiveScale();
     geojsonLayer=L.geoJSON(RAW,{style:styleFn,onEachFeature}).addTo(map);
     map.fitBounds(geojsonLayer.getBounds(),{padding:[20,20]});
-    updateLegend(curScale);updateAvail();updateAllTooltips();renderPanel();
+    updateLegend(curScale,curVillageProps);updateAvail();updateAllTooltips();renderPanel();
   }catch(e){
     loadingEl.style.background='rgba(180,0,0,.85)';
     loadingEl.textContent='資料載入失敗：'+e.message+'（請確認 sanmin_vote.geojson 與 index.html 在同一資料夾）';
