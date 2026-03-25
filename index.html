@@ -172,14 +172,34 @@
     .calc-strategy-row span:last-child{color:var(--text);font-weight:600;}
     .section-subtitle{font-size:11px;font-weight:700;color:var(--text);margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border);}
     @media(max-width:640px){
-      .main{flex-direction:column;}
-      #map{flex:none;height:52vh;width:100%;}
-      .sidebar{width:100%;max-width:none;min-width:0;height:48vh;border-left:none;border-top:1px solid var(--border);flex-direction:row;overflow-x:auto;}
-      .sidebar-inner{display:flex;flex-direction:row;height:calc(100% - 80px);width:max-content;}
-      .sidebar-section{min-width:220px;max-width:300px;border-bottom:none;border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto;height:100%;}
-      .ai-chat-area{min-width:220px;border-top:none;border-right:1px solid var(--border);}
-      .locate-btn{bottom:49vh;}
-      #legend-overlay{bottom:auto;top:8px;right:8px;}
+      /* 手機：header + filter + main 垂直堆疊，main 填滿剩餘空間 */
+      .main{flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+      #map{flex:none;height:38vh;width:100%;}
+      .sidebar{
+        width:100%;max-width:none;min-width:0;
+        flex:1;min-height:0;
+        border-left:none;border-top:1px solid var(--border);
+        flex-direction:column;overflow:hidden;
+      }
+      /* sidebar-inner 可垂直捲動，能顯示所有內容 */
+      .sidebar-inner{
+        flex:1;min-height:0;
+        overflow-y:auto;-webkit-overflow-scrolling:touch;
+      }
+      .sidebar-section{
+        min-width:unset;max-width:none;
+        border-right:none;border-bottom:1px solid var(--border);
+      }
+      /* AI 對話區固定高度，不壓縮 sidebar-inner */
+      .ai-chat-area{
+        min-width:unset;border-right:none;
+        border-top:2px solid var(--border);
+        flex-shrink:0;max-height:120px;
+      }
+      .locate-btn{bottom:42vh;left:8px;}
+      #legend-overlay{bottom:auto;top:6px;right:6px;}
+      .filter-row{padding:4px 10px;gap:4px;}
+      .fbtn{padding:4px 8px;font-size:11px;}
     }
   </style>
 </head>
@@ -196,6 +216,12 @@
     <button class="fbtn y-btn" disabled>2020</button>
     <button class="fbtn y-btn" disabled>2018</button>
   </div>
+  <div class="filter-row" id="row-type">
+    <span class="filter-label">選舉</span>
+    <button class="fbtn t-btn" data-type="P" onclick="setType('P',this)">不分區</button>
+    <button class="fbtn t-btn" data-type="L" onclick="setType('L',this)">區域立委</button>
+    <button class="fbtn t-btn" data-type="C" onclick="setType('C',this)">議員</button>
+  </div>
   <div class="filter-row" id="row-party">
     <span class="filter-label">政黨</span>
     <button class="fbtn p-all" data-party="all" onclick="setParty('all',this)">全區綜覽</button>
@@ -208,12 +234,6 @@
     <button class="fbtn p-obs" data-party="obs" onclick="setParty('obs',this)">歐巴桑</button>
     <button class="fbtn p-pop" data-party="pop" onclick="setParty('pop',this)">人口資訊</button>
     <button class="fbtn p-ana" data-party="ana" onclick="setParty('ana',this)" style="background:rgba(255,229,0,0.12);border-color:rgba(255,229,0,0.35);color:#ffe500;">🎯 選情分析</button>
-  </div>
-  <div class="filter-row" id="row-type">
-    <span class="filter-label">種類</span>
-    <button class="fbtn t-btn" data-type="P" onclick="setType('P',this)">不分區</button>
-    <button class="fbtn t-btn" data-type="L" onclick="setType('L',this)">區域立委</button>
-    <button class="fbtn t-btn" data-type="C" onclick="setType('C',this)">議員</button>
   </div>
 </div>
 
@@ -252,7 +272,7 @@ const PARTIES={
   dpp:{name:'民進黨', color:'#1B9431',dc:'#4ade80',fieldP:'dpp24_p',fieldL:null,fieldC:null},
   kmt:{name:'國民黨', color:'#003F8E',dc:'#60a5fa',fieldP:'kmt24_p',fieldL:null,fieldC:null},
   tpp:{name:'民眾黨', color:'#28C8C8',dc:'#28C8C8',fieldP:'tpp24_p',fieldL:null,fieldC:null},
-  npp:{name:'時代力量',color:'#FBBE01',dc:'#FBBE01',fieldP:'npp24_p',fieldL:null,fieldC:null},
+  npp:{name:'時代力量',color:'#FBBE01',dc:'#FBBE01',fieldP:'npp24_p',fieldL:null,fieldC:'npp22'},
   tsp:{name:'台灣基進',color:'#C00000',dc:'#f87171',fieldP:'tsp24_P',fieldL:null,fieldC:'tsp22'},
   gp: {name:'綠黨',  color:'#66BB6A',dc:'#86efac',fieldP:'gp24_p', fieldL:null,fieldC:null},
   obs:{name:'歐巴桑',color:'#E91E8C',dc:'#f472b6',fieldP:'obs24_P',fieldL:'obs24_L',fieldC:null},
@@ -295,14 +315,19 @@ function buildScale(party,year,type){
     label=`${p.name} 2024 區域立委`;
   }else if(year==='2022'&&type==='C'){
     if(!p.fieldC)return null;
-    vField=p.fieldC; rField='tsp22_v%'; rRkField='tsp22_v%rk';
-    vRkField='tsp22_rk';
-    tField='tsp22_t%'; tRkField='tsp22_t%rk';
+    vField=p.fieldC;
+    // 只有 tsp 才有得票率與催票率欄位
+    if(party==='tsp'){
+      rField='tsp22_v%'; tField='tsp22_t%';
+    }else{
+      rField=null; tField=null;
+    }
+    rRkField=null; tRkField=null; vRkField=null; // 全部由 JS 計算
     label=`${p.name} 2022 議員`;
   }else return null;
 
-  // 地圖著色欄位：2022議員用催票率，2024用票數
-  const displayField = (year==='2022'&&type==='C') ? 'tsp22_t%' : vField;
+  // 地圖著色欄位：2022議員用催票率（tsp）或票數（其他）
+  const displayField = (year==='2022'&&type==='C'&&party==='tsp') ? 'tsp22_t%' : vField;
 
   const vals=RAW.features.map(f=>f.properties[displayField]||0).sort((a,b)=>a-b);
   const n=vals.length;
@@ -375,20 +400,20 @@ function tooltipHTML(props){
       // 得票數（有資料才顯示）
       if(sc.vField&&props[sc.vField]!=null){
         const v=props[sc.vField]||0;
-        const vRk=props[sc.vRkField]||'-';
-        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${v.toLocaleString()}(${vRk})</span>`;
+        const vRk=getRank(sc.vField,props.village,true);
+        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${v.toLocaleString()}(第${vRk}名)</span>`;
       }
-      // 得票率
+      // 得票率（只有 tsp 2022 有）
       if(sc.rField&&props[sc.rField]!=null){
         const rt=((props[sc.rField]||0)*100).toFixed(1);
-        const rRk=props[sc.rRkField]||'-';
-        lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${rt}%(${rRk})</span>`;
+        const rRk=getRank(sc.rField,props.village,true);
+        lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${rt}%(第${rRk}名)</span>`;
       }
       // 催票率
       if(sc.tField&&props[sc.tField]!=null){
         const tt=((props[sc.tField]||0)*100).toFixed(1);
-        const tRk=props[sc.tRkField]||'-';
-        lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${tt}%(${tRk})</span>`;
+        const tRk=getRank(sc.tField,props.village,true);
+        lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${tt}%(第${tRk}名)</span>`;
       }
     }
   }
@@ -470,9 +495,10 @@ function renderFilterPanel(){
 // ── Village → layer map (for sidebar hover interaction) ──
 const villageLayerMap={};
 let selectedVillage=null;
+let hoveredVillage=null;
 let priorityVillages=new Set();
 let priorityLayer=null;
-let curAnalysisTab='oppo';
+let curAnalysisTab='personal';
 
 function selectVillage(name){
   if(selectedVillage&&villageLayerMap[selectedVillage]){
@@ -487,14 +513,37 @@ function selectVillage(name){
 }
 
 function highlightVillage(name,on){
-  const layer=villageLayerMap[name];
-  if(!layer)return;
   if(on){
-    layer.setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
-    layer.bringToFront();
+    // 先清除上一個 hover（若不是 selected）
+    if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage]){
+      geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
+    }
+    hoveredVillage=name;
+    if(name&&villageLayerMap[name]&&name!==selectedVillage){
+      villageLayerMap[name].setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
+      villageLayerMap[name].bringToFront();
+    }
   }else{
-    geojsonLayer.resetStyle(layer);
+    if(name!==selectedVillage&&villageLayerMap[name]) geojsonLayer.resetStyle(villageLayerMap[name]);
+    if(hoveredVillage===name) hoveredVillage=null;
   }
+}
+
+// ── JS 動態排名計算 ──
+function calcRank(field, desc=true){
+  const pairs=RAW.features
+    .map(f=>({v:f.properties.village,val:f.properties[field]??-Infinity}))
+    .filter(o=>o.val>-Infinity)
+    .sort((a,b)=>desc?b.val-a.val:a.val-b.val);
+  const map={};
+  pairs.forEach((o,i)=>{ map[o.v]=i+1; });
+  return map;
+}
+// 快取排名（資料載入後計算一次）
+let _rankCache={};
+function getRank(field,village,desc=true){
+  if(!_rankCache[field]) _rankCache[field]=calcRank(field,desc);
+  return _rankCache[field][village]||'-';
 }
 
 function buildTop7(sc){
@@ -502,13 +551,14 @@ function buildTop7(sc){
   const pc=sc.party?.dc||'var(--accent)';
 
   // row7: interactive rows with data-village
-  const row7=(arr,vfn,color)=>arr.slice(0,7).map((f,i)=>{
+  const row7=(arr,vfn,color,field)=>arr.slice(0,7).map((f,i)=>{
     const vname=f.properties.village;
+    const actualRk=field?getRank(field,vname,true):i+1;
     return`<div class="top-item top-item-interactive" data-village="${vname}"
       onmouseenter="highlightVillage('${vname}',true)"
       onmouseleave="highlightVillage('${vname}',false)"
       onclick="goToVillage('${vname}')">
-      <span class="top-rank">${i+1}</span>
+      <span class="top-rank">${actualRk}</span>
       <span class="top-village">${vname}</span>
       <span class="top-val" style="color:${color}">${vfn(f.properties)}</span>
     </div>`;
@@ -516,17 +566,17 @@ function buildTop7(sc){
 
   const byV=[...fs].sort((a,b)=>(b.properties[sc.vField]||0)-(a.properties[sc.vField]||0));
   let h=`<div class="top-section"><div class="top-section-title">得票數</div>`+
-    row7(byV,p=>(p[sc.vField]||0).toLocaleString()+'票',pc)+`</div>`;
+    row7(byV,p=>(p[sc.vField]||0).toLocaleString()+'票',pc,sc.vField)+`</div>`;
 
   if(sc.rField){
     const byR=[...fs].sort((a,b)=>(b.properties[sc.rField]||0)-(a.properties[sc.rField]||0));
     h+=`<div class="top-section"><div class="top-section-title">得票率</div>`+
-      row7(byR,p=>((p[sc.rField]||0)*100).toFixed(2)+'%','#a5b4fc')+`</div>`;
+      row7(byR,p=>((p[sc.rField]||0)*100).toFixed(2)+'%','#a5b4fc',sc.rField)+`</div>`;
   }
   if(sc.tField){
     const byT=[...fs].sort((a,b)=>(b.properties[sc.tField]||0)-(a.properties[sc.tField]||0));
     h+=`<div class="top-section"><div class="top-section-title">催票率</div>`+
-      row7(byT,p=>((p[sc.tField]||0)*100).toFixed(2)+'%','#fbbf24')+`</div>`;
+      row7(byT,p=>((p[sc.tField]||0)*100).toFixed(2)+'%','#fbbf24',sc.tField)+`</div>`;
   }
   return h;
 }
@@ -602,11 +652,8 @@ function renderVillage(props){
   const pdCls=pd>0?'pos':pd<0?'neg':'';
 
   const tsp22v=(props.tsp22||0).toLocaleString();
-  const tsp22rk=props.tsp22_rk||'-';
   const tsp22vr=props['tsp22_v%']?((props['tsp22_v%'])*100).toFixed(2)+'%':'-';
-  const tsp22vrk=props['tsp22_v%rk']||'-';
   const tsp22t=props['tsp22_t%']?((props['tsp22_t%'])*100).toFixed(2)+'%':'-';
-  const tsp22trk=props['tsp22_t%rk']||'-';
 
   const tot24=props._total24p||0;
   let bars='';
@@ -621,26 +668,27 @@ function renderVillage(props){
     </div>`;
   });
 
+  const pop26rk=getRank('pop2026.02',props.village,true);
+  const pdrk=getRank('_pop_diff',props.village,true); // 增加最多=第1名
+  const tsp22vrk2=getRank('tsp22_v%',props.village,true);
+  const tsp22trk2=getRank('tsp22_t%',props.village,true);
+  const tsp22rk2=getRank('tsp22',props.village,true);
+  const npp22rk2=getRank('npp22',props.village,true);
   return`<div class="sidebar-section">
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
     <div class="info-village">${props.village||'-'}</div>
     <div class="info-area">${props.area||''} · ${props.district||''}</div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-title">👥 人口資訊</div>
-    <div class="stat-row">
-      <span class="stat-label">最新人口</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${pop26}</span>
-        <span class="stat-sub">2026.02 資料<span class="rank-badge">(${props.pop26_rank||'-'}/86名)</span></span>
-      </span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">人口增減</span>
-      <span class="stat-val-block">
-        <span class="stat-value ${pdCls}">${pdStr} 人<span class="rank-badge">(${props.pop_diff_rank||'-'}/86名)</span></span>
-        <span class="stat-sub">與 2022 年相比</span>
-      </span>
+    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+      <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)">${pop26}</div>
+        <div style="font-size:10px;color:var(--muted)">最新人口</div>
+        <div style="font-size:10px;color:var(--accent)">第 ${pop26rk} 名</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
+        <div style="font-size:16px;font-weight:700;color:${pd>0?'var(--green)':pd<0?'var(--red)':'var(--text)'}">${pdStr}</div>
+        <div style="font-size:10px;color:var(--muted)">增減人口</div>
+        <div style="font-size:10px;color:var(--accent)">第 ${getRank('_pop_diff',props.village,true)} 名</div>
+      </div>
     </div>
   </div>
   <div class="sidebar-section">
@@ -649,21 +697,31 @@ function renderVillage(props){
       <span class="stat-label">得票數</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22v} 票</span>
-        <span class="stat-sub rank-badge">(${tsp22rk}/86名)</span>
+        <span class="stat-sub rank-badge">(第 ${tsp22rk2} 名 / 86)</span>
       </span>
     </div>
     <div class="stat-row">
       <span class="stat-label">得票率</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22vr}</span>
-        <span class="stat-sub rank-badge">(${tsp22vrk}/86名)</span>
+        <span class="stat-sub rank-badge">(第 ${tsp22vrk2} 名 / 86)</span>
       </span>
     </div>
     <div class="stat-row">
       <span class="stat-label">催票率</span>
       <span class="stat-val-block">
         <span class="stat-value">${tsp22t}</span>
-        <span class="stat-sub rank-badge">(${tsp22trk}/86名)</span>
+        <span class="stat-sub rank-badge">(第 ${tsp22trk2} 名 / 86)</span>
+      </span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">🗳️ 2022 議員選舉（時代力量）</div>
+    <div class="stat-row">
+      <span class="stat-label">得票數</span>
+      <span class="stat-val-block">
+        <span class="stat-value">${(props.npp22||0).toLocaleString()} 票</span>
+        <span class="stat-sub rank-badge">(第 ${npp22rk2} 名 / 86)</span>
       </span>
     </div>
   </div>
@@ -785,8 +843,20 @@ function onEachFeature(feature,layer){
   // 建立 village → layer 對照表
   villageLayerMap[feature.properties.village]=layer;
   layer.on({
-    mouseover:e=>{e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});e.target.bringToFront();},
-    mouseout: e=>{if(e.target!==villageLayerMap[selectedVillage])geojsonLayer.resetStyle(e.target);},
+    mouseover:e=>{
+      if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage]){
+        geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
+      }
+      hoveredVillage=feature.properties.village;
+      if(feature.properties.village!==selectedVillage){
+        e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});
+        e.target.bringToFront();
+      }
+    },
+    mouseout: e=>{
+      if(feature.properties.village!==selectedVillage) geojsonLayer.resetStyle(e.target);
+      if(hoveredVillage===feature.properties.village) hoveredVillage=null;
+    },
     click:    e=>{selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
   });
   layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
@@ -801,6 +871,14 @@ function onEachFeature(feature,layer){
     const res=await fetch('sanmin_vote.geojson');
     if(!res.ok)throw new Error('HTTP '+res.status);
     RAW=await res.json();
+    // 注入衍生欄位（GeoJSON 只存原始數字）
+    RAW.features.forEach(f=>{
+      const p=f.properties;
+      p._pop_diff = (p['pop2026.02']||0) - (p.pop2022||0);
+      p._total24p = (p.dpp24_p||0)+(p.kmt24_p||0)+(p.tpp24_p||0)
+                  +(p.tsp24_P||0)+(p.npp24_p||0)+(p.gp24_p||0)+(p.obs24_P||0);
+    });
+    _rankCache={};
     AI_DATA=RAW.features.map(f=>{
       const p=f.properties;
       return{
