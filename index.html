@@ -136,6 +136,41 @@
     }
     .village-label::before{display:none!important;}
 
+
+    /* ── Analysis Panel ── */
+    .atab-bar{display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap;}
+    .atab{flex:1;min-width:0;padding:5px 3px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.15s;white-space:nowrap;}
+    .atab.active{background:rgba(255,229,0,0.18);border-color:rgba(255,229,0,0.5);color:#ffe500;}
+    .analysis-intro{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid rgba(255,229,0,0.4);}
+    .oppo-item,.flow-item{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer;border-radius:4px;transition:background 0.12s;}
+    .oppo-item:hover,.flow-item:hover{background:rgba(79,124,255,0.1);margin:0 -5px;padding:5px 5px;}
+    .oppo-rank{font-size:10px;color:var(--accent);font-weight:700;width:16px;flex-shrink:0;}
+    .oppo-village{flex:1;color:var(--text);}
+    .oppo-val{font-size:11px;font-weight:600;}
+    .flow-bar-outer{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+    .flow-bar{height:100%;border-radius:3px;transition:width 0.3s;}
+    .flow-val{font-size:11px;font-weight:600;width:42px;text-align:right;flex-shrink:0;}
+    .priority-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .priority-count{font-size:11px;color:var(--accent);}
+    .priority-clear{font-size:11px;color:var(--muted);cursor:pointer;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:none;}
+    .priority-clear:hover{border-color:var(--red);color:var(--red);}
+    .priority-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+    .priority-check{width:14px;height:14px;accent-color:#ffe500;cursor:pointer;flex-shrink:0;}
+    .priority-vname{flex:1;cursor:pointer;color:var(--text);}
+    .priority-vname:hover{color:var(--accent);}
+    .priority-sub{font-size:10px;color:var(--muted);text-align:right;}
+    .priority-dot{display:inline-block;width:8px;height:8px;background:#ffe500;border-radius:50%;margin-right:4px;box-shadow:0 0 6px rgba(255,229,0,.7);}
+    .calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+    .calc-label{font-size:12px;color:var(--muted);}
+    .calc-value{font-size:14px;font-weight:700;color:var(--text);}
+    .calc-input-wrap{display:flex;align-items:center;gap:6px;}
+    .calc-input{background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;font-weight:700;width:72px;text-align:right;padding:3px 6px;}
+    .calc-slider{width:100%;accent-color:#ffe500;margin:5px 0;}
+    .calc-strategy{background:rgba(255,255,255,0.03);border-radius:6px;padding:9px 10px;margin-top:8px;}
+    .calc-strategy-title{font-size:11px;color:#ffe500;margin-bottom:6px;font-weight:700;}
+    .calc-strategy-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--muted);}
+    .calc-strategy-row span:last-child{color:var(--text);font-weight:600;}
+    .section-subtitle{font-size:11px;font-weight:700;color:var(--text);margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border);}
     @media(max-width:640px){
       .main{flex-direction:column;}
       #map{flex:none;height:52vh;width:100%;}
@@ -172,6 +207,7 @@
     <button class="fbtn p-gp"  data-party="gp"  onclick="setParty('gp',this)">綠黨</button>
     <button class="fbtn p-obs" data-party="obs" onclick="setParty('obs',this)">歐巴桑</button>
     <button class="fbtn p-pop" data-party="pop" onclick="setParty('pop',this)">人口資訊</button>
+    <button class="fbtn p-ana" data-party="ana" onclick="setParty('ana',this)" style="background:rgba(255,229,0,0.12);border-color:rgba(255,229,0,0.35);color:#ffe500;">🎯 選情分析</button>
   </div>
   <div class="filter-row" id="row-type">
     <span class="filter-label">種類</span>
@@ -305,7 +341,7 @@ const POP_SCALE={
 function GRAY(){return{label:'',isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['#1e2235'],legendColors:[],legendLabels:[]};}
 
 function getActiveScale(){
-  if(curParty==='all')return GRAY();
+  if(curParty==='all'||curParty==='ana')return GRAY();
   if(curParty==='pop')return POP_SCALE;
   return buildScale(curParty,curYear,curType)||GRAY();
 }
@@ -378,6 +414,7 @@ function renderPanel(){
   if(curVillageProps){el.innerHTML=renderVillage(curVillageProps);return;}
   if(curParty==='all'){el.innerHTML=renderOverview();return;}
   if(curParty==='pop'){el.innerHTML=renderPopPanel();return;}
+  if(curParty==='ana'){el.innerHTML=renderAnalysis();return;}
   el.innerHTML=renderFilterPanel();
   triggerAI();
 }
@@ -432,6 +469,22 @@ function renderFilterPanel(){
 // ── Top-7 three metrics ──
 // ── Village → layer map (for sidebar hover interaction) ──
 const villageLayerMap={};
+let selectedVillage=null;
+let priorityVillages=new Set();
+let priorityLayer=null;
+let curAnalysisTab='oppo';
+
+function selectVillage(name){
+  if(selectedVillage&&villageLayerMap[selectedVillage]){
+    geojsonLayer.resetStyle(villageLayerMap[selectedVillage]);
+  }
+  selectedVillage=name;
+  if(name&&villageLayerMap[name]){
+    const l=villageLayerMap[name];
+    l.setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
+    l.bringToFront();
+  }
+}
 
 function highlightVillage(name,on){
   const layer=villageLayerMap[name];
@@ -482,8 +535,8 @@ function goToVillage(name){
   const f=RAW.features.find(f=>f.properties.village===name);
   if(!f)return;
   curVillageProps=f.properties;
+  selectVillage(name);
   renderPanel();
-  // pan map to village
   const layer=villageLayerMap[name];
   if(layer) map.fitBounds(layer.getBounds(),{maxZoom:16,padding:[40,40]});
 }
@@ -654,6 +707,9 @@ function applyUpdate(){
 }
 function setParty(party,btn){
   curParty=party;
+  if(party==='ana'){
+    // analysis mode: grey map
+  }
   document.querySelectorAll('#row-party .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(party!=='all'&&party!=='pop'){
@@ -677,7 +733,7 @@ function setYear(year,btn){
   updateAvail();applyUpdate();
 }
 function setType(type,btn){if(btn.disabled)return;curType=type;updateAvail();applyUpdate();}
-function goBack(){curVillageProps=null;renderPanel();}
+function goBack(){curVillageProps=null;selectVillage(null);renderPanel();}
 
 // ── Chat ──
 function toggleChat(){
@@ -730,8 +786,8 @@ function onEachFeature(feature,layer){
   villageLayerMap[feature.properties.village]=layer;
   layer.on({
     mouseover:e=>{e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});e.target.bringToFront();},
-    mouseout: e=>geojsonLayer.resetStyle(e.target),
-    click:    e=>{e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});e.target.bringToFront();curVillageProps=feature.properties;renderPanel();}
+    mouseout: e=>{if(e.target!==villageLayerMap[selectedVillage])geojsonLayer.resetStyle(e.target);},
+    click:    e=>{selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
   });
   layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
 }
@@ -774,6 +830,224 @@ function onEachFeature(feature,layer){
     loadingEl.textContent='資料載入失敗：'+e.message+'（請確認 sanmin_vote.geojson 與 index.html 在同一資料夾）';
   }
 })();
+
+// ── Priority map overlay ──
+function updatePriorityOverlay(){
+  if(priorityLayer){map.removeLayer(priorityLayer);priorityLayer=null;}
+  if(priorityVillages.size===0)return;
+  const geoms=RAW.features.filter(f=>priorityVillages.has(f.properties.village));
+  priorityLayer=L.geoJSON({type:'FeatureCollection',features:geoms},{
+    style:{fillColor:'transparent',weight:3,color:'#ffe500',opacity:0.85,fillOpacity:0,dashArray:'5,4'},
+    interactive:false
+  }).addTo(map);
+}
+
+function togglePriority(name){
+  if(priorityVillages.has(name))priorityVillages.delete(name);
+  else priorityVillages.add(name);
+  updatePriorityOverlay();
+  renderPanel();
+}
+
+function clearPriority(){
+  priorityVillages.clear();
+  updatePriorityOverlay();
+  renderPanel();
+}
+
+function setAnalysisTab(t){
+  curAnalysisTab=t;
+  renderPanel();
+}
+
+// ── Analysis calculations ──
+function renderAnalysis(){
+  const fs=RAW.features;
+  const tabs=[
+    {id:'oppo',label:'🔍 機會里'},
+    {id:'flow',label:'📉 票源流向'},
+    {id:'priority',label:'⭐ 重點里'},
+    {id:'calc',label:'🧮 試算器'}
+  ];
+  const tabHtml=tabs.map(t=>`<button class="atab${curAnalysisTab===t.id?' active':''}" onclick="setAnalysisTab('${t.id}')">${t.label}</button>`).join('');
+
+  let body='';
+  if(curAnalysisTab==='oppo') body=renderOppo(fs);
+  else if(curAnalysisTab==='flow') body=renderFlow(fs);
+  else if(curAnalysisTab==='priority') body=renderPriority(fs);
+  else if(curAnalysisTab==='calc') body=renderCalc(fs);
+
+  return`<div class="sidebar-section">
+    <div class="sidebar-title">🎯 選情分析</div>
+    <div class="atab-bar">${tabHtml}</div>
+    ${body}
+  </div>`;
+}
+
+// ── 機會里：催票潛力分析 ──
+function renderOppo(fs){
+  const tRates=fs.map(f=>f.properties['tsp22_t%']||0);
+  const vRates=fs.map(f=>f.properties['tsp22_v%']||0);
+  const medT=tRates.slice().sort((a,b)=>a-b)[Math.floor(tRates.length*0.75)]; // top quartile target
+  const avgV=vRates.reduce((a,b)=>a+b,0)/vRates.length;
+
+  // For each village: if we boosted tRate to medT (where it's below), how many extra votes?
+  const oppos=fs.map(f=>{
+    const p=f.properties;
+    const cur_t=p['tsp22_t%']||0;
+    const cur_v=p['tsp22_v%']||avgV;
+    const vpop=p.vpop22||0;
+    const gap=medT-cur_t;
+    const extra=gap>0?Math.round(vpop*gap*cur_v):0;
+    return{village:p.village,area:p.area,cur_t,cur_v,vpop,extra,tRk:p['tsp22_t%rk']};
+  }).filter(o=>o.extra>0).sort((a,b)=>b.extra-a.extra).slice(0,12);
+
+  const maxExtra=oppos[0]?.extra||1;
+  const rows=oppos.map((o,i)=>{
+    const w=(o.extra/maxExtra*100).toFixed(0);
+    const isPriority=priorityVillages.has(o.village);
+    return`<div class="oppo-item" onclick="goToVillage('${o.village}')">
+      <span class="oppo-rank">${i+1}</span>
+      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}<span>${o.village}</span><span style="font-size:10px;color:var(--muted);margin-left:4px">${o.area}</span></span>
+      <span class="oppo-val" style="color:var(--green)">+${o.extra}票</span>
+    </div>`;
+  }).join('');
+
+  const target_pct=(medT*100).toFixed(1);
+  return`<div class="analysis-intro">若各里催票率提升至全區前25%水準（${target_pct}%），估計可額外獲得的票數。</div>
+  <div class="section-subtitle">最有潛力的里（催票率成長空間最大）</div>
+  ${rows}
+  <div style="font-size:10px;color:var(--muted);margin-top:8px">點擊里名可定位地圖</div>`;
+}
+
+// ── 票源流向：2022議員 vs 2024基進不分區 ──
+function renderFlow(fs){
+  const data=fs.map(f=>{
+    const p=f.properties;
+    const v22=p.tsp22||0;
+    const v24=p.tsp24_P||0;
+    const diff=v22-v24;
+    return{village:p.village,area:p.area,v22,v24,diff};
+  }).sort((a,b)=>a.diff-b.diff); // 流失最多排前面
+
+  const lost=data.filter(d=>d.diff<0).sort((a,b)=>a.diff-b.diff).slice(0,8);
+  const gained=data.filter(d=>d.diff>0).sort((a,b)=>b.diff-a.diff).slice(0,8);
+  const maxAbs=Math.max(...data.map(d=>Math.abs(d.diff)),1);
+
+  const mkRow=(d)=>{
+    const isPos=d.diff>0;
+    const w=(Math.abs(d.diff)/maxAbs*100).toFixed(0);
+    const col=isPos?'var(--green)':'var(--red)';
+    const isPriority=priorityVillages.has(d.village);
+    return`<div class="flow-item" onclick="goToVillage('${d.village}')">
+      <span style="font-size:11px;color:var(--muted);width:18px;flex-shrink:0">${isPriority?'⭐':''}</span>
+      <span class="oppo-village" style="font-size:11px">${d.village}</span>
+      <span style="font-size:10px;color:var(--muted);width:28px;text-align:right;flex-shrink:0">${d.v22}</span>
+      <span style="font-size:10px;color:var(--muted);margin:0 2px">→</span>
+      <span style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0">${d.v24}</span>
+      <span class="flow-val" style="color:${col}">${d.diff>0?'+':''}${d.diff}</span>
+    </div>`;
+  };
+
+  const totV22=data.reduce((a,d)=>a+d.v22,0);
+  const totV24=data.reduce((a,d)=>a+d.v24,0);
+  const totDiff=totV22-totV24;
+
+  return`<div class="analysis-intro">比較2022年議員票數與2024年基進不分區票數，觀察各里票源變化趨勢。</div>
+  <div class="calc-strategy"><div class="calc-strategy-title">全區總計</div>
+    <div class="calc-strategy-row"><span>2022 議員票</span><span>${totV22.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>2024 基進不分區</span><span>${totV24.toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>差異</span><span style="color:${totDiff>=0?'var(--green)':'var(--red)'}">${totDiff>0?'+':''}${totDiff}</span></div>
+  </div>
+  <div class="section-subtitle" style="margin-top:10px">票數增加的里（個人品牌 > 黨品牌）</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">2022議員 → 2024不分區</div>
+  ${gained.map(mkRow).join('')}
+  <div class="section-subtitle" style="margin-top:10px">票數減少的里（需重點耕耘）</div>
+  ${lost.map(mkRow).join('')}`;
+}
+
+// ── 重點里標記 ──
+function renderPriority(fs){
+  const count=priorityVillages.size;
+  const rows=fs.map(f=>{
+    const p=f.properties;
+    const chk=priorityVillages.has(p.village)?'checked':'';
+    return`<div class="priority-item">
+      <input type="checkbox" class="priority-check" ${chk} onchange="togglePriority('${p.village}')">
+      <span class="priority-vname" onclick="goToVillage('${p.village}')">${p.village}</span>
+      <span class="priority-sub">${p.area}<br>${(p.tsp22||0)}票 · 催${((p['tsp22_t%']||0)*100).toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  return`<div class="priority-header">
+    <span style="font-size:12px;color:var(--text)">已標記 <strong style="color:#ffe500">${count}</strong> 個里</span>
+    ${count>0?`<button class="priority-clear" onclick="clearPriority()">清除全部</button>`:''}
+  </div>
+  ${count>0?`<div class="analysis-intro">⭐ 標記的里會在地圖上顯示黃色虛線邊框</div>`:''}
+  <div class="section-subtitle">全部里（點名稱可定位）</div>
+  <div style="max-height:none">${rows}</div>`;
+}
+
+// ── 試算器 ──
+function renderCalc(fs){
+  const tsp22Total=fs.reduce((a,f)=>a+(f.properties.tsp22||0),0);
+  const target=window._calcTarget||Math.round(tsp22Total*1.2);
+  if(!window._calcTarget) window._calcTarget=target;
+  const gap=target-tsp22Total;
+
+  // Strategy A: uniform tRate improvement
+  const avgT=fs.reduce((a,f)=>a+(f.properties['tsp22_t%']||0),0)/fs.length;
+  // How much extra tRate needed to fill gap?
+  const totalVpop=fs.reduce((a,f)=>a+(f.properties.vpop22||0),0);
+  const avgV=fs.reduce((a,f)=>a+(f.properties['tsp22_v%']||0),0)/fs.length;
+  const neededTrate=gap/(totalVpop*avgV);
+
+  // Strategy B: focus on top opportunity villages
+  const oppoVillages=fs.map(f=>{
+    const p=f.properties;
+    const cur_t=p['tsp22_t%']||0;
+    const medT=0.065; // ~median trate
+    const gapT=medT-cur_t;
+    return{village:p.village,vpop:p.vpop22||0,cur_t,cur_v:p['tsp22_v%']||avgV,extra:gapT>0?Math.round((p.vpop22||0)*gapT*(p['tsp22_v%']||avgV)):0};
+  }).filter(o=>o.extra>0).sort((a,b)=>b.extra-a.extra);
+
+  let cumExtra=0;let topN=0;
+  for(const o of oppoVillages){cumExtra+=o.extra;topN++;if(cumExtra>=gap)break;}
+
+  const pctStr=((neededTrate)*100).toFixed(1);
+  const isDoable=neededTrate<0.03;
+
+  return`<div class="calc-row">
+    <span class="calc-label">2022 基準票數</span>
+    <span class="calc-value">${tsp22Total.toLocaleString()} 票</span>
+  </div>
+  <div class="calc-row">
+    <span class="calc-label">目標票數</span>
+    <div class="calc-input-wrap">
+      <input class="calc-input" type="number" value="${target}" min="0" max="9999" step="50"
+        oninput="window._calcTarget=+this.value||${tsp22Total};renderPanel()">
+    </div>
+  </div>
+  <div class="calc-row">
+    <span class="calc-label">需增加</span>
+    <span class="calc-value" style="color:${gap<=0?'var(--green)':'var(--accent)'}">${gap<=0?'已達標':'+'+gap.toLocaleString()+' 票'}</span>
+  </div>
+  ${gap>0?`
+  <div class="calc-strategy">
+    <div class="calc-strategy-title">策略一：全面提升催票率</div>
+    <div class="calc-strategy-row"><span>每里平均催票率需提升</span><span style="color:${isDoable?'var(--green)':'var(--red)'}">+${pctStr}%</span></div>
+    <div class="calc-strategy-row"><span>目前平均催票率</span><span>${(avgT*100).toFixed(1)}%</span></div>
+    <div class="calc-strategy-row"><span>達成難度</span><span>${isDoable?'🟢 可行':'🔴 較難'}</span></div>
+  </div>
+  <div class="calc-strategy" style="margin-top:6px">
+    <div class="calc-strategy-title">策略二：攻頂機會里</div>
+    <div class="calc-strategy-row"><span>需重點耕耘</span><span>${topN} 個里</span></div>
+    <div class="calc-strategy-row"><span>目標里催票率提升至 6.5%</span><span>可增 ${Math.min(cumExtra,gap).toLocaleString()} 票</span></div>
+    <div class="calc-strategy-row"><span>建議</span><span>切換至「機會里」查看名單</span></div>
+  </div>
+  `:'<div style="font-size:13px;color:var(--green);padding:12px 0;text-align:center">🎉 已超過目標票數！</div>'}`;
+}
+
 </script>
 </body>
 </html>
