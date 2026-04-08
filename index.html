@@ -370,6 +370,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
 }).addTo(map);
 
 function styleFn(f){
+  if(!curScale) return{fillColor:'#1e2235',weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
   const v=f.properties.village;
   let val;
   if(curYear==='pop') val=f.properties._pop_diff||0;
@@ -932,6 +933,7 @@ function onEachFeature(feature,layer){
     renderElectionRow('2022');
     renderCandidateRow(ELECTIONS['2022_council'].candidates);
 
+    curScale=GRAY(); // 建立地圖前先設預設 scale，避免 styleFn null 錯誤
     geojsonLayer=L.geoJSON(RAW,{style:styleFn,onEachFeature}).addTo(map);
     map.fitBounds(geojsonLayer.getBounds(),{padding:[20,20]});
 
