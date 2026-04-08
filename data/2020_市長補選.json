@@ -1,0 +1,703 @@
+{
+  "_meta": {
+    "id": "2020_市長補選",
+    "label": "高雄市第3屆市長補選",
+    "year": "2020",
+    "date": "2020-08-15",
+    "candidates": {
+      "1": "陳其邁（民主進步黨）",
+      "2": "吳益政（無黨籍）",
+      "3": "李眉蓁（中國國民黨）"
+    }
+  },
+  "villages": {
+    "力行里": {
+      "vpop": 1052,
+      "voted": 527,
+      "valid": 523,
+      "dpp": 380,
+      "kmt": 129,
+      "others": 14
+    },
+    "十全里": {
+      "vpop": 1640,
+      "voted": 779,
+      "valid": 778,
+      "dpp": 600,
+      "kmt": 148,
+      "others": 30
+    },
+    "十美里": {
+      "vpop": 1701,
+      "voted": 800,
+      "valid": 798,
+      "dpp": 580,
+      "kmt": 187,
+      "others": 31
+    },
+    "千北里": {
+      "vpop": 1008,
+      "voted": 492,
+      "valid": 490,
+      "dpp": 352,
+      "kmt": 116,
+      "others": 22
+    },
+    "千歲里": {
+      "vpop": 1099,
+      "voted": 557,
+      "valid": 555,
+      "dpp": 386,
+      "kmt": 137,
+      "others": 32
+    },
+    "千秋里": {
+      "vpop": 1948,
+      "voted": 936,
+      "valid": 933,
+      "dpp": 682,
+      "kmt": 211,
+      "others": 40
+    },
+    "博惠里": {
+      "vpop": 3883,
+      "voted": 1840,
+      "valid": 1834,
+      "dpp": 1302,
+      "kmt": 449,
+      "others": 83
+    },
+    "博愛里": {
+      "vpop": 1124,
+      "voted": 542,
+      "valid": 539,
+      "dpp": 355,
+      "kmt": 158,
+      "others": 26
+    },
+    "同德里": {
+      "vpop": 2578,
+      "voted": 1225,
+      "valid": 1221,
+      "dpp": 898,
+      "kmt": 277,
+      "others": 46
+    },
+    "安吉里": {
+      "vpop": 4279,
+      "voted": 1727,
+      "valid": 1721,
+      "dpp": 1181,
+      "kmt": 459,
+      "others": 81
+    },
+    "安和里": {
+      "vpop": 2357,
+      "voted": 1168,
+      "valid": 1163,
+      "dpp": 884,
+      "kmt": 241,
+      "others": 38
+    },
+    "安宜里": {
+      "vpop": 2959,
+      "voted": 1509,
+      "valid": 1501,
+      "dpp": 1128,
+      "kmt": 318,
+      "others": 55
+    },
+    "安寧里": {
+      "vpop": 1763,
+      "voted": 774,
+      "valid": 770,
+      "dpp": 578,
+      "kmt": 164,
+      "others": 28
+    },
+    "安康里": {
+      "vpop": 2669,
+      "voted": 1053,
+      "valid": 1046,
+      "dpp": 787,
+      "kmt": 228,
+      "others": 31
+    },
+    "安東里": {
+      "vpop": 2779,
+      "voted": 1301,
+      "valid": 1294,
+      "dpp": 935,
+      "kmt": 299,
+      "others": 60
+    },
+    "安泰里": {
+      "vpop": 3622,
+      "voted": 1631,
+      "valid": 1623,
+      "dpp": 1161,
+      "kmt": 406,
+      "others": 56
+    },
+    "安生里": {
+      "vpop": 1346,
+      "voted": 694,
+      "valid": 694,
+      "dpp": 523,
+      "kmt": 137,
+      "others": 34
+    },
+    "安發里": {
+      "vpop": 4238,
+      "voted": 1758,
+      "valid": 1754,
+      "dpp": 1234,
+      "kmt": 442,
+      "others": 78
+    },
+    "安邦里": {
+      "vpop": 3534,
+      "voted": 1585,
+      "valid": 1583,
+      "dpp": 1194,
+      "kmt": 317,
+      "others": 72
+    },
+    "寶中里": {
+      "vpop": 2778,
+      "voted": 1199,
+      "valid": 1195,
+      "dpp": 899,
+      "kmt": 243,
+      "others": 53
+    },
+    "寶國里": {
+      "vpop": 7345,
+      "voted": 3047,
+      "valid": 3037,
+      "dpp": 2120,
+      "kmt": 772,
+      "others": 145
+    },
+    "寶安里": {
+      "vpop": 6710,
+      "voted": 2586,
+      "valid": 2579,
+      "dpp": 1730,
+      "kmt": 731,
+      "others": 118
+    },
+    "寶德里": {
+      "vpop": 4802,
+      "voted": 1981,
+      "valid": 1974,
+      "dpp": 1433,
+      "kmt": 462,
+      "others": 79
+    },
+    "寶慶里": {
+      "vpop": 2516,
+      "voted": 1041,
+      "valid": 1037,
+      "dpp": 730,
+      "kmt": 260,
+      "others": 47
+    },
+    "寶業里": {
+      "vpop": 5259,
+      "voted": 2132,
+      "valid": 2130,
+      "dpp": 1531,
+      "kmt": 493,
+      "others": 106
+    },
+    "寶民里": {
+      "vpop": 2978,
+      "voted": 1215,
+      "valid": 1213,
+      "dpp": 840,
+      "kmt": 320,
+      "others": 53
+    },
+    "寶泰里": {
+      "vpop": 3786,
+      "voted": 1465,
+      "valid": 1456,
+      "dpp": 1068,
+      "kmt": 318,
+      "others": 70
+    },
+    "寶獅里": {
+      "vpop": 3516,
+      "voted": 1539,
+      "valid": 1537,
+      "dpp": 1087,
+      "kmt": 392,
+      "others": 58
+    },
+    "寶玉里": {
+      "vpop": 7777,
+      "voted": 3005,
+      "valid": 2994,
+      "dpp": 2125,
+      "kmt": 723,
+      "others": 146
+    },
+    "寶珠里": {
+      "vpop": 6606,
+      "voted": 2137,
+      "valid": 2134,
+      "dpp": 1530,
+      "kmt": 512,
+      "others": 92
+    },
+    "寶盛里": {
+      "vpop": 4715,
+      "voted": 2057,
+      "valid": 2047,
+      "dpp": 1439,
+      "kmt": 530,
+      "others": 78
+    },
+    "寶興里": {
+      "vpop": 6340,
+      "voted": 2640,
+      "valid": 2631,
+      "dpp": 1921,
+      "kmt": 591,
+      "others": 119
+    },
+    "寶華里": {
+      "vpop": 3044,
+      "voted": 1165,
+      "valid": 1162,
+      "dpp": 767,
+      "kmt": 356,
+      "others": 39
+    },
+    "寶龍里": {
+      "vpop": 3961,
+      "voted": 1756,
+      "valid": 1745,
+      "dpp": 1247,
+      "kmt": 414,
+      "others": 84
+    },
+    "川東里": {
+      "vpop": 1195,
+      "voted": 521,
+      "valid": 520,
+      "dpp": 389,
+      "kmt": 114,
+      "others": 17
+    },
+    "建東里": {
+      "vpop": 1142,
+      "voted": 438,
+      "valid": 435,
+      "dpp": 290,
+      "kmt": 120,
+      "others": 25
+    },
+    "德仁里": {
+      "vpop": 1822,
+      "voted": 860,
+      "valid": 857,
+      "dpp": 619,
+      "kmt": 206,
+      "others": 32
+    },
+    "德北里": {
+      "vpop": 1837,
+      "voted": 838,
+      "valid": 837,
+      "dpp": 593,
+      "kmt": 208,
+      "others": 36
+    },
+    "德智里": {
+      "vpop": 2046,
+      "voted": 1010,
+      "valid": 1005,
+      "dpp": 720,
+      "kmt": 250,
+      "others": 35
+    },
+    "德東里": {
+      "vpop": 765,
+      "voted": 413,
+      "valid": 412,
+      "dpp": 300,
+      "kmt": 94,
+      "others": 18
+    },
+    "德行里": {
+      "vpop": 1058,
+      "voted": 586,
+      "valid": 583,
+      "dpp": 429,
+      "kmt": 134,
+      "others": 20
+    },
+    "德西里": {
+      "vpop": 856,
+      "voted": 382,
+      "valid": 378,
+      "dpp": 253,
+      "kmt": 109,
+      "others": 16
+    },
+    "本上里": {
+      "vpop": 4396,
+      "voted": 1760,
+      "valid": 1749,
+      "dpp": 1189,
+      "kmt": 462,
+      "others": 98
+    },
+    "本元里": {
+      "vpop": 4886,
+      "voted": 2067,
+      "valid": 2058,
+      "dpp": 1461,
+      "kmt": 493,
+      "others": 104
+    },
+    "本和里": {
+      "vpop": 6806,
+      "voted": 2861,
+      "valid": 2848,
+      "dpp": 2026,
+      "kmt": 714,
+      "others": 108
+    },
+    "本安里": {
+      "vpop": 4232,
+      "voted": 1781,
+      "valid": 1777,
+      "dpp": 1190,
+      "kmt": 494,
+      "others": 93
+    },
+    "本揚里": {
+      "vpop": 6990,
+      "voted": 2982,
+      "valid": 2972,
+      "dpp": 2058,
+      "kmt": 790,
+      "others": 124
+    },
+    "本文里": {
+      "vpop": 1911,
+      "voted": 878,
+      "valid": 875,
+      "dpp": 626,
+      "kmt": 212,
+      "others": 37
+    },
+    "本武里": {
+      "vpop": 1543,
+      "voted": 732,
+      "valid": 728,
+      "dpp": 534,
+      "kmt": 163,
+      "others": 31
+    },
+    "本館里": {
+      "vpop": 8177,
+      "voted": 3389,
+      "valid": 3382,
+      "dpp": 2459,
+      "kmt": 799,
+      "others": 124
+    },
+    "正興里": {
+      "vpop": 11311,
+      "voted": 4242,
+      "valid": 4228,
+      "dpp": 2953,
+      "kmt": 1064,
+      "others": 211
+    },
+    "正順里": {
+      "vpop": 3781,
+      "voted": 1541,
+      "valid": 1538,
+      "dpp": 1122,
+      "kmt": 361,
+      "others": 55
+    },
+    "民享里": {
+      "vpop": 1921,
+      "voted": 1010,
+      "valid": 1007,
+      "dpp": 734,
+      "kmt": 230,
+      "others": 43
+    },
+    "港新里": {
+      "vpop": 1340,
+      "voted": 581,
+      "valid": 580,
+      "dpp": 408,
+      "kmt": 156,
+      "others": 16
+    },
+    "港東里": {
+      "vpop": 1337,
+      "voted": 641,
+      "valid": 639,
+      "dpp": 469,
+      "kmt": 145,
+      "others": 25
+    },
+    "港西里": {
+      "vpop": 769,
+      "voted": 328,
+      "valid": 328,
+      "dpp": 233,
+      "kmt": 84,
+      "others": 11
+    },
+    "灣中里": {
+      "vpop": 5195,
+      "voted": 1999,
+      "valid": 1997,
+      "dpp": 1503,
+      "kmt": 402,
+      "others": 92
+    },
+    "灣利里": {
+      "vpop": 3037,
+      "voted": 1451,
+      "valid": 1447,
+      "dpp": 1131,
+      "kmt": 280,
+      "others": 36
+    },
+    "灣勝里": {
+      "vpop": 1822,
+      "voted": 822,
+      "valid": 818,
+      "dpp": 645,
+      "kmt": 151,
+      "others": 22
+    },
+    "灣子里": {
+      "vpop": 3715,
+      "voted": 1417,
+      "valid": 1413,
+      "dpp": 1012,
+      "kmt": 341,
+      "others": 60
+    },
+    "灣復里": {
+      "vpop": 3445,
+      "voted": 1385,
+      "valid": 1381,
+      "dpp": 1021,
+      "kmt": 292,
+      "others": 68
+    },
+    "灣愛里": {
+      "vpop": 2883,
+      "voted": 1148,
+      "valid": 1140,
+      "dpp": 841,
+      "kmt": 239,
+      "others": 60
+    },
+    "灣成里": {
+      "vpop": 2252,
+      "voted": 957,
+      "valid": 956,
+      "dpp": 680,
+      "kmt": 243,
+      "others": 33
+    },
+    "灣興里": {
+      "vpop": 1790,
+      "voted": 776,
+      "valid": 773,
+      "dpp": 580,
+      "kmt": 159,
+      "others": 34
+    },
+    "灣華里": {
+      "vpop": 2564,
+      "voted": 1062,
+      "valid": 1060,
+      "dpp": 761,
+      "kmt": 253,
+      "others": 46
+    },
+    "立德里": {
+      "vpop": 1134,
+      "voted": 558,
+      "valid": 556,
+      "dpp": 392,
+      "kmt": 142,
+      "others": 22
+    },
+    "立業里": {
+      "vpop": 935,
+      "voted": 424,
+      "valid": 421,
+      "dpp": 310,
+      "kmt": 81,
+      "others": 30
+    },
+    "立誠里": {
+      "vpop": 661,
+      "voted": 350,
+      "valid": 349,
+      "dpp": 263,
+      "kmt": 71,
+      "others": 15
+    },
+    "精華里": {
+      "vpop": 1440,
+      "voted": 747,
+      "valid": 742,
+      "dpp": 526,
+      "kmt": 181,
+      "others": 35
+    },
+    "興德里": {
+      "vpop": 1761,
+      "voted": 812,
+      "valid": 810,
+      "dpp": 558,
+      "kmt": 205,
+      "others": 47
+    },
+    "裕民里": {
+      "vpop": 1208,
+      "voted": 535,
+      "valid": 530,
+      "dpp": 373,
+      "kmt": 127,
+      "others": 30
+    },
+    "豐裕里": {
+      "vpop": 2377,
+      "voted": 1020,
+      "valid": 1014,
+      "dpp": 760,
+      "kmt": 224,
+      "others": 30
+    },
+    "達仁里": {
+      "vpop": 1416,
+      "voted": 661,
+      "valid": 659,
+      "dpp": 479,
+      "kmt": 148,
+      "others": 32
+    },
+    "達勇里": {
+      "vpop": 916,
+      "voted": 424,
+      "valid": 423,
+      "dpp": 303,
+      "kmt": 93,
+      "others": 27
+    },
+    "達德里": {
+      "vpop": 1208,
+      "voted": 597,
+      "valid": 595,
+      "dpp": 474,
+      "kmt": 110,
+      "others": 11
+    },
+    "達明里": {
+      "vpop": 1393,
+      "voted": 627,
+      "valid": 625,
+      "dpp": 484,
+      "kmt": 120,
+      "others": 21
+    },
+    "長明里": {
+      "vpop": 1025,
+      "voted": 410,
+      "valid": 410,
+      "dpp": 265,
+      "kmt": 133,
+      "others": 12
+    },
+    "鳳北里": {
+      "vpop": 1322,
+      "voted": 689,
+      "valid": 686,
+      "dpp": 517,
+      "kmt": 136,
+      "others": 33
+    },
+    "鳳南里": {
+      "vpop": 815,
+      "voted": 454,
+      "valid": 452,
+      "dpp": 341,
+      "kmt": 92,
+      "others": 19
+    },
+    "鼎中里": {
+      "vpop": 3330,
+      "voted": 1544,
+      "valid": 1542,
+      "dpp": 1157,
+      "kmt": 329,
+      "others": 56
+    },
+    "鼎力里": {
+      "vpop": 3684,
+      "voted": 1614,
+      "valid": 1609,
+      "dpp": 1188,
+      "kmt": 352,
+      "others": 69
+    },
+    "鼎強里": {
+      "vpop": 3779,
+      "voted": 1621,
+      "valid": 1616,
+      "dpp": 1218,
+      "kmt": 333,
+      "others": 65
+    },
+    "鼎泰里": {
+      "vpop": 20263,
+      "voted": 7965,
+      "valid": 7937,
+      "dpp": 5362,
+      "kmt": 2183,
+      "others": 392
+    },
+    "鼎盛里": {
+      "vpop": 7219,
+      "voted": 2892,
+      "valid": 2886,
+      "dpp": 2050,
+      "kmt": 726,
+      "others": 110
+    },
+    "鼎西里": {
+      "vpop": 6898,
+      "voted": 2839,
+      "valid": 2831,
+      "dpp": 2108,
+      "kmt": 610,
+      "others": 113
+    },
+    "鼎金里": {
+      "vpop": 3778,
+      "voted": 1547,
+      "valid": 1541,
+      "dpp": 1157,
+      "kmt": 336,
+      "others": 48
+    }
+  }
+}

@@ -1,0 +1,699 @@
+{
+  "_meta": {
+    "id": "2020_罷免",
+    "label": "高雄市第3屆市長韓國瑜罷免案",
+    "year": "2020",
+    "date": "2020-06-06",
+    "note": "agree=同意罷免, disagree=不同意罷免"
+  },
+  "villages": {
+    "鼎金里": {
+      "vpop": 3781,
+      "voted": 1612,
+      "valid": 1606,
+      "invalid": 6,
+      "agree": 1578,
+      "disagree": 28
+    },
+    "鼎盛里": {
+      "vpop": 7230,
+      "voted": 3100,
+      "valid": 3088,
+      "invalid": 12,
+      "agree": 3022,
+      "disagree": 66
+    },
+    "鼎強里": {
+      "vpop": 3798,
+      "voted": 1780,
+      "valid": 1775,
+      "invalid": 5,
+      "agree": 1735,
+      "disagree": 40
+    },
+    "鼎力里": {
+      "vpop": 3671,
+      "voted": 1710,
+      "valid": 1705,
+      "invalid": 5,
+      "agree": 1658,
+      "disagree": 47
+    },
+    "鼎西里": {
+      "vpop": 6881,
+      "voted": 3123,
+      "valid": 3110,
+      "invalid": 13,
+      "agree": 3042,
+      "disagree": 68
+    },
+    "鼎中里": {
+      "vpop": 3281,
+      "voted": 1627,
+      "valid": 1621,
+      "invalid": 6,
+      "agree": 1590,
+      "disagree": 31
+    },
+    "鼎泰里": {
+      "vpop": 20226,
+      "voted": 8360,
+      "valid": 8328,
+      "invalid": 32,
+      "agree": 8108,
+      "disagree": 220
+    },
+    "本館里": {
+      "vpop": 8179,
+      "voted": 3625,
+      "valid": 3615,
+      "invalid": 10,
+      "agree": 3536,
+      "disagree": 79
+    },
+    "本和里": {
+      "vpop": 6781,
+      "voted": 2927,
+      "valid": 2917,
+      "invalid": 10,
+      "agree": 2845,
+      "disagree": 72
+    },
+    "本文里": {
+      "vpop": 1908,
+      "voted": 879,
+      "valid": 876,
+      "invalid": 3,
+      "agree": 844,
+      "disagree": 32
+    },
+    "本武里": {
+      "vpop": 1550,
+      "voted": 778,
+      "valid": 772,
+      "invalid": 6,
+      "agree": 762,
+      "disagree": 10
+    },
+    "本元里": {
+      "vpop": 4915,
+      "voted": 2205,
+      "valid": 2195,
+      "invalid": 10,
+      "agree": 2151,
+      "disagree": 44
+    },
+    "本安里": {
+      "vpop": 4251,
+      "voted": 1814,
+      "valid": 1807,
+      "invalid": 7,
+      "agree": 1784,
+      "disagree": 23
+    },
+    "本上里": {
+      "vpop": 4412,
+      "voted": 1854,
+      "valid": 1844,
+      "invalid": 10,
+      "agree": 1816,
+      "disagree": 28
+    },
+    "本揚里": {
+      "vpop": 7021,
+      "voted": 3060,
+      "valid": 3047,
+      "invalid": 13,
+      "agree": 2974,
+      "disagree": 73
+    },
+    "寶獅里": {
+      "vpop": 3510,
+      "voted": 1537,
+      "valid": 1529,
+      "invalid": 8,
+      "agree": 1502,
+      "disagree": 27
+    },
+    "寶德里": {
+      "vpop": 4816,
+      "voted": 2166,
+      "valid": 2152,
+      "invalid": 14,
+      "agree": 2114,
+      "disagree": 38
+    },
+    "寶泰里": {
+      "vpop": 3776,
+      "voted": 1604,
+      "valid": 1593,
+      "invalid": 11,
+      "agree": 1560,
+      "disagree": 33
+    },
+    "寶興里": {
+      "vpop": 6336,
+      "voted": 2792,
+      "valid": 2778,
+      "invalid": 14,
+      "agree": 2710,
+      "disagree": 68
+    },
+    "寶中里": {
+      "vpop": 2802,
+      "voted": 1330,
+      "valid": 1324,
+      "invalid": 6,
+      "agree": 1278,
+      "disagree": 46
+    },
+    "寶華里": {
+      "vpop": 3047,
+      "voted": 1182,
+      "valid": 1180,
+      "invalid": 2,
+      "agree": 1154,
+      "disagree": 26
+    },
+    "寶國里": {
+      "vpop": 7372,
+      "voted": 3143,
+      "valid": 3125,
+      "invalid": 18,
+      "agree": 3061,
+      "disagree": 64
+    },
+    "寶民里": {
+      "vpop": 2987,
+      "voted": 1275,
+      "valid": 1275,
+      "invalid": 0,
+      "agree": 1250,
+      "disagree": 25
+    },
+    "寶慶里": {
+      "vpop": 2510,
+      "voted": 1093,
+      "valid": 1081,
+      "invalid": 12,
+      "agree": 1061,
+      "disagree": 20
+    },
+    "寶業里": {
+      "vpop": 5263,
+      "voted": 2345,
+      "valid": 2338,
+      "invalid": 7,
+      "agree": 2294,
+      "disagree": 44
+    },
+    "寶盛里": {
+      "vpop": 4719,
+      "voted": 2044,
+      "valid": 2036,
+      "invalid": 8,
+      "agree": 1993,
+      "disagree": 43
+    },
+    "寶安里": {
+      "vpop": 6725,
+      "voted": 2701,
+      "valid": 2692,
+      "invalid": 9,
+      "agree": 2631,
+      "disagree": 61
+    },
+    "寶龍里": {
+      "vpop": 3983,
+      "voted": 1884,
+      "valid": 1876,
+      "invalid": 8,
+      "agree": 1820,
+      "disagree": 56
+    },
+    "寶珠里": {
+      "vpop": 6582,
+      "voted": 2249,
+      "valid": 2236,
+      "invalid": 13,
+      "agree": 2184,
+      "disagree": 52
+    },
+    "寶玉里": {
+      "vpop": 7785,
+      "voted": 3333,
+      "valid": 3320,
+      "invalid": 13,
+      "agree": 3227,
+      "disagree": 93
+    },
+    "灣子里": {
+      "vpop": 3704,
+      "voted": 1520,
+      "valid": 1510,
+      "invalid": 10,
+      "agree": 1482,
+      "disagree": 28
+    },
+    "灣愛里": {
+      "vpop": 2879,
+      "voted": 1250,
+      "valid": 1245,
+      "invalid": 5,
+      "agree": 1210,
+      "disagree": 35
+    },
+    "灣中里": {
+      "vpop": 5197,
+      "voted": 2191,
+      "valid": 2185,
+      "invalid": 6,
+      "agree": 2145,
+      "disagree": 40
+    },
+    "灣華里": {
+      "vpop": 2572,
+      "voted": 1064,
+      "valid": 1060,
+      "invalid": 4,
+      "agree": 1038,
+      "disagree": 22
+    },
+    "灣勝里": {
+      "vpop": 1826,
+      "voted": 869,
+      "valid": 868,
+      "invalid": 1,
+      "agree": 845,
+      "disagree": 23
+    },
+    "灣利里": {
+      "vpop": 3036,
+      "voted": 1522,
+      "valid": 1514,
+      "invalid": 8,
+      "agree": 1490,
+      "disagree": 24
+    },
+    "灣復里": {
+      "vpop": 3447,
+      "voted": 1437,
+      "valid": 1429,
+      "invalid": 8,
+      "agree": 1389,
+      "disagree": 40
+    },
+    "正興里": {
+      "vpop": 11281,
+      "voted": 4618,
+      "valid": 4589,
+      "invalid": 29,
+      "agree": 4504,
+      "disagree": 85
+    },
+    "正順里": {
+      "vpop": 3789,
+      "voted": 1721,
+      "valid": 1713,
+      "invalid": 8,
+      "agree": 1674,
+      "disagree": 39
+    },
+    "灣興里": {
+      "vpop": 1805,
+      "voted": 843,
+      "valid": 835,
+      "invalid": 8,
+      "agree": 819,
+      "disagree": 16
+    },
+    "灣成里": {
+      "vpop": 2246,
+      "voted": 955,
+      "valid": 953,
+      "invalid": 2,
+      "agree": 931,
+      "disagree": 22
+    },
+    "安康里": {
+      "vpop": 2671,
+      "voted": 1068,
+      "valid": 1065,
+      "invalid": 3,
+      "agree": 1054,
+      "disagree": 11
+    },
+    "安寧里": {
+      "vpop": 1769,
+      "voted": 824,
+      "valid": 816,
+      "invalid": 8,
+      "agree": 785,
+      "disagree": 31
+    },
+    "安吉里": {
+      "vpop": 4284,
+      "voted": 1769,
+      "valid": 1762,
+      "invalid": 7,
+      "agree": 1733,
+      "disagree": 29
+    },
+    "安發里": {
+      "vpop": 4233,
+      "voted": 1859,
+      "valid": 1848,
+      "invalid": 11,
+      "agree": 1814,
+      "disagree": 34
+    },
+    "安東里": {
+      "vpop": 2784,
+      "voted": 1352,
+      "valid": 1340,
+      "invalid": 12,
+      "agree": 1304,
+      "disagree": 36
+    },
+    "安和里": {
+      "vpop": 2373,
+      "voted": 1171,
+      "valid": 1165,
+      "invalid": 6,
+      "agree": 1132,
+      "disagree": 33
+    },
+    "達德里": {
+      "vpop": 1218,
+      "voted": 640,
+      "valid": 637,
+      "invalid": 3,
+      "agree": 622,
+      "disagree": 15
+    },
+    "達明里": {
+      "vpop": 1403,
+      "voted": 658,
+      "valid": 652,
+      "invalid": 6,
+      "agree": 635,
+      "disagree": 17
+    },
+    "達仁里": {
+      "vpop": 1411,
+      "voted": 645,
+      "valid": 642,
+      "invalid": 3,
+      "agree": 628,
+      "disagree": 14
+    },
+    "達勇里": {
+      "vpop": 914,
+      "voted": 404,
+      "valid": 403,
+      "invalid": 1,
+      "agree": 389,
+      "disagree": 14
+    },
+    "同德里": {
+      "vpop": 2581,
+      "voted": 1257,
+      "valid": 1250,
+      "invalid": 7,
+      "agree": 1215,
+      "disagree": 35
+    },
+    "德智里": {
+      "vpop": 2045,
+      "voted": 954,
+      "valid": 949,
+      "invalid": 5,
+      "agree": 920,
+      "disagree": 29
+    },
+    "德仁里": {
+      "vpop": 1837,
+      "voted": 863,
+      "valid": 860,
+      "invalid": 3,
+      "agree": 827,
+      "disagree": 33
+    },
+    "安生里": {
+      "vpop": 1350,
+      "voted": 704,
+      "valid": 703,
+      "invalid": 1,
+      "agree": 681,
+      "disagree": 22
+    },
+    "德東里": {
+      "vpop": 770,
+      "voted": 390,
+      "valid": 388,
+      "invalid": 2,
+      "agree": 383,
+      "disagree": 5
+    },
+    "德行里": {
+      "vpop": 1058,
+      "voted": 565,
+      "valid": 562,
+      "invalid": 3,
+      "agree": 539,
+      "disagree": 23
+    },
+    "精華里": {
+      "vpop": 1448,
+      "voted": 678,
+      "valid": 672,
+      "invalid": 6,
+      "agree": 649,
+      "disagree": 23
+    },
+    "民享里": {
+      "vpop": 1912,
+      "voted": 961,
+      "valid": 957,
+      "invalid": 4,
+      "agree": 931,
+      "disagree": 26
+    },
+    "安宜里": {
+      "vpop": 2951,
+      "voted": 1467,
+      "valid": 1463,
+      "invalid": 4,
+      "agree": 1422,
+      "disagree": 41
+    },
+    "安泰里": {
+      "vpop": 3635,
+      "voted": 1664,
+      "valid": 1655,
+      "invalid": 9,
+      "agree": 1613,
+      "disagree": 42
+    },
+    "安邦里": {
+      "vpop": 3519,
+      "voted": 1711,
+      "valid": 1706,
+      "invalid": 5,
+      "agree": 1656,
+      "disagree": 50
+    },
+    "十全里": {
+      "vpop": 1642,
+      "voted": 852,
+      "valid": 847,
+      "invalid": 5,
+      "agree": 823,
+      "disagree": 24
+    },
+    "十美里": {
+      "vpop": 1697,
+      "voted": 820,
+      "valid": 817,
+      "invalid": 3,
+      "agree": 796,
+      "disagree": 21
+    },
+    "德北里": {
+      "vpop": 1838,
+      "voted": 833,
+      "valid": 828,
+      "invalid": 5,
+      "agree": 809,
+      "disagree": 19
+    },
+    "立誠里": {
+      "vpop": 670,
+      "voted": 349,
+      "valid": 348,
+      "invalid": 1,
+      "agree": 342,
+      "disagree": 6
+    },
+    "立業里": {
+      "vpop": 941,
+      "voted": 455,
+      "valid": 453,
+      "invalid": 2,
+      "agree": 440,
+      "disagree": 13
+    },
+    "港東里": {
+      "vpop": 1336,
+      "voted": 624,
+      "valid": 621,
+      "invalid": 3,
+      "agree": 595,
+      "disagree": 26
+    },
+    "港新里": {
+      "vpop": 1346,
+      "voted": 575,
+      "valid": 575,
+      "invalid": 0,
+      "agree": 566,
+      "disagree": 9
+    },
+    "港西里": {
+      "vpop": 773,
+      "voted": 316,
+      "valid": 314,
+      "invalid": 2,
+      "agree": 304,
+      "disagree": 10
+    },
+    "博愛里": {
+      "vpop": 1129,
+      "voted": 457,
+      "valid": 454,
+      "invalid": 3,
+      "agree": 441,
+      "disagree": 13
+    },
+    "博惠里": {
+      "vpop": 3895,
+      "voted": 1758,
+      "valid": 1748,
+      "invalid": 10,
+      "agree": 1703,
+      "disagree": 45
+    },
+    "長明里": {
+      "vpop": 1027,
+      "voted": 367,
+      "valid": 365,
+      "invalid": 2,
+      "agree": 356,
+      "disagree": 9
+    },
+    "建東里": {
+      "vpop": 1146,
+      "voted": 401,
+      "valid": 399,
+      "invalid": 2,
+      "agree": 388,
+      "disagree": 11
+    },
+    "興德里": {
+      "vpop": 1729,
+      "voted": 752,
+      "valid": 747,
+      "invalid": 5,
+      "agree": 726,
+      "disagree": 21
+    },
+    "鳳南里": {
+      "vpop": 817,
+      "voted": 426,
+      "valid": 423,
+      "invalid": 3,
+      "agree": 409,
+      "disagree": 14
+    },
+    "鳳北里": {
+      "vpop": 1337,
+      "voted": 697,
+      "valid": 695,
+      "invalid": 2,
+      "agree": 677,
+      "disagree": 18
+    },
+    "德西里": {
+      "vpop": 849,
+      "voted": 371,
+      "valid": 368,
+      "invalid": 3,
+      "agree": 358,
+      "disagree": 10
+    },
+    "豐裕里": {
+      "vpop": 2385,
+      "voted": 1070,
+      "valid": 1065,
+      "invalid": 5,
+      "agree": 1027,
+      "disagree": 38
+    },
+    "川東里": {
+      "vpop": 1196,
+      "voted": 526,
+      "valid": 522,
+      "invalid": 4,
+      "agree": 508,
+      "disagree": 14
+    },
+    "裕民里": {
+      "vpop": 1211,
+      "voted": 526,
+      "valid": 524,
+      "invalid": 2,
+      "agree": 507,
+      "disagree": 17
+    },
+    "力行里": {
+      "vpop": 1059,
+      "voted": 468,
+      "valid": 465,
+      "invalid": 3,
+      "agree": 457,
+      "disagree": 8
+    },
+    "千歲里": {
+      "vpop": 1102,
+      "voted": 519,
+      "valid": 516,
+      "invalid": 3,
+      "agree": 505,
+      "disagree": 11
+    },
+    "立德里": {
+      "vpop": 1136,
+      "voted": 511,
+      "valid": 509,
+      "invalid": 2,
+      "agree": 498,
+      "disagree": 11
+    },
+    "千北里": {
+      "vpop": 1018,
+      "voted": 477,
+      "valid": 474,
+      "invalid": 3,
+      "agree": 461,
+      "disagree": 13
+    },
+    "千秋里": {
+      "vpop": 1956,
+      "voted": 891,
+      "valid": 886,
+      "invalid": 5,
+      "agree": 872,
+      "disagree": 14
+    }
+  }
+}

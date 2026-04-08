@@ -12,8 +12,6 @@
       --bg:#0f1117;--panel:#1a1d27;--border:#2a2d3e;
       --accent:#4f7cff;--text:#e8eaf0;--muted:#8892aa;
       --green:#22c55e;--red:#ef4444;
-      --dpp:#1B9431;--kmt:#003F8E;--tpp:#28C8C8;
-      --npp:#FBBE01;--tsp:#C00000;--gp:#66BB6A;--obs:#E91E8C;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     html,body{height:100%;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--bg);color:var(--text);overflow:hidden;}
@@ -32,14 +30,8 @@
     .fbtn:hover:not(:disabled){border-color:var(--accent);color:var(--text);}
     .fbtn:disabled{opacity:0.22;cursor:not-allowed;}
     .fbtn.active{color:#fff;font-weight:500;}
-    .fbtn.active.p-dpp{background:var(--dpp);border-color:var(--dpp);}
-    .fbtn.active.p-kmt{background:var(--kmt);border-color:var(--kmt);}
-    .fbtn.active.p-tpp{background:var(--tpp);border-color:var(--tpp);color:#0f1117;}
-    .fbtn.active.p-npp{background:var(--npp);border-color:var(--npp);color:#0f1117;}
-    .fbtn.active.p-tsp{background:var(--tsp);border-color:var(--tsp);}
-    .fbtn.active.p-gp{background:var(--gp);border-color:var(--gp);color:#0f1117;}
-    .fbtn.active.p-obs{background:var(--obs);border-color:var(--obs);}
-    .fbtn.active.p-pop,.fbtn.active.p-all,.fbtn.active.y-btn,.fbtn.active.t-btn,.fbtn.active.m-btn{background:var(--accent);border-color:var(--accent);}
+    .y-btn.active,.m-btn.active{background:var(--accent);border-color:var(--accent);}
+    /* election & candidate active colors set via JS */
 
     .main{display:flex;flex:1;overflow:hidden;min-height:0;}
     #map{flex:1;background:#151820;min-width:0;position:relative;}
@@ -57,22 +49,16 @@
     .lg-needle{position:absolute;top:-4px;width:2px;height:18px;background:#fff;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.8);transform:translateX(-50%);transition:left 0.3s;}
     .lg-needle-tip{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;white-space:nowrap;background:rgba(0,0,0,.7);border-radius:2px;padding:1px 4px;font-weight:600;}
 
-    .sidebar{
-      width:38%;max-width:480px;min-width:270px;
-      background:var(--panel);border-left:1px solid var(--border);
-      display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
-    }
+    .sidebar{width:38%;max-width:480px;min-width:270px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
     .sidebar-inner{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;}
     .sidebar-section{padding:13px 15px;border-bottom:1px solid var(--border);}
     .sidebar-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;}
 
     .back-btn{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:10px;padding:4px 0;border:none;background:none;transition:color 0.15s;}
     .back-btn:hover{color:var(--accent);}
-
     .info-placeholder{font-size:14px;color:var(--muted);line-height:1.8;}
     .info-village{font-size:22px;font-weight:700;color:var(--text);}
     .info-area{font-size:13px;color:var(--muted);margin-bottom:6px;}
-    .info-section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:10px 0 5px;padding-top:8px;border-top:1px solid var(--border);}
 
     .stat-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);}
     .stat-row:last-child{border-bottom:none;}
@@ -81,11 +67,13 @@
     .stat-value{font-size:15px;font-weight:600;color:var(--text);}
     .stat-sub{font-size:12px;color:var(--muted);display:block;margin-top:1px;}
     .rank-badge{font-size:12px;color:var(--muted);font-weight:400;margin-left:3px;}
-    .hl{color:var(--accent);}.pos{color:var(--green);}.neg{color:var(--red);}
+    .pos{color:var(--green);}.neg{color:var(--red);}
 
     .party-bar-wrap{margin-top:5px;}
-    .party-row{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
-    .pname{font-size:13px;width:56px;flex-shrink:0;}
+    .party-row{display:flex;align-items:center;gap:5px;margin-bottom:5px;cursor:pointer;border-radius:4px;padding:2px 3px;transition:background 0.12s;}
+    .party-row:hover{background:rgba(255,255,255,0.05);}
+    .party-row.sel{background:rgba(255,255,255,0.07);outline:1px solid rgba(255,255,255,0.15);}
+    .pname{font-size:13px;width:88px;flex-shrink:0;}
     .pbar-bg{flex:1;height:9px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;}
     .pbar-fill{height:100%;border-radius:2px;transition:width 0.3s;}
     .pstats{font-size:12px;color:var(--muted);width:100px;text-align:right;flex-shrink:0;}
@@ -96,8 +84,7 @@
     .top-item{display:flex;align-items:baseline;gap:6px;padding:3px 0;font-size:13px;}
     .top-item-interactive{cursor:pointer;border-radius:4px;padding:4px 6px;margin:0 -6px;transition:background 0.15s;}
     .top-item-interactive:hover{background:rgba(79,124,255,0.12);}
-    .top-item-interactive .top-village{color:var(--text);}
-    .top-rank{font-size:12px;color:var(--accent);font-weight:700;width:18px;flex-shrink:0;}
+    .top-rank{font-size:12px;color:var(--accent);font-weight:700;width:32px;flex-shrink:0;}
     .top-village{flex:1;color:var(--text);}
     .top-val{font-size:11px;color:var(--muted);text-align:right;}
 
@@ -113,7 +100,6 @@
     .ai-chat-area{border-top:2px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;max-height:210px;}
     .ai-chat-header{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;cursor:pointer;flex-shrink:0;user-select:none;}
     .ai-chat-header span{font-size:12px;color:var(--muted);}
-    .ai-chat-toggle{font-size:12px;color:var(--muted);}
     .ai-chat-msgs{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:5px;min-height:0;}
     .msg{font-size:12px;line-height:1.6;padding:6px 10px;border-radius:6px;max-width:92%;word-break:break-all;}
     .msg.user{background:var(--accent);color:#fff;align-self:flex-end;}
@@ -124,90 +110,25 @@
     .ai-send{padding:5px 11px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;}
     .ai-send:disabled{opacity:0.4;cursor:not-allowed;}
 
-    /* ── Building markers ── */
     .bld-popup{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#1a1d27;line-height:1.6;}
     .bld-popup b{color:#4f7cff;}
-    .bld-toggle{position:absolute;bottom:80px;left:10px;z-index:1000;
-      background:rgba(22,25,43,0.93);border:1px solid rgba(255,255,255,0.12);
-      border-radius:6px;padding:5px 9px;font-size:11px;color:var(--muted);
-      cursor:pointer;display:none;white-space:nowrap;user-select:none;}
+    .bld-toggle{position:absolute;bottom:80px;left:10px;z-index:1000;background:rgba(22,25,43,0.93);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 9px;font-size:11px;color:var(--muted);cursor:pointer;display:none;white-space:nowrap;user-select:none;}
     .bld-toggle.on{color:#ffe500;border-color:rgba(255,229,0,0.4);}
     .locate-btn{position:absolute;bottom:36px;left:10px;z-index:1000;width:32px;height:40px;background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
     .locate-btn:hover{filter:drop-shadow(0 2px 6px rgba(79,124,255,0.7));}
-
     .leaflet-container{background:#151820;}
     .leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important;}
     .leaflet-control-attribution{background:rgba(15,17,23,0.85)!important;color:var(--muted)!important;font-size:9px!important;}
-    @keyframes fadeHint{0%{opacity:1}70%{opacity:1}100%{opacity:0;pointer-events:none}}
-    .village-label{
-      background:transparent!important;border:none!important;box-shadow:none!important;
-      font-family:'Noto Sans TC',sans-serif;color:#fff;pointer-events:none;
-      text-align:center;line-height:1.45;white-space:nowrap;
-      text-shadow:-1px -1px 2px rgba(0,0,0,0.95),1px -1px 2px rgba(0,0,0,0.95),
-                  -1px 1px 2px rgba(0,0,0,0.95),1px 1px 2px rgba(0,0,0,0.95);
-    }
+    .village-label{background:transparent!important;border:none!important;box-shadow:none!important;font-family:'Noto Sans TC',sans-serif;color:#fff;pointer-events:none;text-align:center;line-height:1.45;white-space:nowrap;text-shadow:-1px -1px 2px rgba(0,0,0,0.95),1px -1px 2px rgba(0,0,0,0.95),-1px 1px 2px rgba(0,0,0,0.95),1px 1px 2px rgba(0,0,0,0.95);}
     .village-label::before{display:none!important;}
-
-
-    /* ── Analysis Panel ── */
-    .atab-bar{display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap;}
-    .atab{flex:1;min-width:0;padding:5px 3px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.15s;white-space:nowrap;}
-    .atab.active{background:rgba(255,229,0,0.18);border-color:rgba(255,229,0,0.5);color:#ffe500;}
-    .analysis-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:3px solid rgba(255,229,0,0.4);}
-    .oppo-item,.flow-item{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer;border-radius:4px;transition:background 0.12s;}
-    .oppo-item:hover,.flow-item:hover{background:rgba(79,124,255,0.1);margin:0 -5px;padding:5px 5px;}
-    .oppo-rank{font-size:10px;color:var(--accent);font-weight:700;width:16px;flex-shrink:0;}
-    .oppo-village{flex:1;color:var(--text);}
-    .oppo-val{font-size:11px;font-weight:600;}
-    .flow-bar-outer{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
-    .flow-bar{height:100%;border-radius:3px;transition:width 0.3s;}
-    .flow-val{font-size:11px;font-weight:600;width:42px;text-align:right;flex-shrink:0;}
-    .priority-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-    .priority-count{font-size:11px;color:var(--accent);}
-    .priority-clear{font-size:11px;color:var(--muted);cursor:pointer;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:none;}
-    .priority-clear:hover{border-color:var(--red);color:var(--red);}
-    .priority-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
-    .priority-check{width:14px;height:14px;accent-color:#ffe500;cursor:pointer;flex-shrink:0;}
-    .priority-vname{flex:1;cursor:pointer;color:var(--text);}
-    .priority-vname:hover{color:var(--accent);}
-    .priority-sub{font-size:10px;color:var(--muted);text-align:right;}
-    .priority-dot{display:inline-block;width:8px;height:8px;background:#ffe500;border-radius:50%;margin-right:4px;box-shadow:0 0 6px rgba(255,229,0,.7);}
-    .calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
-    .calc-label{font-size:12px;color:var(--muted);}
-    .calc-value{font-size:14px;font-weight:700;color:var(--text);}
-    .calc-input-wrap{display:flex;align-items:center;gap:6px;}
-    .calc-input{background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;font-weight:700;width:72px;text-align:right;padding:3px 6px;}
-    .calc-slider{width:100%;accent-color:#ffe500;margin:5px 0;}
-    .calc-strategy{background:rgba(255,255,255,0.03);border-radius:6px;padding:9px 10px;margin-top:8px;}
-    .calc-strategy-title{font-size:11px;color:#ffe500;margin-bottom:6px;font-weight:700;}
-    .calc-strategy-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--muted);}
-    .calc-strategy-row span:last-child{color:var(--text);font-weight:600;}
-    .section-subtitle{font-size:11px;font-weight:700;color:var(--text);margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+    @keyframes fadeHint{0%{opacity:1}70%{opacity:1}100%{opacity:0;pointer-events:none}}
     @media(max-width:640px){
-      /* 手機：header + filter + main 垂直堆疊，main 填滿剩餘空間 */
       .main{flex-direction:column;flex:1;min-height:0;overflow:hidden;}
       #map{flex:none;height:38vh;width:100%;}
-      .sidebar{
-        width:100%;max-width:none;min-width:0;
-        flex:1;min-height:0;
-        border-left:none;border-top:1px solid var(--border);
-        flex-direction:column;overflow:hidden;
-      }
-      /* sidebar-inner 可垂直捲動，能顯示所有內容 */
-      .sidebar-inner{
-        flex:1;min-height:0;
-        overflow-y:auto;-webkit-overflow-scrolling:touch;
-      }
-      .sidebar-section{
-        min-width:unset;max-width:none;
-        border-right:none;border-bottom:1px solid var(--border);
-      }
-      /* AI 對話區固定高度，不壓縮 sidebar-inner */
-      .ai-chat-area{
-        min-width:unset;border-right:none;
-        border-top:2px solid var(--border);
-        flex-shrink:0;max-height:120px;
-      }
+      .sidebar{width:100%;max-width:none;min-width:0;flex:1;min-height:0;border-left:none;border-top:1px solid var(--border);flex-direction:column;overflow:hidden;}
+      .sidebar-inner{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+      .sidebar-section{min-width:unset;max-width:none;border-right:none;border-bottom:1px solid var(--border);}
+      .ai-chat-area{min-width:unset;border-right:none;border-top:2px solid var(--border);flex-shrink:0;max-height:120px;}
       .locate-btn{bottom:42vh;left:8px;}
       #legend-overlay{bottom:auto;top:6px;right:6px;}
       .filter-row{padding:4px 10px;gap:4px;}
@@ -219,42 +140,22 @@
 <header>
   <div class="dot"></div>
   <div><div class="sub">高雄市</div><h1>三民區選舉地圖</h1></div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0">
-    <a href="mailto:a91060603@gmail.com"
-       style="font-size:11px;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color 0.15s"
-       onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
-      ✉ 相關合作請來信
-    </a>
-    <span id="visit-count" style="font-size:11px;color:var(--muted);white-space:nowrap">👁 ...</span>
-  </div>
 </header>
 <div class="filter-area">
   <div class="filter-row" id="row-year">
     <span class="filter-label">年分</span>
     <button class="fbtn y-btn" data-year="2024" onclick="setYear('2024',this)">2024</button>
     <button class="fbtn y-btn" data-year="2022" onclick="setYear('2022',this)">2022</button>
-    <button class="fbtn y-btn" disabled>2020</button>
-    <button class="fbtn y-btn" disabled>2018</button>
+    <button class="fbtn y-btn" data-year="2020" onclick="setYear('2020',this)">2020</button>
+    <button class="fbtn y-btn" data-year="pop"  onclick="setYear('pop',this)">人口資訊</button>
   </div>
-  <div class="filter-row" id="row-type">
+  <div class="filter-row" id="row-election">
     <span class="filter-label">選舉</span>
-    <button class="fbtn t-btn" data-type="P" onclick="setType('P',this)">不分區</button>
-    <button class="fbtn t-btn" data-type="L" onclick="setType('L',this)">區域立委</button>
-    <button class="fbtn t-btn" data-type="C" onclick="setType('C',this)">議員</button>
+    <!-- 動態產生 -->
   </div>
-  <div class="filter-row" id="row-party">
-    <span class="filter-label">政黨</span>
-    <button class="fbtn p-all" data-party="all" onclick="setParty('all',this)">全區綜覽</button>
-    <button class="fbtn p-dpp" data-party="dpp" onclick="setParty('dpp',this)">民進黨</button>
-    <button class="fbtn p-kmt" data-party="kmt" onclick="setParty('kmt',this)">國民黨</button>
-    <button class="fbtn p-tpp" data-party="tpp" onclick="setParty('tpp',this)">民眾黨</button>
-    <button class="fbtn p-npp" data-party="npp" onclick="setParty('npp',this)">時代力量</button>
-    <button class="fbtn p-tsp" data-party="tsp" onclick="setParty('tsp',this)">台灣基進</button>
-    <button class="fbtn p-gp"  data-party="gp"  onclick="setParty('gp',this)">綠黨</button>
-    <button class="fbtn p-obs" data-party="obs" onclick="setParty('obs',this)">歐巴桑</button>
-    <button class="fbtn p-pop" data-party="pop" onclick="setParty('pop',this)">人口資訊</button>
-    <!-- 選情分析暫時關閉 -->
-    <button class="fbtn p-ana" data-party="ana" disabled title="選情分析功能整修中" style="opacity:0.3;cursor:not-allowed;">🎯 選情分析</button>
+  <div class="filter-row" id="row-candidate">
+    <span class="filter-label">候選人</span>
+    <!-- 動態產生 -->
   </div>
   <div class="filter-row" id="row-metric">
     <span class="filter-label">熱力</span>
@@ -275,12 +176,7 @@
       </svg>
     </button>
     <div id="legend-overlay"></div>
-    <div id="map-hint" style="
-      position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-      z-index:900;background:rgba(15,17,23,0.82);border:1px solid rgba(255,255,255,0.1);
-      border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);
-      pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);
-      transition:opacity 0.5s;animation:fadeHint 4s forwards;">
+    <div id="map-hint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(15,17,23,0.82);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);animation:fadeHint 4s forwards;">
       👆 點擊里可查看詳細資料
     </div>
   </div>
@@ -293,7 +189,7 @@
       </div>
       <div class="ai-chat-msgs" id="chat-msgs" style="display:none"></div>
       <div class="ai-chat-input-row" id="chat-input-row" style="display:none">
-        <input class="ai-input" id="chat-input" placeholder="例：哪個里催票率最高？" onkeydown="if(event.key==='Enter')sendChat()">
+        <input class="ai-input" id="chat-input" placeholder="例：哪個里張博洋得票最高？" onkeydown="if(event.key==='Enter')sendChat()">
         <button class="ai-send" id="chat-send" onclick="sendChat()">送出</button>
       </div>
     </div>
@@ -301,24 +197,103 @@
 </div>
 
 <script>
-let RAW, AI_DATA;
-
-
-const PARTIES={
-  dpp:{name:'民進黨', color:'#1B9431',dc:'#4ade80',fieldP:'dpp24_p',fieldL:null,fieldC:null},
-  kmt:{name:'國民黨', color:'#003F8E',dc:'#60a5fa',fieldP:'kmt24_p',fieldL:null,fieldC:null},
-  tpp:{name:'民眾黨', color:'#28C8C8',dc:'#28C8C8',fieldP:'tpp24_p',fieldL:null,fieldC:null},
-  npp:{name:'時代力量',color:'#FBBE01',dc:'#FBBE01',fieldP:'npp24_p',fieldL:null,fieldC:'npp22'},
-  tsp:{name:'台灣基進',color:'#C00000',dc:'#f87171',fieldP:'tsp24_P',fieldL:null,fieldC:'tsp22'},
-  gp: {name:'綠黨',  color:'#66BB6A',dc:'#86efac',fieldP:'gp24_p', fieldL:null,fieldC:null},
-  obs:{name:'歐巴桑',color:'#E91E8C',dc:'#f472b6',fieldP:'obs24_P',fieldL:'obs24_L',fieldC:null},
+// ═══════════════════════════════════════════════════════
+// 選舉資料登錄表
+// ═══════════════════════════════════════════════════════
+const ELECTIONS = {
+  '2024_P': {
+    label:'不分區', year:'2024',
+    file:'data/2024_立委.json', dataKey:'P',
+    candidates:[
+      {key:'dpp', name:'民進黨',    color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
+      {key:'kmt', name:'國民黨',    color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
+      {key:'tpp', name:'民眾黨',    color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
+      {key:'npp', name:'時代力量',  color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
+      {key:'tsp', name:'台灣基進',  color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
+      {key:'gp',  name:'綠黨',      color:'#66BB6A', dc:'#86efac', aggKeys:['gp']},
+      {key:'obs', name:'歐巴桑',    color:'#E91E8C', dc:'#f472b6', aggKeys:['obs']},
+    ]
+  },
+  '2024_L': {
+    label:'區域立委', year:'2024',
+    file:'data/2024_立委.json', dataKey:'L',
+    candidates:[
+      {key:'dpp', name:'民進黨',  color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
+      {key:'kmt', name:'國民黨',  color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
+      {key:'obs', name:'歐巴桑', color:'#E91E8C', dc:'#f472b6', aggKeys:['obs']},
+      {key:'others', name:'其他', color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+    ]
+  },
+  '2024_president': {
+    label:'總統', year:'2024',
+    file:'data/2024_總統.json', dataKey:null,
+    candidates:[
+      {key:'dpp', name:'賴清德', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
+      {key:'kmt', name:'侯友宜', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
+      {key:'tpp', name:'柯文哲', color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
+    ]
+  },
+  '2022_council': {
+    label:'市議員', year:'2022',
+    file:'data/2022_議員.json', dataKey:null,
+    candidates:[
+      {key:'tsp', name:'張博洋（基進）', color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
+      {key:'npp', name:'林于凱（時力）', color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
+      {key:'dpp', name:'民進黨合計',    color:'#1B9431', dc:'#4ade80', aggKeys:['dpp_何','dpp_鄭','dpp_林','dpp_康']},
+      {key:'kmt', name:'國民黨合計',    color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt_曾','kmt_童','kmt_黃柏','kmt_黃香']},
+      {key:'tpp', name:'李佳玲（民眾）', color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
+      {key:'ind', name:'無黨籍合計',    color:'#6b7280', dc:'#9ca3af', aggKeys:['ind_2','ind_4']},
+    ]
+  },
+  '2022_mayor': {
+    label:'市長', year:'2022',
+    file:'data/2022_市長.json', dataKey:null,
+    candidates:[
+      {key:'dpp',    name:'陳其邁', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
+      {key:'kmt',    name:'柯志恩', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
+      {key:'others', name:'其他',   color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+    ]
+  },
+  '2020_recall': {
+    label:'韓國瑜罷免', year:'2020',
+    file:'data/2020_罷免.json', dataKey:null,
+    candidates:[
+      {key:'agree',    name:'同意罷免', color:'#22c55e', dc:'#4ade80', aggKeys:['agree']},
+      {key:'disagree', name:'不同意',   color:'#ef4444', dc:'#f87171', aggKeys:['disagree']},
+    ]
+  },
+  '2020_byelection': {
+    label:'市長補選', year:'2020',
+    file:'data/2020_市長補選.json', dataKey:null,
+    candidates:[
+      {key:'dpp',    name:'陳其邁', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
+      {key:'kmt',    name:'李眉蓁', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
+      {key:'others', name:'吳益政', color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+    ]
+  },
 };
 
-let curParty='tsp',curYear='2022',curType='C',curMetric='V'; // V=得票數,R=得票率,T=催票率
-let curVillageProps=null,curScale=null,geojsonLayer=null;
-let chatOpen=false,chatHistory=[],chatLoading=false;
+const YEAR_ELECTIONS = {
+  '2024': ['2024_P','2024_L','2024_president'],
+  '2022': ['2022_council','2022_mayor'],
+  '2020': ['2020_recall','2020_byelection'],
+};
 
-// ── Color utils ──
+// ═══════════════════════════════════════════════════════
+// 狀態變數
+// ═══════════════════════════════════════════════════════
+let RAW=null, EDATA_CACHE={};
+let curYear='2022', curElection='2022_council', curCandidate='tsp', curMetric='V';
+let curVillageProps=null, curScale=null, geojsonLayer=null;
+let valueMap={}, _rankCache={}, _popRankCache={};
+let chatOpen=false, chatHistory=[], chatLoading=false;
+let selectedVillage=null, hoveredVillage=null;
+let priorityVillages=new Set(), priorityLayer=null;
+let buildingLayer=null, buildingsVisible=true;
+
+// ═══════════════════════════════════════════════════════
+// 顏色工具
+// ═══════════════════════════════════════════════════════
 function lighten(hex,steps){
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return Array.from({length:steps},(_,i)=>{
@@ -332,69 +307,45 @@ function getColor(scale,v){
   return scale.colors[scale.colors.length-1];
 }
 
-// ── Scale builder ──
-function buildScale(party,year,type){
-  if(!party||party==='all'||party==='pop')return null;
-  const p=PARTIES[party];
-  let vField,rField,vRkField,rRkField,tField,tRkField,label;
-  if(year==='2024'&&type==='P'){
-    // 2024不分區：只有票數，無真實得票率資料
-    vField=p.fieldP; rField=null; rRkField=null;
-    vRkField=`${party}24p_rank`;
-    tField=null; tRkField=null;
-    label=`${p.name} 2024 不分區`;
-  }else if(year==='2024'&&type==='L'){
-    if(!p.fieldL)return null;
-    vField=p.fieldL; rField=null; rRkField=null;
-    vRkField='obs24L_rank';
-    tField=null; tRkField=null;
-    label=`${p.name} 2024 區域立委`;
-  }else if(year==='2022'&&type==='C'){
-    if(!p.fieldC)return null;
-    vField=p.fieldC;
-    // 只有 tsp 才有得票率與催票率欄位
-    if(party==='tsp'){
-      rField='tsp22_v%'; tField='tsp22_t%';
-    }else{
-      rField=null; tField=null;
-    }
-    rRkField=null; tRkField=null; vRkField=null; // 全部由 JS 計算
-    label=`${p.name} 2022 議員`;
-  }else return null;
+// ═══════════════════════════════════════════════════════
+// 值域計算（valueMap）
+// ═══════════════════════════════════════════════════════
+function computeValueMap(){
+  valueMap={}; _rankCache={};
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+  if(!el||!cand)return;
+  const eData=EDATA_CACHE[el.file];
+  if(!eData)return;
+  RAW.features.forEach(f=>{
+    const v=f.properties.village;
+    let vRow=eData.villages[v];
+    if(!vRow)return;
+    if(el.dataKey)vRow=vRow[el.dataKey];
+    if(!vRow)return;
+    const votes=cand.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0);
+    const valid=vRow.valid||1;
+    const vpop=vRow.vpop||1;
+    valueMap[v]={V:votes,R:votes/valid,T:votes/vpop,votes,valid,vpop};
+  });
+}
 
-  // 地圖著色欄位：根據 curMetric + 可用性決定
-  let displayField;
-  if(curMetric==='R'&&rField) displayField=rField;
-  else if(curMetric==='T'&&tField) displayField=tField;
-  else displayField=vField;  // 預設：得票數
-
-  const vals=RAW.features.map(f=>f.properties[displayField]||0).sort((a,b)=>a-b);
-  const n=vals.length;
+// ═══════════════════════════════════════════════════════
+// Scale
+// ═══════════════════════════════════════════════════════
+function buildScaleFromMap(){
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+  if(!el||!cand||!Object.keys(valueMap).length)return GRAY();
+  const vals=Object.values(valueMap).map(d=>d[curMetric]||0).sort((a,b)=>a-b);
+  const n=vals.length; if(!n)return GRAY();
   const q=[vals[0],vals[Math.floor(n*.2)],vals[Math.floor(n*.4)],vals[Math.floor(n*.6)],vals[Math.floor(n*.8)],vals[n-1]];
-  // 2022用百分比格式，2024用票數格式
-  // isRate：displayField 是比率欄位才用百分比格式
-  const isRate=(rField&&displayField===rField)||(tField&&displayField===tField);
-  const fmt=isRate ? v=>(v*100).toFixed(1)+'%' : v=>v.toLocaleString()+'票';
-
-  // map colors: light→dark (low→high)
-  const colorsFwd=lighten(p.color,6);
-  // legend: high on top (reverse)
-  const colorsRev=[...colorsFwd].reverse();
-  const labelsRev=[
-    `> ${fmt(q[4])}`,
-    `${fmt(q[3])}–${fmt(q[4])}`,
-    `${fmt(q[2])}–${fmt(q[3])}`,
-    `${fmt(q[1])}–${fmt(q[2])}`,
-    `${fmt(q[0])}–${fmt(q[1])}`,
-    `< ${fmt(q[1])}`,
-  ];
-
-  return{label,isParty:true,partyKey:party,vField,rField,tField,
-    vRkField,rRkField,tRkField,displayField,
-    breaks:q.slice(1,5),colors:colorsFwd,
-    legendColors:colorsRev,legendLabels:labelsRev,
-    fmt,party:p,year,type,isRate,
-    metricLabel:curMetric==='V'?'得票數':curMetric==='R'?'得票率':'催票率'};
+  const isRate=curMetric==='R'||curMetric==='T';
+  const fmt=isRate?v=>(v*100).toFixed(1)+'%':v=>v.toLocaleString()+'票';
+  const colors=lighten(cand.color,6);
+  const metricLabel=curMetric==='V'?'得票數':curMetric==='R'?'得票率':'催票率';
+  return{isElection:true,label:`${el.label}・${cand.name}`,metricLabel,
+    breaks:q.slice(1,5),colors,isRate,candColor:cand.color,fmt,gMin:q[0],gMax:q[n-1]};
 }
 
 const POP_SCALE={
@@ -402,114 +353,109 @@ const POP_SCALE={
   breaks:[-150,-50,0,100,300],
   colors:['#450a0a','#dc2626','#fca5a5','#d1fae5','#22c55e','#14532d'],
   legendColors:['#14532d','#22c55e','#d1fae5','#fca5a5','#dc2626','#450a0a'],
-  legendLabels:['> 300','100~300','0~100','−50~0','−150~−50','< −150'],
 };
-function GRAY(){return{label:'',isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['#1e2235'],legendColors:[],legendLabels:[]};}
+function GRAY(){return{isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['#1e2235']};}
 
 function getActiveScale(){
-  if(curParty==='all'||curParty==='ana')return GRAY();
-  if(curParty==='pop')return POP_SCALE;
-  return buildScale(curParty,curYear,curType)||GRAY();
+  if(curYear==='pop')return POP_SCALE;
+  return buildScaleFromMap();
 }
 
-// ── Map ──
+// ═══════════════════════════════════════════════════════
+// 地圖
+// ═══════════════════════════════════════════════════════
 const map=L.map('map',{zoomControl:true});
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
   attribution:'© CARTO',subdomains:'abcd',maxZoom:19
 }).addTo(map);
 
 function styleFn(f){
-  return{fillColor:getColor(curScale,f.properties[curScale.displayField]),weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
+  const v=f.properties.village;
+  let val;
+  if(curYear==='pop') val=f.properties._pop_diff||0;
+  else val=valueMap[v]?.[curMetric]||0;
+  return{fillColor:getColor(curScale,val),weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
 }
 
-// ── Zoom-based tooltip ──
-const Z_LABEL=12, Z_STATS=15;
+const Z_LABEL=12,Z_STATS=15;
 function tooltipHTML(props){
   const z=map.getZoom();
   if(z<Z_LABEL)return '';
   const nfs=Math.max(10,Math.min(15,8+(z-10)));
   const sfs=Math.max(9,Math.min(12,7+(z-10)));
   const showStats=z>=Z_STATS;
-  const sc=curScale;
   let lines='';
-  if(showStats&&sc){
-    if(sc.isPop){
+  if(showStats){
+    if(curYear==='pop'){
       const d=props._pop_diff||0;
       const c=d>0?'#22c55e':d<0?'#ef4444':'#aaa';
       lines+=`<span style="display:block;font-size:${sfs}px;color:${c}">${(d>0?'+':'')+d.toLocaleString()}人</span>`;
-    }else if(sc.isParty){
-      // 得票數（有資料才顯示）
-      if(sc.vField&&props[sc.vField]!=null){
-        const v=props[sc.vField]||0;
-        const vRk=getRank(sc.vField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${v.toLocaleString()}(${vRk}/86)</span>`;
-      }
-      // 得票率（只有 tsp 2022 有）
-      if(sc.rField&&props[sc.rField]!=null){
-        const rt=((props[sc.rField]||0)*100).toFixed(1);
-        const rRk=getRank(sc.rField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${rt}%(${rRk}/86)</span>`;
-      }
-      // 催票率
-      if(sc.tField&&props[sc.tField]!=null){
-        const tt=((props[sc.tField]||0)*100).toFixed(1);
-        const tRk=getRank(sc.tField,props.village,true);
-        lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${tt}%(${tRk}/86)</span>`;
+    }else{
+      const vd=valueMap[props.village];
+      if(vd){
+        const rkV=getElectionRank('V',props.village);
+        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${vd.V.toLocaleString()}(${rkV}/86)</span>`;
+        if(curMetric==='R'){const rkR=getElectionRank('R',props.village);lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${(vd.R*100).toFixed(1)}%(${rkR}/86)</span>`;}
+        if(curMetric==='T'){const rkT=getElectionRank('T',props.village);lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${(vd.T*100).toFixed(1)}%(${rkT}/86)</span>`;}
       }
     }
   }
   return `<span style="display:block;font-size:${nfs}px;font-weight:700">${props.village||''}</span>${lines}`;
 }
-function updateAllTooltips(){
-  if(!geojsonLayer)return;
-  geojsonLayer.eachLayer(l=>l.setTooltipContent(tooltipHTML(l.feature.properties)));
-}
+function updateAllTooltips(){if(!geojsonLayer)return;geojsonLayer.eachLayer(l=>l.setTooltipContent(tooltipHTML(l.feature.properties)));}
 map.on('zoomend',updateAllTooltips);
 
-// ── Legend ──
+// ═══════════════════════════════════════════════════════
+// 圖例
+// ═══════════════════════════════════════════════════════
 function updateLegend(scale,villageProps){
   const el=document.getElementById('legend-overlay');
-  if(!scale||scale.isOverview||!scale.gradMin==null){el.innerHTML='';return;}
+  if(!scale||scale.isOverview){el.innerHTML='';return;}
   if(scale.isPop){
-    // 人口增減：固定段落色帶
     const bars=scale.legendColors.slice().reverse().map(c=>`<span style="flex:1;background:${c};height:100%;display:inline-block"></span>`).join('');
-    const vmin=scale.legendLabels[scale.legendLabels.length-1].replace('< ','< ');
-    const vmax=scale.legendLabels[0].replace('> ','> ');
-    el.innerHTML=`<div class="lg-title">${scale.label}</div>
-      <div class="lg-bar-wrap">
-        <div class="lg-bar" style="display:flex;overflow:hidden">${bars}</div>
-        <div class="lg-labels"><span>減少最多</span><span>增加最多</span></div>
-      </div>`;
+    el.innerHTML=`<div class="lg-title">${scale.label}</div><div class="lg-bar-wrap"><div class="lg-bar" style="display:flex;overflow:hidden">${bars}</div><div class="lg-labels"><span>減少最多</span><span>增加最多</span></div></div>`;
     return;
   }
-  if(!scale.gradMin==null&&scale.gradMin==null){el.innerHTML='';return;}
-  // 取得目前 displayField 的全域 min/max
-  const allVals=RAW.features.map(f=>f.properties[scale.displayField]||0);
-  const gMin=Math.min(...allVals),gMax=Math.max(...allVals);
-  const partyColor=scale.party?.color||'#4f7cff';
-  // 漸層：左邊淡(白往黨色)，右邊深
-  const grad=`linear-gradient(to right, rgba(255,255,255,0.15), ${partyColor})`;
-  const isRate=scale.isRate;
-  const fmtV=v=>isRate?((v)*100).toFixed(1)+'%':v.toLocaleString();
-  // 當前里的指針位置
-  let needleHTML='';
-  if(villageProps&&scale.displayField){
-    const val=villageProps[scale.displayField]||0;
-    const pct=gMax>gMin?Math.max(0,Math.min(100,((val-gMin)/(gMax-gMin))*100)):0;
-    const label=fmtV(val);
-    needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%">
-      <div class="lg-needle-tip">${label}</div>
-    </div>`;
+  if(scale.isElection){
+    const allVals=Object.values(valueMap).map(d=>d[curMetric]||0);
+    if(!allVals.length){el.innerHTML='';return;}
+    const gMin=Math.min(...allVals),gMax=Math.max(...allVals);
+    const fmtV=v=>scale.isRate?(v*100).toFixed(1)+'%':v.toLocaleString();
+    const grad=`linear-gradient(to right,rgba(255,255,255,0.15),${scale.candColor})`;
+    let needleHTML='';
+    if(villageProps&&valueMap[villageProps.village]){
+      const val=valueMap[villageProps.village][curMetric]||0;
+      const pct=gMax>gMin?Math.max(0,Math.min(100,(val-gMin)/(gMax-gMin)*100)):0;
+      needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${fmtV(val)}</div></div>`;
+    }
+    el.innerHTML=`<div class="lg-title">${scale.label}（${scale.metricLabel}）</div><div class="lg-bar-wrap"><div class="lg-bar" style="background:${grad}"></div>${needleHTML}<div class="lg-labels"><span>${fmtV(gMin)}</span><span>${fmtV(gMax)}</span></div></div>`;
   }
-  el.innerHTML=`<div class="lg-title">${scale.label}（${scale.metricLabel||'得票數'}）</div>
-    <div class="lg-bar-wrap">
-      <div class="lg-bar" style="background:${grad}"></div>
-      ${needleHTML}
-      <div class="lg-labels"><span>${fmtV(gMin)}</span><span>${fmtV(gMax)}</span></div>
-    </div>`;
 }
 
-// ── Panel ──
+// ═══════════════════════════════════════════════════════
+// 排名
+// ═══════════════════════════════════════════════════════
+function getElectionRank(metric,village){
+  if(!_rankCache[metric]){
+    const entries=Object.entries(valueMap).map(([v,d])=>({v,val:d[metric]||0})).sort((a,b)=>b.val-a.val);
+    _rankCache[metric]={};
+    entries.forEach((e,i)=>_rankCache[metric][e.v]=i+1);
+  }
+  return _rankCache[metric][village]||'-';
+}
+function getPopRank(field,village,desc=true){
+  const key=field+(desc?'_d':'_a');
+  if(!_popRankCache[key]){
+    const entries=RAW.features.map(f=>({v:f.properties.village,val:f.properties[field]??-Infinity})).filter(e=>e.val>-Infinity).sort((a,b)=>desc?b.val-a.val:a.val-b.val);
+    _popRankCache[key]={};
+    entries.forEach((e,i)=>_popRankCache[key][e.v]=i+1);
+  }
+  return _popRankCache[key][village]||'-';
+}
+
+// ═══════════════════════════════════════════════════════
+// 面板
+// ═══════════════════════════════════════════════════════
 function renderPanel(){
   const el=document.getElementById('main-panel');
   if(curVillageProps){
@@ -518,42 +464,44 @@ function renderPanel(){
     return;
   }
   updateLegend(curScale,null);
-  if(curParty==='all'){el.innerHTML=renderOverview();return;}
-  if(curParty==='pop'){el.innerHTML=renderPopPanel();return;}
-  if(curParty==='ana'){el.innerHTML=renderAnalysis();return;}
-  el.innerHTML=renderFilterPanel();
+  if(curYear==='pop'){el.innerHTML=renderPopPanel();return;}
+  if(!curElection||!curCandidate||!EDATA_CACHE[ELECTIONS[curElection]?.file]){
+    el.innerHTML=`<div class="sidebar-section"><div class="info-placeholder">載入資料中...</div></div>`;
+    return;
+  }
+  el.innerHTML=renderElectionPanel();
   triggerAI();
 }
 
-// ── Overview ──
 function renderOverview(){
+  if(!RAW)return '';
   const fs=RAW.features;
-  const tot=fs.reduce((s,f)=>s+(f.properties._total24p||0),0);
   const p26=fs.reduce((s,f)=>s+(f.properties['pop2026.02']||0),0);
   const p22=fs.reduce((s,f)=>s+(f.properties.pop2022||0),0);
-  const pd=p26-p22;
-  let h=`<div class="sidebar-section"><div class="sidebar-title">全區統計</div>
-    <div class="stat-sm"><span class="lbl">里數</span><span>86</span></div>
-    <div class="stat-sm"><span class="lbl">2024 不分區總票數</span><span style="color:var(--accent)">${tot.toLocaleString()}</span></div>`;
-  Object.entries(PARTIES).forEach(([k,p])=>{
-    const t=fs.reduce((s,f)=>s+(f.properties[p.fieldP]||0),0);
-    if(!t)return;
-    h+=`<div class="stat-sm"><span class="lbl" style="color:${p.dc}">${p.name}</span><span>${t.toLocaleString()} <span style="color:var(--muted);font-size:11px">(${(t/tot*100).toFixed(1)}%)</span></span></div>`;
-  });
-  h+=`</div><div class="sidebar-section"><div class="sidebar-title">人口</div>
+  return`<div class="sidebar-section">
+    <div class="sidebar-title">全區概覽</div>
+    <div class="stat-sm"><span class="lbl">里數</span><span>86里</span></div>
     <div class="stat-sm"><span class="lbl">最新人口</span><span>${p26.toLocaleString()}</span></div>
-    <div class="stat-sm"><span class="lbl">人口增減</span><span style="color:${pd>=0?'#22c55e':'#ef4444'}">${(pd>0?'+':'')+pd.toLocaleString()}</span></div></div>`;
-  return h;
+    <div class="stat-sm"><span class="lbl">2022人口</span><span>${p22.toLocaleString()}</span></div>
+    <div class="stat-sm"><span class="lbl">增減</span><span style="color:${p26>p22?'var(--green)':'var(--red)'}">${(p26>p22?'+':'')+(p26-p22).toLocaleString()}</span></div>
+  </div>
+  <div class="sidebar-section"><div class="info-placeholder" style="font-size:12px;line-height:2">← 點選年分開始<br>或點擊地圖上的里查看詳細資料</div></div>`;
 }
 
-// ── Pop panel ──
 function renderPopPanel(){
   const fs=RAW.features;
   const byPop=[...fs].sort((a,b)=>(b.properties['pop2026.02']||0)-(a.properties['pop2026.02']||0));
   const byDiff=[...fs].sort((a,b)=>(b.properties._pop_diff||0)-(a.properties._pop_diff||0));
   const row7=(arr,vfn)=>arr.slice(0,7).map((f,i)=>{
-    const {val,color}=vfn(f.properties);
-    return`<div class="top-item"><span class="top-rank">${i+1}</span><span class="top-village">${f.properties.village}</span><span class="top-val" style="color:${color||'var(--muted)'}">${val}</span></div>`;
+    const r=vfn(f.properties);
+    return`<div class="top-item top-item-interactive"
+      onmouseenter="highlightVillage('${f.properties.village}',true)"
+      onmouseleave="highlightVillage('${f.properties.village}',false)"
+      onclick="goToVillage('${f.properties.village}')">
+      <span class="top-rank">${i+1}/86</span>
+      <span class="top-village">${f.properties.village}</span>
+      <span class="top-val" style="color:${r.color}">${r.val}</span>
+    </div>`;
   }).join('');
   return`<div class="sidebar-section"><div class="sidebar-title">最新人口 前7里</div>`+
     row7(byPop,p=>({val:(p['pop2026.02']||0).toLocaleString()+'人',color:'var(--accent)'}))+`</div>`+
@@ -561,261 +509,107 @@ function renderPopPanel(){
     row7(byDiff,p=>{const d=p._pop_diff||0;return{val:(d>0?'+':'')+d.toLocaleString()+'人',color:d>0?'#22c55e':'#ef4444'};})+'</div>';
 }
 
-// ── Filter summary panel ──
-function renderFilterPanel(){
-  const sc=curScale;
-  if(!sc||sc.isOverview)return`<div class="sidebar-section"><div class="info-placeholder">請選擇政黨與選舉種類。</div></div>`;
-  const fs=RAW.features;
-  // 計算全區總票數
-  const partyTotal=sc.vField ? fs.reduce((s,f)=>s+(f.properties[sc.vField]||0),0) : 0;
-  const allTotal=fs.reduce((s,f)=>s+(f.properties._total24p||0),0);
-  const pct=allTotal>0?(partyTotal/allTotal*100).toFixed(1):'-';
-  const partyColor=sc.party?.dc||'var(--accent)';
-  // 全區總票數摘要卡
-  const totalCard=partyTotal>0?`<div class="sidebar-section" style="padding:10px 15px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="flex:1">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${sc.label} 全區合計</div>
-        <div style="font-size:22px;font-weight:700;color:${partyColor}">${partyTotal.toLocaleString()} <span style="font-size:14px">票</span></div>
-        ${sc.vField===sc.party?.fieldP?`<div style="font-size:12px;color:var(--muted);margin-top:2px">佔全區不分區 <b style="color:${partyColor}">${pct}%</b></div>`:''}
-      </div>
-      <div style="width:40px;height:40px;border-radius:50%;background:${sc.party?.color};opacity:0.18;flex-shrink:0"></div>
-    </div>
-  </div>`:'';
-  return totalCard+`<div class="sidebar-section" id="ai-section">
-    <div class="sidebar-title">${sc.label}</div>
+function renderElectionPanel(){
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+  if(!el||!cand)return`<div class="sidebar-section"><div class="info-placeholder">請選擇候選人</div></div>`;
+  const villages=RAW.features.map(f=>f.properties.village).filter(v=>valueMap[v]);
+  const byV=[...villages].sort((a,b)=>(valueMap[b].V||0)-(valueMap[a].V||0));
+  const byR=[...villages].sort((a,b)=>(valueMap[b].R||0)-(valueMap[a].R||0));
+  const byT=[...villages].sort((a,b)=>(valueMap[b].T||0)-(valueMap[a].T||0));
+  const mkRow=(v,rk,val,color)=>`<div class="top-item top-item-interactive"
+    onmouseenter="highlightVillage('${v}',true)"
+    onmouseleave="highlightVillage('${v}',false)"
+    onclick="goToVillage('${v}')">
+    <span class="top-rank">${rk}/86</span>
+    <span class="top-village">${v}</span>
+    <span class="top-val" style="color:${color}">${val}</span>
+  </div>`;
+  const top7V=byV.slice(0,7).map((v,i)=>mkRow(v,i+1,(valueMap[v].V||0).toLocaleString()+'票',cand.dc||cand.color));
+  const top7R=byR.slice(0,7).map((v,i)=>mkRow(v,i+1,((valueMap[v].R||0)*100).toFixed(2)+'%','#a5b4fc'));
+  const top7T=byT.slice(0,7).map((v,i)=>mkRow(v,i+1,((valueMap[v].T||0)*100).toFixed(2)+'%','#fbbf24'));
+  return`<div class="sidebar-section" id="ai-section">
+    <div class="sidebar-title">${el.label}・${cand.name}</div>
     <div id="ai-content"><div class="ai-loading"><div class="ai-spinner"></div>AI 分析中...</div></div>
   </div>
-  <div class="sidebar-section" id="top7-section"></div>`;
+  <div class="sidebar-section">
+    <div class="top-section"><div class="top-section-title">得票數</div>${top7V.join('')}</div>
+    <div class="top-section"><div class="top-section-title">得票率</div>${top7R.join('')}</div>
+    <div class="top-section"><div class="top-section-title">催票率</div>${top7T.join('')}</div>
+  </div>`;
 }
 
-// ── Top-7 three metrics ──
-// ── Village → layer map (for sidebar hover interaction) ──
-const villageLayerMap={};
-let selectedVillage=null;
-let hoveredVillage=null;
-let priorityVillages=new Set();
-let priorityLayer=null;
-let buildingLayer=null;
-let buildingsVisible=true;
-
-// ── 建築/地點標記資料 ──────────────────────────────────
-// 格式：每筆 { name, lat, lng, note }
-// 若有多個分類，可加 type 欄位
-// 例：{ name:'○○大廈', lat:22.645, lng:120.293, note:'約300戶' }
-const BUILDINGS = [
-  // ← 把你的建築座標貼在這裡
-  // { name:'範例大廈', lat:22.6450, lng:120.2930, note:'' },
-];
-// ─────────────────────────────────────────────────────
-
-function initBuildingLayer(){
-  if(buildingLayer){ map.removeLayer(buildingLayer); buildingLayer=null; }
-  if(!BUILDINGS.length) return;
-  buildingLayer = L.layerGroup();
-  BUILDINGS.forEach(b=>{
-    const m = L.circleMarker([b.lat, b.lng],{
-      radius:7, fillColor:'#ffe500', color:'#fff',
-      weight:1.5, fillOpacity:0.9
-    });
-    const note = b.note ? `<br><span style="color:#666">${b.note}</span>` : '';
-    m.bindPopup(`<div class="bld-popup"><b>${b.name}</b>${note}</div>`,
-      {maxWidth:200, className:'bld-popup-wrap'});
-    buildingLayer.addLayer(m);
-  });
-  if(buildingsVisible) buildingLayer.addTo(map);
-  const btn=document.getElementById('bldToggle');
-  if(btn){ btn.style.display='block'; btn.classList.toggle('on',buildingsVisible); }
-}
-
-function toggleBuildings(){
-  buildingsVisible=!buildingsVisible;
-  if(buildingLayer){
-    if(buildingsVisible) buildingLayer.addTo(map);
-    else map.removeLayer(buildingLayer);
-  }
-  const btn=document.getElementById('bldToggle');
-  if(btn){ btn.textContent=`🏢 建築標記`; btn.classList.toggle('on',buildingsVisible); }
-}
-let curAnalysisTab='personal';
-
-function selectVillage(name){
-  if(selectedVillage&&villageLayerMap[selectedVillage]){
-    geojsonLayer.resetStyle(villageLayerMap[selectedVillage]);
-  }
-  selectedVillage=name;
-  if(name&&villageLayerMap[name]){
-    const l=villageLayerMap[name];
-    l.setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
-    l.bringToFront();
-  }
-}
-
-function highlightVillage(name,on){
-  if(on){
-    // 先清除上一個 hover（若不是 selected）
-    if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage]){
-      geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
-    }
-    hoveredVillage=name;
-    if(name&&villageLayerMap[name]&&name!==selectedVillage){
-      villageLayerMap[name].setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
-      villageLayerMap[name].bringToFront();
-    }
-  }else{
-    if(name!==selectedVillage&&villageLayerMap[name]) geojsonLayer.resetStyle(villageLayerMap[name]);
-    if(hoveredVillage===name) hoveredVillage=null;
-  }
-}
-
-// ── JS 動態排名計算 ──
-function calcRank(field, desc=true){
-  const pairs=RAW.features
-    .map(f=>({v:f.properties.village,val:f.properties[field]??-Infinity}))
-    .filter(o=>o.val>-Infinity)
-    .sort((a,b)=>desc?b.val-a.val:a.val-b.val);
-  const map={};
-  pairs.forEach((o,i)=>{ map[o.v]=i+1; });
-  return map;
-}
-// 快取排名（資料載入後計算一次）
-let _rankCache={};
-function getRank(field,village,desc=true){
-  if(!_rankCache[field]) _rankCache[field]=calcRank(field,desc);
-  return _rankCache[field][village]||'-';
-}
-
-function buildTop7(sc){
-  const fs=RAW.features;
-  const pc=sc.party?.dc||'var(--accent)';
-
-  // row7: interactive rows with data-village
-  const row7=(arr,vfn,color,field)=>arr.slice(0,7).map((f,i)=>{
-    const vname=f.properties.village;
-    const actualRk=field?getRank(field,vname,true):i+1;
-    return`<div class="top-item top-item-interactive" data-village="${vname}"
-      onmouseenter="highlightVillage('${vname}',true)"
-      onmouseleave="highlightVillage('${vname}',false)"
-      onclick="goToVillage('${vname}')">
-      <span class="top-rank">${actualRk}</span>
-      <span class="top-village">${vname}</span>
-      <span class="top-val" style="color:${color}">${vfn(f.properties)}</span>
-    </div>`;
-  }).join('');
-
-  const byV=[...fs].sort((a,b)=>(b.properties[sc.vField]||0)-(a.properties[sc.vField]||0));
-  let h=`<div class="top-section"><div class="top-section-title">得票數</div>`+
-    row7(byV,p=>(p[sc.vField]||0).toLocaleString()+'票',pc,sc.vField)+`</div>`;
-
-  if(sc.rField){
-    const byR=[...fs].sort((a,b)=>(b.properties[sc.rField]||0)-(a.properties[sc.rField]||0));
-    h+=`<div class="top-section"><div class="top-section-title">得票率</div>`+
-      row7(byR,p=>((p[sc.rField]||0)*100).toFixed(2)+'%','#a5b4fc',sc.rField)+`</div>`;
-  }
-  if(sc.tField){
-    const byT=[...fs].sort((a,b)=>(b.properties[sc.tField]||0)-(a.properties[sc.tField]||0));
-    h+=`<div class="top-section"><div class="top-section-title">催票率</div>`+
-      row7(byT,p=>((p[sc.tField]||0)*100).toFixed(2)+'%','#fbbf24',sc.tField)+`</div>`;
-  }
-  return h;
-}
-
-function goToVillage(name){
-  const f=RAW.features.find(f=>f.properties.village===name);
-  if(!f)return;
-  curVillageProps=f.properties;
-  selectVillage(name);
-  renderPanel();
-  const layer=villageLayerMap[name];
-  if(layer) map.fitBounds(layer.getBounds(),{maxZoom:16,padding:[40,40]});
-}
-
-// ── AI summary ──
-async function triggerAI(){
-  const sc=curScale;
-  if(!sc||!sc.isParty)return;
-  const fs=RAW.features;
-
-  const byV=[...fs].sort((a,b)=>(b.properties[sc.vField]||0)-(a.properties[sc.vField]||0));
-  const top1v=byV[0]?.properties;
-  const top1vVal=(top1v?.[sc.vField]||0).toLocaleString();
-
-  let top1rInfo='',top1tInfo='';
-  if(sc.rField){
-    const byR=[...fs].sort((a,b)=>(b.properties[sc.rField]||0)-(a.properties[sc.rField]||0));
-    const t=byR[0]?.properties;
-    top1rInfo=`得票率第1名：${t?.village}（${((t?.[sc.rField]||0)*100).toFixed(2)}%）`;
-  }
-  if(sc.tField){
-    const byT=[...fs].sort((a,b)=>(b.properties[sc.tField]||0)-(a.properties[sc.tField]||0));
-    const t=byT[0]?.properties;
-    top1tInfo=`催票率第1名：${t?.village}（${((t?.[sc.tField]||0)*100).toFixed(2)}%）`;
-  }
-
-  // Render top7 immediately
-  const t7=document.getElementById('top7-section');
-  if(t7)t7.innerHTML=buildTop7(sc);
-
-  const aiEl=document.getElementById('ai-content');
-  if(!aiEl)return;
-
-  const prompt=`你是高雄市三民區選舉地圖助手。用繁體中文寫1-2句說明，明確指出各指標第1名的里名。不要列名單。
-選舉：${sc.label}
-得票數第1名：${top1v?.village}（${top1vVal}票）
-${top1rInfo}
-${top1tInfo}
-請說明這次選舉三個指標各自的第1名是哪個里。`;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})
-    });
-    const d=await res.json();
-    const txt=d.content?.find(c=>c.type==='text')?.text||'';
-    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${txt||'（分析完成）'}</div>`;
-  }catch(e){
-    // fallback summary
-    let fb=`得票數最高為<strong>${top1v?.village}</strong>（${top1vVal}票）`;
-    if(top1rInfo)fb+='，'+top1rInfo.replace('得票率第1名：','得票率最高為');
-    if(top1tInfo)fb+='，'+top1tInfo.replace('催票率第1名：','催票率最高為');
-    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${fb}。</div>`;
-  }
-}
-
-// ── Village detail ──
 function renderVillage(props){
+  const village=props.village;
   const pop26=(props['pop2026.02']||0).toLocaleString();
   const pd=props._pop_diff||0;
   const pdStr=(pd>0?'+':'')+pd.toLocaleString();
   const pdCls=pd>0?'pos':pd<0?'neg':'';
+  const pop26rk=getPopRank('pop2026.02',village,true);
+  const pdrk=getPopRank('_pop_diff',village,true);
 
-  const tsp22v=(props.tsp22||0).toLocaleString();
-  const tsp22vr=props['tsp22_v%']?((props['tsp22_v%'])*100).toFixed(2)+'%':'-';
-  const tsp22t=props['tsp22_t%']?((props['tsp22_t%'])*100).toFixed(2)+'%':'-';
+  let elHTML='';
+  if(curYear!=='pop'){
+    const el=ELECTIONS[curElection];
+    const eData=el?EDATA_CACHE[el.file]:null;
+    if(el&&eData){
+      let vRow=eData.villages[village];
+      if(el.dataKey&&vRow)vRow=vRow[el.dataKey];
+      if(vRow){
+        const valid=vRow.valid||1;
+        const vpop=vRow.vpop||1;
+        const selCand=el.candidates.find(c=>c.key===curCandidate);
+        const selVotes=selCand?selCand.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0):0;
+        const rkV=getElectionRank('V',village);
+        const rkR=getElectionRank('R',village);
+        const rkT=getElectionRank('T',village);
+        const bars=el.candidates.map(c=>{
+          const v2=c.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0);
+          const pct=(v2/valid*100).toFixed(1);
+          const w=(v2/valid*100).toFixed(1);
+          const isSel=c.key===curCandidate;
+          return`<div class="party-row${isSel?' sel':''}" onclick="setCandidate('${c.key}')">
+            <div class="pname" style="color:${c.dc||c.color}">${c.name}</div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:${w}%;background:${c.color}"></div></div>
+            <div class="pstats">${v2.toLocaleString()} <span style="opacity:0.6">(${pct}%)</span></div>
+          </div>`;
+        }).join('');
+        elHTML=`<div class="sidebar-section">
+          <div class="sidebar-title">🗳️ ${el.label}・${selCand?.name||''}</div>
+          <div class="stat-row">
+            <span class="stat-label">得票數</span>
+            <span class="stat-val-block">
+              <span class="stat-value">${selVotes.toLocaleString()} 票</span>
+              <span class="stat-sub rank-badge">(${rkV}/86)</span>
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">得票率</span>
+            <span class="stat-val-block">
+              <span class="stat-value">${(selVotes/valid*100).toFixed(2)}%</span>
+              <span class="stat-sub rank-badge">(${rkR}/86)</span>
+            </span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">催票率</span>
+            <span class="stat-val-block">
+              <span class="stat-value">${(selVotes/vpop*100).toFixed(2)}%</span>
+              <span class="stat-sub rank-badge">(${rkT}/86)</span>
+            </span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">本里完整得票（點擊切換）</div>
+          <div class="party-bar-wrap">${bars}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">選舉人數 ${vpop.toLocaleString()} ・ 有效票 ${valid.toLocaleString()}</div>
+        </div>`;
+      }
+    }
+  }
 
-  const tot24=props._total24p||0;
-  let bars='';
-  Object.entries(PARTIES).forEach(([k,p])=>{
-    const v=props[p.fieldP]||0;if(!v)return;
-    const pct=tot24>0?(v/tot24*100).toFixed(1):0;
-    const w=tot24>0?(v/tot24*100):0;
-    bars+=`<div class="party-row">
-      <div class="pname" style="color:${p.dc}">${p.name}</div>
-      <div class="pbar-bg"><div class="pbar-fill" style="width:${w}%;background:${p.color}"></div></div>
-      <div class="pstats">${v.toLocaleString()} <span style="opacity:0.6">(${pct}%)</span></div>
-    </div>`;
-  });
-
-  const pop26rk=getRank('pop2026.02',props.village,true);
-  const pdrk=getRank('_pop_diff',props.village,true); // 增加最多=第1名
-  const tsp22vrk2=getRank('tsp22_v%',props.village,true);
-  const tsp22trk2=getRank('tsp22_t%',props.village,true);
-  const tsp22rk2=getRank('tsp22',props.village,true);
-  const npp22rk2=getRank('npp22',props.village,true);
   return`<div class="sidebar-section">
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
-    <div class="info-village">${props.village||'-'}</div>
+    <div class="info-village">${village||'-'}</div>
     <div class="info-area">${props.area||''} · ${props.district||''}</div>
     <div class="stat-row" style="margin-top:6px">
       <span class="stat-label">最新人口</span>
@@ -831,272 +625,72 @@ function renderVillage(props){
         <span class="stat-sub rank-badge">(${pdrk}/86)</span>
       </span>
     </div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-title">🗳️ 2022 議員選舉（台灣基進）</div>
-    <div class="stat-row">
-      <span class="stat-label">得票數</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${tsp22v} 票</span>
-        <span class="stat-sub rank-badge">(${tsp22rk2}/86)</span>
-      </span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">得票率</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${tsp22vr}</span>
-        <span class="stat-sub rank-badge">(${tsp22vrk2}/86)</span>
-      </span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">催票率</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${tsp22t}</span>
-        <span class="stat-sub rank-badge">(${tsp22trk2}/86)</span>
-      </span>
-    </div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-title">🗳️ 2022 議員選舉（時代力量）</div>
-    <div class="stat-row">
-      <span class="stat-label">得票數</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${(props.npp22||0).toLocaleString()} 票</span>
-        <span class="stat-sub rank-badge">(${npp22rk2}/86)</span>
-      </span>
-    </div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-title">🗳️ 2024 各黨不分區</div>
-    <div class="stat-row"><span class="stat-label">總票數</span><span class="stat-value hl">${tot24.toLocaleString()}</span></div>
-    <div class="party-bar-wrap">${bars}</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:8px">※ 各候選人得票資料待補</div>
-  </div>`;
+  </div>${elHTML}`;
 }
 
-// ── Controls ──
-function updateAvail(){
-  const ybs=document.querySelectorAll('.y-btn'),tbs=document.querySelectorAll('.t-btn');
-  const mbs=document.querySelectorAll('.m-btn');
-  if(curParty==='all'||curParty==='pop'||curParty==='ana'){
-    ybs.forEach(b=>b.disabled=true);
-    tbs.forEach(b=>b.disabled=true);
-    mbs.forEach(b=>b.disabled=true);
-    return;
-  }
-  const p=PARTIES[curParty];
-  ybs.forEach(b=>{
-    const y=b.dataset?.year;if(!y){b.disabled=true;return;}
-    if(y==='2020'||y==='2018'){b.disabled=true;return;}
-    b.disabled=(y==='2022'&&!p.fieldC);
-  });
-  tbs.forEach(b=>{
-    const t=b.dataset.type;
-    if(curYear==='2024'){
-      if(t==='P')b.disabled=!p.fieldP;
-      else if(t==='L')b.disabled=!p.fieldL;
-      else b.disabled=true;
-    }else if(curYear==='2022')b.disabled=(t!=='C');
-    else b.disabled=true;
-  });
-}
-function syncActive(){
-  document.querySelectorAll('.y-btn').forEach(b=>b.classList.toggle('active',b.dataset?.year===curYear));
-  document.querySelectorAll('.t-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===curType));
-  // 熱力圖指標：沒有 rField/tField 時 disable
-  const sc2=buildScale(curParty,curYear,curType);
-  const mbs=document.querySelectorAll('.m-btn');
-  if(curParty==='all'||curParty==='pop'||curParty==='ana'){
-    mbs.forEach(b=>{b.disabled=true;b.classList.remove('active');});
-    return;
-  }
-  mbs.forEach(b=>{
-    const m=b.dataset.metric;
-    if(m==='R') b.disabled=!sc2?.rField;
-    else if(m==='T') b.disabled=!sc2?.tField;
-    else b.disabled=false;
-    b.classList.toggle('active',b.dataset.metric===curMetric&&!b.disabled);
-  });
-  // 若目前 metric 被 disable，回退到 V
-  if(!sc2?.[curMetric==='R'?'rField':curMetric==='T'?'tField':'vField']&&curMetric!=='V'){
-    curMetric='V';
-    document.querySelector('[data-metric="V"]')?.classList.add('active');
-  }
-}
-function applyUpdate(){
-  curScale=getActiveScale();
-  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
-  updateLegend(curScale,curVillageProps);updateAllTooltips();syncActive();
-  curVillageProps=null;renderPanel();
-}
-function setParty(party,btn){
-  curParty=party;
-  if(party==='ana'){
-    // analysis mode: grey map
-  }
-  document.querySelectorAll('#row-party .fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(party!=='all'&&party!=='pop'&&party!=='ana'){
-    const p=PARTIES[party];
-    if(!curYear)curYear='2024';
-    if(curYear==='2022'&&!p.fieldC)curYear='2024';
-    if(curYear==='2024'&&curType==='C')curType='P';
-    if(curYear==='2024'&&curType==='L'&&!p.fieldL)curType='P';
-    if(curYear==='2022')curType='C';
-  }
-  updateAvail();applyUpdate();
-}
-function setMetric(metric,btn){
-  curMetric=metric;
-  document.querySelectorAll('.m-btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  // 重新計算 displayField：根據 curMetric
-  curScale=getActiveScale();
-  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
-  updateLegend(curScale,curVillageProps);
-  updateAllTooltips();
-}
-
-function setYear(year,btn){
-  if(btn.disabled)return;
-  curYear=year;
-  if(year==='2022')curType='C';
-  else if(year==='2024'){
-    if(curType==='C')curType='P';
-    if(curType==='L'&&!PARTIES[curParty]?.fieldL)curType='P';
-  }
-  updateAvail();applyUpdate();
-}
-function setType(type,btn){if(btn.disabled)return;curType=type;updateAvail();applyUpdate();}
-function goBack(){curVillageProps=null;selectVillage(null);renderPanel();}
-
-// ── Chat ──
-function toggleChat(){
-  chatOpen=!chatOpen;
-  document.getElementById('chat-msgs').style.display=chatOpen?'flex':'none';
-  document.getElementById('chat-input-row').style.display=chatOpen?'flex':'none';
-  document.getElementById('chat-toggle').textContent=chatOpen?'▲':'▼';
-}
-function appendMsg(role,text){
-  const el=document.getElementById('chat-msgs');
-  const d=document.createElement('div');d.className=`msg ${role}`;d.textContent=text;
-  el.appendChild(d);el.scrollTop=el.scrollHeight;
-}
-async function sendChat(){
-  if(chatLoading)return;
-  const input=document.getElementById('chat-input');
-  const q=input.value.trim();if(!q)return;
-  input.value='';appendMsg('user',q);
-  chatLoading=true;document.getElementById('chat-send').disabled=true;
-  const sys=`你是高雄市三民區選舉地圖的資料查詢助手。只根據以下資料回答，用繁體中文，回答簡短精確。
-欄位說明：v=里名,a=區域,p26=最新人口(2026.02),pd=人口增減(vs2022),p26rk=人口排名,pdrk=增減排名,tsp22=台灣基進2022議員得票數,tsp22rk=得票數排名,tsp22v=得票率(%),tsp22vrk=得票率排名,tsp22t=催票率(%),tsp22trk=催票率排名,d24/k24/tp24/tsp24/n24/g24/o24=各黨2024不分區票數,tot24=2024不分區總票數
-資料：${JSON.stringify(AI_DATA)}`;
-  chatHistory.push({role:'user',content:q});
+// ═══════════════════════════════════════════════════════
+// AI 分析
+// ═══════════════════════════════════════════════════════
+async function triggerAI(){
+  const aiEl=document.getElementById('ai-content');
+  if(!aiEl)return;
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+  if(!el||!cand)return;
+  const villages=Object.keys(valueMap);
+  if(!villages.length)return;
+  const byV=[...villages].sort((a,b)=>valueMap[b].V-valueMap[a].V);
+  const byR=[...villages].sort((a,b)=>valueMap[b].R-valueMap[a].R);
+  const byT=[...villages].sort((a,b)=>valueMap[b].T-valueMap[a].T);
+  const prompt=`你是高雄三民區選舉地圖助手，用繁體中文寫1-2句，指出三個指標第1名里名。不要列名單。
+選舉：${el.label}，候選人：${cand.name}
+得票數第1：${byV[0]}（${valueMap[byV[0]].V.toLocaleString()}票）
+得票率第1：${byR[0]}（${(valueMap[byR[0]].R*100).toFixed(2)}%）
+催票率第1：${byT[0]}（${(valueMap[byT[0]].T*100).toFixed(2)}%）`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:sys,messages:chatHistory.slice(-6)})
-    });
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
     const d=await res.json();
     const txt=d.content?.find(c=>c.type==='text')?.text||'';
-    chatHistory.push({role:'assistant',content:txt});
-    appendMsg('assistant',txt||'抱歉，無法取得回答。');
+    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${txt||'（分析完成）'}</div>`;
   }catch(e){
-    appendMsg('assistant','連線失敗，請稍後再試。');
+    const fb=`得票數最高：<strong>${byV[0]}</strong>（${valueMap[byV[0]].V.toLocaleString()}票），得票率最高：<strong>${byR[0]}</strong>（${(valueMap[byR[0]].R*100).toFixed(2)}%），催票率最高：<strong>${byT[0]}</strong>（${(valueMap[byT[0]].T*100).toFixed(2)}%）`;
+    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${fb}。</div>`;
   }
-  chatLoading=false;document.getElementById('chat-send').disabled=false;
 }
 
-// ── Locate ──
-function locateUser(){document.getElementById('locateBtn').style.opacity='0.5';map.locate({setView:true,maxZoom:16});}
-map.on('locationfound',e=>{
-  document.getElementById('locateBtn').style.opacity='1';
-  L.circleMarker(e.latlng,{radius:8,fillColor:'#4285F4',color:'#fff',weight:2,fillOpacity:0.9}).addTo(map).bindPopup('你在這裡').openPopup();
-});
-map.on('locationerror',()=>{document.getElementById('locateBtn').style.opacity='1';alert('無法取得位置，請確認已允許定位權限。');});
-
-// ── Init ──
-function onEachFeature(feature,layer){
-  // 建立 village → layer 對照表
-  villageLayerMap[feature.properties.village]=layer;
-  layer.on({
-    mouseover:e=>{
-      if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage]){
-        geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
-      }
-      hoveredVillage=feature.properties.village;
-      if(feature.properties.village!==selectedVillage){
-        e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});
-        e.target.bringToFront();
-      }
-    },
-    mouseout: e=>{
-      if(feature.properties.village!==selectedVillage) geojsonLayer.resetStyle(e.target);
-      if(hoveredVillage===feature.properties.village) hoveredVillage=null;
-    },
-    click:    e=>{
-      selectVillage(feature.properties.village);
-      curVillageProps=feature.properties;
-      renderPanel();
-      const hint=document.getElementById('map-hint');
-      if(hint)hint.style.display='none';
-    }
+// ═══════════════════════════════════════════════════════
+// 建築標記
+// ═══════════════════════════════════════════════════════
+const BUILDINGS=[
+  // { name:'範例大廈', lat:22.6450, lng:120.2930, note:'' },
+];
+function initBuildingLayer(){
+  if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}
+  if(!BUILDINGS.length)return;
+  buildingLayer=L.layerGroup();
+  BUILDINGS.forEach(b=>{
+    const m=L.circleMarker([b.lat,b.lng],{radius:7,fillColor:'#ffe500',color:'#fff',weight:1.5,fillOpacity:0.9});
+    m.bindPopup(`<div class="bld-popup"><b>${b.name}</b>${b.note?'<br><span style="color:#666">'+b.note+'</span>':''}</div>`,{maxWidth:200});
+    buildingLayer.addLayer(m);
   });
-  layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
+  if(buildingsVisible)buildingLayer.addTo(map);
+  const btn=document.getElementById('bldToggle');
+  if(btn){btn.style.display='block';btn.classList.toggle('on',buildingsVisible);}
+}
+function toggleBuildings(){
+  buildingsVisible=!buildingsVisible;
+  if(buildingLayer){if(buildingsVisible)buildingLayer.addTo(map);else map.removeLayer(buildingLayer);}
+  const btn=document.getElementById('bldToggle');
+  if(btn)btn.classList.toggle('on',buildingsVisible);
 }
 
-(async()=>{
-  const loadingEl = document.createElement('div');
-  loadingEl.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1.2rem;z-index:9999;background:rgba(0,0,0,.7);padding:1rem 2rem;border-radius:8px';
-  loadingEl.textContent='載入地圖資料中…';
-  document.body.appendChild(loadingEl);
-  try{
-    const res=await fetch('sanmin_vote.geojson');
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    RAW=await res.json();
-    // 注入衍生欄位（GeoJSON 只存原始數字）
-    RAW.features.forEach(f=>{
-      const p=f.properties;
-      p._pop_diff = (p['pop2026.02']||0) - (p.pop2022||0);
-      p._total24p = (p.dpp24_p||0)+(p.kmt24_p||0)+(p.tpp24_p||0)
-                  +(p.tsp24_P||0)+(p.npp24_p||0)+(p.gp24_p||0)+(p.obs24_P||0);
-    });
-    _rankCache={};
-    AI_DATA=RAW.features.map(f=>{
-      const p=f.properties;
-      return{
-        v:p.village, a:p.area,
-        p26:p['pop2026.02'], pd:p._pop_diff,
-        p26rk:p.pop26_rank, pdrk:p.pop_diff_rank,
-        tsp22:p.tsp22, tsp22rk:p.tsp22_rk,
-        tsp22v:p['tsp22_v%']?+(p['tsp22_v%']*100).toFixed(2):0,
-        tsp22vrk:p['tsp22_v%rk'],
-        tsp22t:p['tsp22_t%']?+(p['tsp22_t%']*100).toFixed(2):0,
-        tsp22trk:p['tsp22_t%rk'],
-        d24:p.dpp24_p, k24:p.kmt24_p, tp24:p.tpp24_p,
-        tsp24:p.tsp24_P, n24:p.npp24_p, g24:p.gp24_p,
-        o24:p.obs24_P, tot24:p._total24p
-      };
-    });
-    document.body.removeChild(loadingEl);
-    document.querySelector('[data-party="tsp"]').classList.add('active');
-    document.querySelector('[data-year="2022"]').classList.add('active');
-    document.querySelector('[data-type="C"]').classList.add('active');
-    curScale=getActiveScale();
-    geojsonLayer=L.geoJSON(RAW,{style:styleFn,onEachFeature}).addTo(map);
-    map.fitBounds(geojsonLayer.getBounds(),{padding:[20,20]});
-    updateLegend(curScale,curVillageProps);updateAvail();updateAllTooltips();renderPanel();
-    initBuildingLayer();
-  }catch(e){
-    loadingEl.style.background='rgba(180,0,0,.85)';
-    loadingEl.textContent='資料載入失敗：'+e.message+'（請確認 sanmin_vote.geojson 與 index.html 在同一資料夾）';
-  }
-})();
-
-// ── Priority map overlay ──
+// ═══════════════════════════════════════════════════════
+// 重點里
+// ═══════════════════════════════════════════════════════
 function updatePriorityOverlay(){
   if(priorityLayer){map.removeLayer(priorityLayer);priorityLayer=null;}
-  if(priorityVillages.size===0)return;
+  if(!priorityVillages.size)return;
   const geoms=RAW.features.filter(f=>priorityVillages.has(f.properties.village));
   priorityLayer=L.geoJSON({type:'FeatureCollection',features:geoms},{
     style:{fillColor:'transparent',weight:3,color:'#ffe500',opacity:0.85,fillOpacity:0,dashArray:'5,4'},
@@ -1104,289 +698,254 @@ function updatePriorityOverlay(){
   }).addTo(map);
 }
 
-function togglePriority(name){
-  if(priorityVillages.has(name))priorityVillages.delete(name);
-  else priorityVillages.add(name);
-  updatePriorityOverlay();
+// ═══════════════════════════════════════════════════════
+// Highlight / Select
+// ═══════════════════════════════════════════════════════
+const villageLayerMap={};
+function selectVillage(name){
+  if(selectedVillage&&villageLayerMap[selectedVillage])geojsonLayer.resetStyle(villageLayerMap[selectedVillage]);
+  selectedVillage=name;
+  if(name&&villageLayerMap[name]){
+    villageLayerMap[name].setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});
+    villageLayerMap[name].bringToFront();
+  }
+}
+function highlightVillage(name,on){
+  if(on){
+    if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage])geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
+    hoveredVillage=name;
+    if(name&&villageLayerMap[name]&&name!==selectedVillage){villageLayerMap[name].setStyle({weight:4,color:'#ffe500',fillOpacity:0.95,opacity:1});villageLayerMap[name].bringToFront();}
+  }else{
+    if(name!==selectedVillage&&villageLayerMap[name])geojsonLayer.resetStyle(villageLayerMap[name]);
+    if(hoveredVillage===name)hoveredVillage=null;
+  }
+}
+function goToVillage(name){
+  const f=RAW.features.find(f=>f.properties.village===name);
+  if(!f)return;
+  curVillageProps=f.properties;
+  selectVillage(name);
   renderPanel();
+  const layer=villageLayerMap[name];
+  if(layer)map.fitBounds(layer.getBounds(),{maxZoom:16,padding:[40,40]});
 }
+function goBack(){curVillageProps=null;selectVillage(null);renderPanel();}
 
-function clearPriority(){
-  priorityVillages.clear();
-  updatePriorityOverlay();
-  renderPanel();
-}
-
-function setAnalysisTab(t){
-  curAnalysisTab=t;
-  renderPanel();
-}
-
-// ── Analysis layout ──
-function renderAnalysis(){
-  const tabs=[
-    {id:'personal', label:'🧑 個人票估算'},
-    {id:'thirdforce',label:'🌊 第三勢力票倉'},
-    {id:'priority',  label:'⭐ 重點里標記'},
-    {id:'calc',      label:'🧮 試算器'}
-  ];
-  const tabHtml=tabs.map(t=>`<button class="atab${curAnalysisTab===t.id?' active':''}" onclick="setAnalysisTab('${t.id}')">${t.label}</button>`).join('');
-  let body='';
-  if(curAnalysisTab==='personal')   body=renderPersonalVotes(RAW.features);
-  else if(curAnalysisTab==='thirdforce') body=renderThirdForce(RAW.features);
-  else if(curAnalysisTab==='priority')  body=renderPriority(RAW.features);
-  else if(curAnalysisTab==='calc')      body=renderCalc(RAW.features);
-  return`<div class="sidebar-section">
-    <div class="sidebar-title">🎯 選情分析（無黨籍連任）</div>
-    <div class="atab-bar">${tabHtml}</div>
-    ${body}
-  </div>`;
-}
-
-// ── 個人票估算：2022議員 - 2024基進不分區 ──
-// 2022 = 個人票+黨票混合；2024基進 = 退黨後純黨票
-// 差值大 → 這些票跟著人，不跟著黨，是朋友的「個人票」
-function renderPersonalVotes(fs){
-  const data=fs.map(f=>{
-    const p=f.properties;
-    const v22=p.tsp22||0;          // 2022 議員票
-    const v24tsp=p.tsp24_P||0;     // 2024 基進不分區
-    const personal=v22-v24tsp;     // 估計個人票（正 = 跟著人走）
-    const personalPct=v22>0?(personal/v22*100):0;
-    return{village:p.village,area:p.area,v22,v24tsp,personal,personalPct,
-           tRate:p['tsp22_t%']||0};
-  });
-
-  const totV22=data.reduce((a,d)=>a+d.v22,0);
-  const totV24=data.reduce((a,d)=>a+d.v24tsp,0);
-  const totPersonal=data.reduce((a,d)=>a+Math.max(d.personal,0),0);
-
-  // 正值：個人票強的里（可能跟著朋友走）
-  const positives=[...data].filter(d=>d.personal>0)
-    .sort((a,b)=>b.personal-a.personal).slice(0,10);
-  // 負值：黨票重的里（朋友退黨後反而更多人投基進）⚠️
-  const negatives=[...data].filter(d=>d.personal<0)
-    .sort((a,b)=>a.personal-b.personal).slice(0,6);
-
-  const mkRow=(d,i,showPct)=>{
-    const isPos=d.personal>=0;
-    const isPriority=priorityVillages.has(d.village);
-    return`<div class="oppo-item" onclick="goToVillage('${d.village}')">
-      <span class="oppo-rank">${i+1}</span>
-      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}${d.village}
-        <span style="font-size:10px;color:var(--muted);margin-left:3px">${d.area}</span></span>
-      <span style="font-size:10px;color:var(--muted);margin-right:4px">${d.v22}→${d.v24tsp}</span>
-      <span class="oppo-val" style="color:${isPos?'var(--green)':'var(--red)'}">
-        ${d.personal>0?'+':''}${d.personal}
-        ${showPct?`<span style="font-size:10px;opacity:0.7">(${d.personalPct.toFixed(0)}%)</span>`:''}
-      </span>
-    </div>`;
-  };
-
-  return`
-  <div class="analysis-intro">
-    <b style="color:var(--text)">解讀方式</b><br>
-    2022議員票（基進黨籍） − 2024基進不分區票 = 估計個人票。<br>
-    差值越大 → 這些票可能是個人支持者，無黨籍連任時較可能跟著走。<br>
-    <span style="color:var(--red)">差值為負 → 退黨後基進反而獲得更多票，這些是黨的鐵票，不確定會否轉移。</span>
-  </div>
-  <div class="calc-strategy">
-    <div class="calc-strategy-title">全區概覽</div>
-    <div class="calc-strategy-row"><span>2022 議員總票數</span><span>${totV22.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>2024 基進不分區</span><span>${totV24.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>差值（樂觀個人票估計）</span>
-      <span style="color:${(totV22-totV24)>=0?'var(--green)':'var(--red)'}">
-        ${(totV22-totV24)>0?'+':''}${(totV22-totV24).toLocaleString()} 票
-      </span></div>
-  </div>
-  <div class="section-subtitle" style="margin-top:10px">🟢 個人票強勢里（較安全）</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">2022議員→2024基進 · 差值=估計個人票</div>
-  ${positives.map((d,i)=>mkRow(d,i,true)).join('')}
-  <div class="section-subtitle" style="margin-top:10px">🔴 須注意：黨票重的里</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">退黨後基進反而比2022更多票，這些里的票源忠誠度偏向黨</div>
-  ${negatives.map((d,i)=>mkRow(d,i,false)).join('')}`;
-}
-
-// ── 第三勢力票倉 ──
-// 2024年「非藍非綠」票(基進+時力+綠黨+歐巴桑) = 第三勢力潛在票倉
-// 以無黨籍身分可嘗試爭取，但有不確定性（部分是黨鐵票）
-function renderThirdForce(fs){
-  const data=fs.map(f=>{
-    const p=f.properties;
-    const tsp=p.tsp24_P||0;
-    const npp=p.npp24_p||0;
-    const gp=p.gp24_p||0;
-    const obs=p.obs24_P||0;
-    const third=tsp+npp+gp+obs;
-    const tot24=p._total24p||0;
-    const thirdPct=tot24>0?(third/tot24*100):0;
-    const v22=p.tsp22||0;
-    const gain=third-v22; // 第三勢力票倉 vs 朋友2022基準
-    return{village:p.village,area:p.area,tsp,npp,gp,obs,third,thirdPct,v22,gain,tot24};
-  });
-
-  const totThird=data.reduce((a,d)=>a+d.third,0);
-  const totV22=data.reduce((a,d)=>a+d.v22,0);
-
-  // 第三勢力大 且 高於2022基準 的里 = 有上升空間
-  const potential=[...data].sort((a,b)=>b.gain-a.gain).slice(0,12);
-
-  const maxThird=Math.max(...data.map(d=>d.third));
-
-  const mkRow=(d,i)=>{
-    const isPriority=priorityVillages.has(d.village);
-    const w=(d.third/maxThird*80).toFixed(0);
-    const pct=d.thirdPct.toFixed(1);
-    return`<div class="oppo-item" onclick="goToVillage('${d.village}')">
-      <span class="oppo-rank">${i+1}</span>
-      <span class="oppo-village">${isPriority?'<span class="priority-dot"></span>':''}${d.village}
-        <span style="font-size:10px;color:var(--muted);margin-left:3px">${d.area}</span></span>
-      <span style="font-size:10px;color:var(--muted);text-align:right;min-width:55px">
-        第三${d.third}票<br><span style="color:var(--muted)">${pct}%</span></span>
-      <span class="oppo-val" style="color:${d.gain>=0?'var(--accent)':'var(--muted)'}">
-        ${d.gain>0?'+':''}${d.gain}
-      </span>
-    </div>`;
-  };
-
-  // breakdown by party
-  const totTSP=data.reduce((a,d)=>a+d.tsp,0);
-  const totNPP=data.reduce((a,d)=>a+d.npp,0);
-  const totGP=data.reduce((a,d)=>a+d.gp,0);
-  const totOBS=data.reduce((a,d)=>a+d.obs,0);
-
-  return`
-  <div class="analysis-intro">
-    <b style="color:var(--text)">第三勢力票倉</b> = 2024年基進＋時力＋綠黨＋歐巴桑不分區<br>
-    以無黨籍身分參選，<span style="color:var(--green)">有機會爭取</span>這批選票，
-    但基進鐵票是否認同退黨仍有<span style="color:var(--red)">不確定性</span>。
-  </div>
-  <div class="calc-strategy">
-    <div class="calc-strategy-title">2024 第三勢力全區概覽</div>
-    <div class="calc-strategy-row"><span>🔴 基進</span><span>${totTSP.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>🟡 時代力量</span><span>${totNPP.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>🟢 綠黨</span><span>${totGP.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>🩷 歐巴桑</span><span>${totOBS.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row" style="border-top:1px solid var(--border);margin-top:3px;padding-top:6px">
-      <span><b>合計</b></span><span style="color:var(--accent)"><b>${totThird.toLocaleString()} 票</b></span></div>
-    <div class="calc-strategy-row"><span>朋友2022議員票</span><span>${totV22.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>理論增幅（若全部爭取）</span>
-      <span style="color:${(totThird-totV22)>=0?'var(--green)':'var(--red)'}">
-        ${(totThird-totV22)>0?'+':''}${(totThird-totV22).toLocaleString()} 票
-      </span></div>
-  </div>
-  <div class="section-subtitle" style="margin-top:10px">第三勢力潛力最大的里</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:4px">第三勢力票數 vs 2022議員基準，正值=有成長空間</div>
-  ${potential.map((d,i)=>mkRow(d,i)).join('')}`;
-}
-
-// ── 重點里標記 ──
-function renderPriority(fs){
-  const count=priorityVillages.size;
-  const rows=fs.map(f=>{
-    const p=f.properties;
-    const v22=p.tsp22||0;
-    const v24tsp=p.tsp24_P||0;
-    const third=(p.tsp24_P||0)+(p.npp24_p||0)+(p.gp24_p||0)+(p.obs24_P||0);
-    const chk=priorityVillages.has(p.village)?'checked':'';
-    return`<div class="priority-item">
-      <input type="checkbox" class="priority-check" ${chk} onchange="togglePriority('${p.village}')">
-      <span class="priority-vname" onclick="goToVillage('${p.village}')">${p.village}</span>
-      <span class="priority-sub">${p.area}<br>
-        22議員${v22}票 · 24第三${third}票</span>
-    </div>`;
+// ═══════════════════════════════════════════════════════
+// 控制項
+// ═══════════════════════════════════════════════════════
+function renderElectionRow(year){
+  const row=document.getElementById('row-election');
+  if(year==='pop'||!YEAR_ELECTIONS[year]){
+    row.innerHTML=`<span class="filter-label">選舉</span>`;
+    document.querySelectorAll('.m-btn').forEach(b=>{b.disabled=true;b.classList.remove('active');});
+    return;
+  }
+  const elections=YEAR_ELECTIONS[year];
+  const btns=elections.map(elId=>{
+    const el=ELECTIONS[elId];
+    const isActive=elId===curElection;
+    return`<button class="fbtn e-btn" data-el="${elId}" onclick="setElection('${elId}',this)"
+      style="${isActive?'background:var(--accent);border-color:var(--accent);color:#fff':''}">${el.label}</button>`;
   }).join('');
-
-  return`<div class="priority-header">
-    <span style="font-size:12px;color:var(--text)">已標記 <strong style="color:#ffe500">${count}</strong> 個里</span>
-    ${count>0?`<button class="priority-clear" onclick="clearPriority()">清除全部</button>`:''}
-  </div>
-  ${count>0?`<div class="analysis-intro">⭐ 標記的里會在地圖上顯示黃色虛線邊框</div>`:''}
-  <div class="section-subtitle">全部86里（點名稱可定位）</div>
-  <div>${rows}</div>`;
+  row.innerHTML=`<span class="filter-label">選舉</span>${btns}`;
+  document.querySelectorAll('.m-btn').forEach(b=>b.disabled=false);
 }
 
-// ── 試算器 ──
-function renderCalc(fs){
-  const tsp22Total=fs.reduce((a,f)=>a+(f.properties.tsp22||0),0);
-  // 估計可爭取的票：個人票(樂觀) + 部分第三勢力增幅
-  const personalPool=fs.reduce((a,f)=>{
-    const diff=(f.properties.tsp22||0)-(f.properties.tsp24_P||0);
-    return a+Math.max(diff,0);
-  },0);
-  const thirdPool=fs.reduce((a,f)=>{
-    const t=(f.properties.tsp24_P||0)+(f.properties.npp24_p||0)+(f.properties.gp24_p||0)+(f.properties.obs24_P||0);
-    return a+t;
-  },0);
-
-  if(!window._calcTarget) window._calcTarget=tsp22Total;
-  const target=window._calcTarget;
-  const gap=target-tsp22Total;
-  const neededFromThird=Math.max(gap,0);
-  const thirdCoverage=thirdPool>0?(neededFromThird/thirdPool*100).toFixed(0):0;
-  const personalCoverage=personalPool>0?(Math.min(neededFromThird,personalPool)/personalPool*100).toFixed(0):0;
-
-  return`<div class="calc-row">
-    <span class="calc-label">2022 基準票數（議員）</span>
-    <span class="calc-value">${tsp22Total.toLocaleString()} 票</span>
-  </div>
-  <div class="calc-row">
-    <span class="calc-label" style="flex:0.7">目標票數</span>
-    <div class="calc-input-wrap">
-      <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer" onclick="window._calcTarget=Math.max(0,(window._calcTarget||${tsp22Total})-50);renderPanel()">−</button>
-      <input class="calc-input" type="number" value="${target}" min="0" max="9999" step="50"
-        oninput="window._calcTarget=+this.value||${tsp22Total};renderPanel()">
-      <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:2px 8px;cursor:pointer" onclick="window._calcTarget=(window._calcTarget||${tsp22Total})+50;renderPanel()">＋</button>
-    </div>
-  </div>
-  <div class="calc-row">
-    <span class="calc-label">需增加</span>
-    <span class="calc-value" style="color:${gap<=0?'var(--green)':'var(--accent)'}">${gap<=0?'已達標 ✓':'+'+gap.toLocaleString()+' 票'}</span>
-  </div>
-  <div class="calc-strategy" style="margin-top:8px">
-    <div class="calc-strategy-title">票源估算</div>
-    <div class="calc-strategy-row"><span>個人票池（樂觀估計）</span><span style="color:var(--green)">${personalPool.toLocaleString()} 票</span></div>
-    <div class="calc-strategy-row"><span>第三勢力總池</span><span style="color:var(--accent)">${thirdPool.toLocaleString()} 票</span></div>
-  </div>
-  ${gap>0?`
-  <div class="calc-strategy" style="margin-top:6px">
-    <div class="calc-strategy-title">需求分析</div>
-    <div class="calc-strategy-row">
-      <span>需爭取第三勢力的比例</span>
-      <span style="color:${+thirdCoverage<30?'var(--green)':+thirdCoverage<60?'#fbbf24':'var(--red)'}">
-        ${thirdCoverage}%
-      </span>
-    </div>
-    <div class="calc-strategy-row">
-      <span>個人票池是否足夠</span>
-      <span style="color:${personalPool>=gap?'var(--green)':'var(--red)'}">
-        ${personalPool>=gap?'✓ 個人票估計足夠':'需額外爭取第三勢力'}
-      </span>
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">
-      ⚠️ 個人票池為樂觀估計，實際轉移率取決於朋友與選民的連結強度
-    </div>
-  </div>`:'<div style="font-size:13px;color:var(--green);padding:12px 0;text-align:center">🎉 以現有基準已達目標！</div>'}`;
+function renderCandidateRow(candidates){
+  const row=document.getElementById('row-candidate');
+  const btns=candidates.map(c=>{
+    const isActive=c.key===curCandidate;
+    const style=isActive?`background:${c.color};border-color:${c.color};color:#fff`:`color:${c.dc||c.color}`;
+    return`<button class="fbtn c-btn" data-key="${c.key}" data-color="${c.color}" data-dc="${c.dc||c.color}"
+      style="${style}" onclick="setCandidate('${c.key}',this)">${c.name}</button>`;
+  }).join('');
+  row.innerHTML=`<span class="filter-label">候選人</span>${btns}`;
 }
 
-// ── Visit counter (hits.sh) ──
-(async()=>{
-  try{
-    // hits.sh 每次請求自動 +1，回傳 JSON {total, today}
-    // 用 sanmin-election-map 作為唯一識別
-    const r=await fetch('https://api.hits.sh/hits?url=sanmin-election-map-a91060603&format=json');
-    const d=await r.json();
-    const el=document.getElementById('visit-count');
-    if(el&&d.total!=null){
-      el.textContent=`👁 ${Number(d.total).toLocaleString()} 次瀏覽`;
-      el.title=`今日 ${d.today||'-'} 次`;
+async function applyUpdate(){
+  curVillageProps=null;selectVillage(null);
+  if(curYear!=='pop'&&curElection){
+    const el=ELECTIONS[curElection];
+    if(el&&!EDATA_CACHE[el.file]){
+      document.getElementById('main-panel').innerHTML=`<div class="sidebar-section"><div class="info-placeholder">載入 ${el.label} 資料中...</div></div>`;
+      try{
+        const res=await fetch(el.file);
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        EDATA_CACHE[el.file]=await res.json();
+      }catch(e){
+        document.getElementById('main-panel').innerHTML=`<div class="sidebar-section"><div class="info-placeholder" style="color:var(--red)">載入失敗：${el.file}<br>請確認 data/ 資料夾已上傳至 GitHub</div></div>`;
+        return;
+      }
     }
+    computeValueMap();
+  }
+  curScale=getActiveScale();
+  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  updateLegend(curScale,curVillageProps);
+  updateAllTooltips();
+  renderPanel();
+}
+
+function setYear(year,btn){
+  curYear=year;
+  document.querySelectorAll('.y-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(year!=='pop'){
+    const elections=YEAR_ELECTIONS[year]||[];
+    if(elections.length){
+      curElection=elections[0];
+      const el=ELECTIONS[curElection];
+      if(el?.candidates.length)curCandidate=el.candidates[0].key;
+    }
+  }
+  renderElectionRow(year);
+  if(year!=='pop'&&curElection)renderCandidateRow(ELECTIONS[curElection]?.candidates||[]);
+  else document.getElementById('row-candidate').innerHTML=`<span class="filter-label">候選人</span>`;
+  applyUpdate();
+}
+
+function setElection(elId,btn){
+  curElection=elId;
+  document.querySelectorAll('.e-btn').forEach(b=>{b.style.background='';b.style.borderColor='';b.style.color='';});
+  if(btn){btn.style.background='var(--accent)';btn.style.borderColor='var(--accent)';btn.style.color='#fff';}
+  const el=ELECTIONS[elId];
+  if(el?.candidates.length){curCandidate=el.candidates[0].key;renderCandidateRow(el.candidates);}
+  applyUpdate();
+}
+
+function setCandidate(key,btn){
+  curCandidate=key;
+  document.querySelectorAll('.c-btn').forEach(b=>{
+    const isActive=b.dataset.key===key;
+    b.style.background=isActive?b.dataset.color:'';
+    b.style.borderColor=isActive?b.dataset.color:'';
+    b.style.color=isActive?'#fff':(b.dataset.dc||b.dataset.color);
+  });
+  computeValueMap();
+  _rankCache={};
+  curScale=getActiveScale();
+  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  updateLegend(curScale,curVillageProps);
+  updateAllTooltips();
+  renderPanel();
+}
+
+function setMetric(metric,btn){
+  curMetric=metric;
+  document.querySelectorAll('.m-btn').forEach(b=>b.classList.toggle('active',b.dataset.metric===metric));
+  curScale=getActiveScale();
+  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  updateLegend(curScale,curVillageProps);
+  updateAllTooltips();
+}
+
+// ═══════════════════════════════════════════════════════
+// AI 聊天
+// ═══════════════════════════════════════════════════════
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chat-msgs').style.display=chatOpen?'flex':'none';
+  document.getElementById('chat-input-row').style.display=chatOpen?'flex':'none';
+  document.getElementById('chat-toggle').textContent=chatOpen?'▲':'▼';
+}
+function appendMsg(role,text){
+  const box=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg '+role;div.textContent=text;
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+async function sendChat(){
+  if(chatLoading)return;
+  const input=document.getElementById('chat-input');
+  const q=input.value.trim();if(!q)return;
+  input.value='';appendMsg('user',q);
+  chatLoading=true;document.getElementById('chat-send').disabled=true;
+  chatHistory.push({role:'user',content:q});
+  const elInfo=curYear!=='pop'&&curElection?`當前選舉：${ELECTIONS[curElection]?.label}，候選人：${ELECTIONS[curElection]?.candidates.find(c=>c.key===curCandidate)?.name}`:'人口模式';
+  const topData=Object.entries(valueMap).sort((a,b)=>b[1].V-a[1].V).slice(0,20).map(([v,d])=>({里:v,得票:d.V,率:`${(d.R*100).toFixed(1)}%`,催:`${(d.T*100).toFixed(1)}%`}));
+  const sys=`你是高雄三民區選舉地圖助手。${elInfo}。只根據以下資料回答，繁體中文，簡短精確。\n資料(前20里)：${JSON.stringify(topData)}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:sys,messages:chatHistory.slice(-6)})});
+    const d=await res.json();
+    const txt=d.content?.find(c=>c.type==='text')?.text||'';
+    chatHistory.push({role:'assistant',content:txt});
+    appendMsg('assistant',txt||'抱歉，無法取得回答。');
+  }catch(e){appendMsg('assistant','連線失敗，請稍後再試。');}
+  chatLoading=false;document.getElementById('chat-send').disabled=false;
+}
+
+// ═══════════════════════════════════════════════════════
+// 定位
+// ═══════════════════════════════════════════════════════
+function locateUser(){document.getElementById('locateBtn').style.opacity='0.5';map.locate({setView:true,maxZoom:16});}
+map.on('locationfound',e=>{
+  document.getElementById('locateBtn').style.opacity='1';
+  L.circleMarker(e.latlng,{radius:8,fillColor:'#4285F4',color:'#fff',weight:2,fillOpacity:0.9}).addTo(map).bindPopup('你在這裡').openPopup();
+});
+map.on('locationerror',()=>{document.getElementById('locateBtn').style.opacity='1';alert('無法取得位置。');});
+
+// ═══════════════════════════════════════════════════════
+// 地圖事件
+// ═══════════════════════════════════════════════════════
+function onEachFeature(feature,layer){
+  villageLayerMap[feature.properties.village]=layer;
+  layer.on({
+    mouseover:e=>{
+      if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage])geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
+      hoveredVillage=feature.properties.village;
+      if(feature.properties.village!==selectedVillage){e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});e.target.bringToFront();}
+    },
+    mouseout:e=>{
+      if(feature.properties.village!==selectedVillage)geojsonLayer.resetStyle(e.target);
+      if(hoveredVillage===feature.properties.village)hoveredVillage=null;
+    },
+    click:()=>{selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
+  });
+  layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
+}
+
+// ═══════════════════════════════════════════════════════
+// 初始化
+// ═══════════════════════════════════════════════════════
+(async()=>{
+  const loadingEl=document.createElement('div');
+  loadingEl.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1.2rem;z-index:9999;background:rgba(0,0,0,.7);padding:1rem 2rem;border-radius:8px';
+  loadingEl.textContent='載入地圖中…';
+  document.body.appendChild(loadingEl);
+  try{
+    const res=await fetch('sanmin_vote.geojson');
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    RAW=await res.json();
+    // 注入衍生欄位
+    RAW.features.forEach(f=>{
+      const p=f.properties;
+      p._pop_diff=(p['pop2026.02']||0)-(p.pop2022||0);
+    });
+    _popRankCache={};
+    document.body.removeChild(loadingEl);
+
+    // 初始選擇：2022議員・張博洋
+    curYear='2022';curElection='2022_council';curCandidate='tsp';curMetric='V';
+    document.querySelector('[data-year="2022"]').classList.add('active');
+    renderElectionRow('2022');
+    renderCandidateRow(ELECTIONS['2022_council'].candidates);
+
+    geojsonLayer=L.geoJSON(RAW,{style:styleFn,onEachFeature}).addTo(map);
+    map.fitBounds(geojsonLayer.getBounds(),{padding:[20,20]});
+
+    // 預載 2022_議員.json
+    await applyUpdate();
+    initBuildingLayer();
   }catch(e){
-    const el=document.getElementById('visit-count');
-    if(el)el.textContent='';
+    if(loadingEl.parentNode)loadingEl.parentNode.removeChild(loadingEl);
+    const err=document.createElement('div');
+    err.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1rem;z-index:9999;background:rgba(180,0,0,.85);padding:1rem 2rem;border-radius:8px;text-align:center';
+    err.textContent='地圖資料載入失敗：'+e.message;
+    document.body.appendChild(err);
   }
 })();
-
 </script>
 </body>
 </html>
