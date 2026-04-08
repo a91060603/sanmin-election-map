@@ -19,7 +19,7 @@
     html,body{height:100%;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--bg);color:var(--text);overflow:hidden;}
     body{display:flex;flex-direction:column;}
 
-    header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;}
+    header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);flex-shrink:0;}
     header h1{font-size:15px;font-weight:700;}
     header .sub{font-size:11px;color:var(--muted);}
@@ -124,12 +124,21 @@
     .ai-send{padding:5px 11px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;}
     .ai-send:disabled{opacity:0.4;cursor:not-allowed;}
 
+    /* ── Building markers ── */
+    .bld-popup{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#1a1d27;line-height:1.6;}
+    .bld-popup b{color:#4f7cff;}
+    .bld-toggle{position:absolute;bottom:80px;left:10px;z-index:1000;
+      background:rgba(22,25,43,0.93);border:1px solid rgba(255,255,255,0.12);
+      border-radius:6px;padding:5px 9px;font-size:11px;color:var(--muted);
+      cursor:pointer;display:none;white-space:nowrap;user-select:none;}
+    .bld-toggle.on{color:#ffe500;border-color:rgba(255,229,0,0.4);}
     .locate-btn{position:absolute;bottom:36px;left:10px;z-index:1000;width:32px;height:40px;background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
     .locate-btn:hover{filter:drop-shadow(0 2px 6px rgba(79,124,255,0.7));}
 
     .leaflet-container{background:#151820;}
     .leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important;}
     .leaflet-control-attribution{background:rgba(15,17,23,0.85)!important;color:var(--muted)!important;font-size:9px!important;}
+    @keyframes fadeHint{0%{opacity:1}70%{opacity:1}100%{opacity:0;pointer-events:none}}
     .village-label{
       background:transparent!important;border:none!important;box-shadow:none!important;
       font-family:'Noto Sans TC',sans-serif;color:#fff;pointer-events:none;
@@ -210,6 +219,14 @@
 <header>
   <div class="dot"></div>
   <div><div class="sub">高雄市</div><h1>三民區選舉地圖</h1></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <a href="mailto:a91060603@gmail.com"
+       style="font-size:11px;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color 0.15s"
+       onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+      ✉ 相關合作請來信
+    </a>
+    <span id="visit-count" style="font-size:11px;color:var(--muted);white-space:nowrap">👁 ...</span>
+  </div>
 </header>
 <div class="filter-area">
   <div class="filter-row" id="row-year">
@@ -236,7 +253,8 @@
     <button class="fbtn p-gp"  data-party="gp"  onclick="setParty('gp',this)">綠黨</button>
     <button class="fbtn p-obs" data-party="obs" onclick="setParty('obs',this)">歐巴桑</button>
     <button class="fbtn p-pop" data-party="pop" onclick="setParty('pop',this)">人口資訊</button>
-    <button class="fbtn p-ana" data-party="ana" onclick="setParty('ana',this)" style="background:rgba(255,229,0,0.12);border-color:rgba(255,229,0,0.35);color:#ffe500;">🎯 選情分析</button>
+    <!-- 選情分析暫時關閉 -->
+    <button class="fbtn p-ana" data-party="ana" disabled title="選情分析功能整修中" style="opacity:0.3;cursor:not-allowed;">🎯 選情分析</button>
   </div>
   <div class="filter-row" id="row-metric">
     <span class="filter-label">熱力</span>
@@ -248,6 +266,7 @@
 
 <div class="main">
   <div id="map">
+    <button id="bldToggle" class="bld-toggle" onclick="toggleBuildings()" title="顯示/隱藏建築標記">🏢 建築標記</button>
     <button class="locate-btn" id="locateBtn" onclick="locateUser()" title="定位我的位置">
       <svg width="24" height="36" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 0C5.4 0 0 5.4 0 12c0 8.4 12 24 12 24S24 20.4 24 12C24 5.4 18.6 0 12 0z" fill="#4285F4"/>
@@ -256,6 +275,14 @@
       </svg>
     </button>
     <div id="legend-overlay"></div>
+    <div id="map-hint" style="
+      position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+      z-index:900;background:rgba(15,17,23,0.82);border:1px solid rgba(255,255,255,0.1);
+      border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);
+      pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);
+      transition:opacity 0.5s;animation:fadeHint 4s forwards;">
+      👆 點擊里可查看詳細資料
+    </div>
   </div>
   <div class="sidebar">
     <div class="sidebar-inner"><div id="main-panel"></div></div>
@@ -538,7 +565,24 @@ function renderPopPanel(){
 function renderFilterPanel(){
   const sc=curScale;
   if(!sc||sc.isOverview)return`<div class="sidebar-section"><div class="info-placeholder">請選擇政黨與選舉種類。</div></div>`;
-  return`<div class="sidebar-section" id="ai-section">
+  const fs=RAW.features;
+  // 計算全區總票數
+  const partyTotal=sc.vField ? fs.reduce((s,f)=>s+(f.properties[sc.vField]||0),0) : 0;
+  const allTotal=fs.reduce((s,f)=>s+(f.properties._total24p||0),0);
+  const pct=allTotal>0?(partyTotal/allTotal*100).toFixed(1):'-';
+  const partyColor=sc.party?.dc||'var(--accent)';
+  // 全區總票數摘要卡
+  const totalCard=partyTotal>0?`<div class="sidebar-section" style="padding:10px 15px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">${sc.label} 全區合計</div>
+        <div style="font-size:22px;font-weight:700;color:${partyColor}">${partyTotal.toLocaleString()} <span style="font-size:14px">票</span></div>
+        ${sc.vField===sc.party?.fieldP?`<div style="font-size:12px;color:var(--muted);margin-top:2px">佔全區不分區 <b style="color:${partyColor}">${pct}%</b></div>`:''}
+      </div>
+      <div style="width:40px;height:40px;border-radius:50%;background:${sc.party?.color};opacity:0.18;flex-shrink:0"></div>
+    </div>
+  </div>`:'';
+  return totalCard+`<div class="sidebar-section" id="ai-section">
     <div class="sidebar-title">${sc.label}</div>
     <div id="ai-content"><div class="ai-loading"><div class="ai-spinner"></div>AI 分析中...</div></div>
   </div>
@@ -552,6 +596,47 @@ let selectedVillage=null;
 let hoveredVillage=null;
 let priorityVillages=new Set();
 let priorityLayer=null;
+let buildingLayer=null;
+let buildingsVisible=true;
+
+// ── 建築/地點標記資料 ──────────────────────────────────
+// 格式：每筆 { name, lat, lng, note }
+// 若有多個分類，可加 type 欄位
+// 例：{ name:'○○大廈', lat:22.645, lng:120.293, note:'約300戶' }
+const BUILDINGS = [
+  // ← 把你的建築座標貼在這裡
+  // { name:'範例大廈', lat:22.6450, lng:120.2930, note:'' },
+];
+// ─────────────────────────────────────────────────────
+
+function initBuildingLayer(){
+  if(buildingLayer){ map.removeLayer(buildingLayer); buildingLayer=null; }
+  if(!BUILDINGS.length) return;
+  buildingLayer = L.layerGroup();
+  BUILDINGS.forEach(b=>{
+    const m = L.circleMarker([b.lat, b.lng],{
+      radius:7, fillColor:'#ffe500', color:'#fff',
+      weight:1.5, fillOpacity:0.9
+    });
+    const note = b.note ? `<br><span style="color:#666">${b.note}</span>` : '';
+    m.bindPopup(`<div class="bld-popup"><b>${b.name}</b>${note}</div>`,
+      {maxWidth:200, className:'bld-popup-wrap'});
+    buildingLayer.addLayer(m);
+  });
+  if(buildingsVisible) buildingLayer.addTo(map);
+  const btn=document.getElementById('bldToggle');
+  if(btn){ btn.style.display='block'; btn.classList.toggle('on',buildingsVisible); }
+}
+
+function toggleBuildings(){
+  buildingsVisible=!buildingsVisible;
+  if(buildingLayer){
+    if(buildingsVisible) buildingLayer.addTo(map);
+    else map.removeLayer(buildingLayer);
+  }
+  const btn=document.getElementById('bldToggle');
+  if(btn){ btn.textContent=`🏢 建築標記`; btn.classList.toggle('on',buildingsVisible); }
+}
 let curAnalysisTab='personal';
 
 function selectVillage(name){
@@ -732,17 +817,19 @@ function renderVillage(props){
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
     <div class="info-village">${props.village||'-'}</div>
     <div class="info-area">${props.area||''} · ${props.district||''}</div>
-    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-      <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
-        <div style="font-size:16px;font-weight:700;color:var(--text)">${pop26}</div>
-        <div style="font-size:10px;color:var(--muted)">最新人口</div>
-        <div style="font-size:10px;color:var(--accent)">${pop26rk}/86</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:5px 10px;text-align:center;flex:1;min-width:70px">
-        <div style="font-size:16px;font-weight:700;color:${pd>0?'var(--green)':pd<0?'var(--red)':'var(--text)'}">${pdStr}</div>
-        <div style="font-size:10px;color:var(--muted)">增減人口</div>
-        <div style="font-size:10px;color:var(--accent)">${getRank('_pop_diff',props.village,true)}/86</div>
-      </div>
+    <div class="stat-row" style="margin-top:6px">
+      <span class="stat-label">最新人口</span>
+      <span class="stat-val-block">
+        <span class="stat-value">${pop26} 人</span>
+        <span class="stat-sub rank-badge">(${pop26rk}/86)</span>
+      </span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">人口增減</span>
+      <span class="stat-val-block">
+        <span class="stat-value ${pdCls}">${pdStr} 人</span>
+        <span class="stat-sub rank-badge">(${pdrk}/86)</span>
+      </span>
     </div>
   </div>
   <div class="sidebar-section">
@@ -947,7 +1034,13 @@ function onEachFeature(feature,layer){
       if(feature.properties.village!==selectedVillage) geojsonLayer.resetStyle(e.target);
       if(hoveredVillage===feature.properties.village) hoveredVillage=null;
     },
-    click:    e=>{selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
+    click:    e=>{
+      selectVillage(feature.properties.village);
+      curVillageProps=feature.properties;
+      renderPanel();
+      const hint=document.getElementById('map-hint');
+      if(hint)hint.style.display='none';
+    }
   });
   layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
 }
@@ -993,6 +1086,7 @@ function onEachFeature(feature,layer){
     geojsonLayer=L.geoJSON(RAW,{style:styleFn,onEachFeature}).addTo(map);
     map.fitBounds(geojsonLayer.getBounds(),{padding:[20,20]});
     updateLegend(curScale,curVillageProps);updateAvail();updateAllTooltips();renderPanel();
+    initBuildingLayer();
   }catch(e){
     loadingEl.style.background='rgba(180,0,0,.85)';
     loadingEl.textContent='資料載入失敗：'+e.message+'（請確認 sanmin_vote.geojson 與 index.html 在同一資料夾）';
@@ -1274,6 +1368,24 @@ function renderCalc(fs){
     </div>
   </div>`:'<div style="font-size:13px;color:var(--green);padding:12px 0;text-align:center">🎉 以現有基準已達目標！</div>'}`;
 }
+
+// ── Visit counter (hits.sh) ──
+(async()=>{
+  try{
+    // hits.sh 每次請求自動 +1，回傳 JSON {total, today}
+    // 用 sanmin-election-map 作為唯一識別
+    const r=await fetch('https://api.hits.sh/hits?url=sanmin-election-map-a91060603&format=json');
+    const d=await r.json();
+    const el=document.getElementById('visit-count');
+    if(el&&d.total!=null){
+      el.textContent=`👁 ${Number(d.total).toLocaleString()} 次瀏覽`;
+      el.title=`今日 ${d.today||'-'} 次`;
+    }
+  }catch(e){
+    const el=document.getElementById('visit-count');
+    if(el)el.textContent='';
+  }
+})();
 
 </script>
 </body>
