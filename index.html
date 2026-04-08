@@ -140,6 +140,14 @@
 <header>
   <div class="dot"></div>
   <div><div class="sub">高雄市</div><h1>三民區選舉地圖</h1></div>
+  <div style="margin-left:auto;flex-shrink:0">
+    <a href="mailto:a91060603@gmail.com"
+       style="font-size:11px;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color 0.15s;user-select:all"
+       onmouseover="this.style.color='var(--accent)'"
+       onmouseout="this.style.color='var(--muted)'">
+      ✉ 歡迎合作 a91060603@gmail.com
+    </a>
+  </div>
 </header>
 <div class="filter-area">
   <div class="filter-row" id="row-year">
@@ -176,8 +184,8 @@
       </svg>
     </button>
     <div id="legend-overlay"></div>
-    <div id="map-hint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(15,17,23,0.82);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);animation:fadeHint 4s forwards;">
-      👆 點擊里可查看詳細資料
+    <div id="map-hint" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(15,17,23,0.75);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px);">
+      👆 點擊地圖上的里，查看選舉詳細數據
     </div>
   </div>
   <div class="sidebar">
@@ -237,12 +245,24 @@ const ELECTIONS = {
     label:'市議員', year:'2022',
     file:'data/2022_議員.json', dataKey:null,
     candidates:[
-      {key:'tsp', name:'張博洋（基進）', color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
-      {key:'npp', name:'林于凱（時力）', color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
-      {key:'dpp', name:'民進黨合計',    color:'#1B9431', dc:'#4ade80', aggKeys:['dpp_何','dpp_鄭','dpp_林','dpp_康']},
-      {key:'kmt', name:'國民黨合計',    color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt_曾','kmt_童','kmt_黃柏','kmt_黃香']},
-      {key:'tpp', name:'李佳玲（民眾）', color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
-      {key:'ind', name:'無黨籍合計',    color:'#6b7280', dc:'#9ca3af', aggKeys:['ind_2','ind_4']},
+      // ── 第三勢力 ──
+      {key:'tsp',    name:'張博洋（基進）',  color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
+      {key:'npp',    name:'林于凱（時力）',  color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
+      // ── 民進黨（合計 + 個別）──
+      {key:'dpp',    name:'民進黨合計',      color:'#1B9431', dc:'#4ade80', aggKeys:['dpp_何','dpp_鄭','dpp_林','dpp_康']},
+      {key:'dpp_何', name:'何權峰（民進）',  color:'#22863a', dc:'#6ee7a0', aggKeys:['dpp_何']},
+      {key:'dpp_康', name:'康裕成（民進）',  color:'#2ea84a', dc:'#86efac', aggKeys:['dpp_康']},
+      {key:'dpp_鄭', name:'鄭孟洳（民進）',  color:'#3dbd60', dc:'#a7f3c0', aggKeys:['dpp_鄭']},
+      {key:'dpp_林', name:'林武忠（民進）',  color:'#4fd375', dc:'#bbf7d0', aggKeys:['dpp_林']},
+      // ── 國民黨（合計 + 個別）──
+      {key:'kmt',      name:'國民黨合計',      color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt_曾','kmt_童','kmt_黃柏','kmt_黃香']},
+      {key:'kmt_童',   name:'童燕珍（國民）',  color:'#1254a5', dc:'#7eb8fb', aggKeys:['kmt_童']},
+      {key:'kmt_黃柏', name:'黃柏霖（國民）',  color:'#2467bc', dc:'#93c5fd', aggKeys:['kmt_黃柏']},
+      {key:'kmt_黃香', name:'黃香菽（國民）',  color:'#367ad3', dc:'#a8d4fe', aggKeys:['kmt_黃香']},
+      {key:'kmt_曾',   name:'曾俊傑（國民）',  color:'#488de8', dc:'#bde0ff', aggKeys:['kmt_曾']},
+      // ── 其他 ──
+      {key:'tpp',    name:'李佳玲（民眾）',  color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
+      {key:'ind',    name:'無黨籍合計',      color:'#6b7280', dc:'#9ca3af', aggKeys:['ind_2','ind_4']},
     ]
   },
   '2022_mayor': {
