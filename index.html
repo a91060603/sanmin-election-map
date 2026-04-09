@@ -1072,7 +1072,8 @@ function onEachFeature(feature,layer){
     initLocationLayer();
   }catch(e){
     if(loadingEl.parentNode)loadingEl.parentNode.removeChild(loadingEl);
-9999;background:rgba(180,0,0,.85);padding:1rem 2rem;border-radius:8px;text-align:center';
+    const err=document.createElement('div');
+    err.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1rem;z-index:9999;background:rgba(180,0,0,.85);padding:1rem 2rem;border-radius:8px;text-align:center';
     err.innerHTML='地圖資料載入失敗：'+e.message+'<br><small>請確認 sanmin_vote.geojson 在同一資料夾</small>';
     document.body.appendChild(err);
   }
