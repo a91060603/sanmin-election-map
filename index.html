@@ -186,6 +186,7 @@
 <div class="main">
   <div id="map">
     <button id="bldToggle" class="bld-toggle" onclick="toggleBuildings()" title="顯示/隱藏建築標記">🏢 建築標記</button>
+    <button id="locToggle" class="bld-toggle" style="bottom:112px;display:none" onclick="toggleLocations()" title="顯示/隱藏地點標記">📍 地點標記</button>
     <button class="locate-btn" id="locateBtn" onclick="locateUser()" title="定位我的位置">
       <svg width="24" height="36" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 0C5.4 0 0 5.4 0 12c0 8.4 12 24 12 24S24 20.4 24 12C24 5.4 18.6 0 12 0z" fill="#4285F4"/>
@@ -1068,7 +1069,57 @@ function onEachFeature(feature,layer){
     // 預載 2022_議員.json
     await applyUpdate();
     initBuildingLayer();
+    initLocationLayer();
   }catch(e){
     if(loadingEl.parentNode)loadingEl.parentNode.removeChild(loadingEl);
-    const err=document.createElement('div');
-    err.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1rem;z-index:
+9999;background:rgba(180,0,0,.85);padding:1rem 2rem;border-radius:8px;text-align:center';
+    err.innerHTML='地圖資料載入失敗：'+e.message+'<br><small>請確認 sanmin_vote.geojson 在同一資料夾</small>';
+    document.body.appendChild(err);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
+// 地址/地點標記圖層
+// ═══════════════════════════════════════════════════════
+let locationLayer=null;
+let locationsVisible=true;
+
+// ── 地點資料：填入地址或座標 ──────────────────────────
+// 格式：{ name:'名稱', lat:緯度, lng:經度, note:'備註' }
+// 若你有地址而非座標，可用 Google Maps 查詢座標後填入
+// 例：搜尋「高雄市三民區○○路○○號」→ 右鍵 → 複製座標
+const LOCATIONS = [
+  // { name:'○○社區活動中心', lat:22.6580, lng:120.3100, note:'約500戶' },
+  // { name:'○○里辦公處',     lat:22.6620, lng:120.3050, note:'' },
+];
+// ─────────────────────────────────────────────────────
+
+function initLocationLayer(){
+  if(locationLayer){map.removeLayer(locationLayer);locationLayer=null;}
+  const btn=document.getElementById('locToggle');
+  if(!LOCATIONS.length){if(btn)btn.style.display='none';return;}
+  locationLayer=L.layerGroup();
+  LOCATIONS.forEach(b=>{
+    const marker=L.circleMarker([b.lat,b.lng],{
+      radius:8,fillColor:'#ffe500',color:'#fff',weight:2,fillOpacity:0.9
+    });
+    const note=b.note?`<br><span style="color:#555">${b.note}</span>`:'';
+    marker.bindPopup(`<div style="font-family:'Noto Sans TC',sans-serif;font-size:13px"><b style="color:#4f7cff">${b.name}</b>${note}</div>`,{maxWidth:220});
+    locationLayer.addLayer(marker);
+  });
+  if(locationsVisible)locationLayer.addTo(map);
+  if(btn){btn.style.display='block';btn.classList.toggle('on',locationsVisible);}
+}
+
+function toggleLocations(){
+  locationsVisible=!locationsVisible;
+  if(locationLayer){
+    if(locationsVisible)locationLayer.addTo(map);
+    else map.removeLayer(locationLayer);
+  }
+  const btn=document.getElementById('locToggle');
+  if(btn)btn.classList.toggle('on',locationsVisible);
+}
+</script>
+</body>
+</html>
