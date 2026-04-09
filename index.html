@@ -122,6 +122,19 @@
     .village-label{background:transparent!important;border:none!important;box-shadow:none!important;font-family:'Noto Sans TC',sans-serif;color:#fff;pointer-events:none;text-align:center;line-height:1.45;white-space:nowrap;text-shadow:-1px -1px 2px rgba(0,0,0,0.95),1px -1px 2px rgba(0,0,0,0.95),-1px 1px 2px rgba(0,0,0,0.95),1px 1px 2px rgba(0,0,0,0.95);}
     .village-label::before{display:none!important;}
     @keyframes fadeHint{0%{opacity:1}70%{opacity:1}100%{opacity:0;pointer-events:none}}
+    .ep-row{padding:6px 4px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:background 0.12s;margin:0 -4px;}
+    .ep-row:hover{background:rgba(79,124,255,0.1);padding:6px 8px;}
+    .ep-row:last-child{border-bottom:none;}
+    .ep-row-top{display:flex;align-items:baseline;gap:5px;margin-bottom:3px;}
+    .ep-rank{font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0;min-width:38px;}
+    .ep-village{font-size:14px;font-weight:600;flex:1;color:var(--text);}
+    .ep-vpop{font-size:10px;color:var(--muted);flex-shrink:0;}
+    .ep-row-bot{display:flex;gap:6px;font-size:11px;color:var(--muted);padding-left:43px;flex-wrap:wrap;}
+    .ep-hi{color:var(--text);font-weight:700;}
+    .ep-tab-bar{display:flex;gap:5px;margin-bottom:10px;align-items:center;}
+    .ep-tab-bar .fbtn{flex:1;}
+    .cand-hero{font-size:17px;font-weight:700;color:var(--text);margin:4px 0 2px;}
+    .cand-total{font-size:12px;color:var(--muted);margin-bottom:8px;}
     @media(max-width:640px){
       .main{flex-direction:column;flex:1;min-height:0;overflow:hidden;}
       #map{flex:none;height:38vh;width:100%;}
@@ -141,11 +154,8 @@
   <div class="dot"></div>
   <div><div class="sub">高雄市</div><h1>三民區選舉地圖</h1></div>
   <div style="margin-left:auto;flex-shrink:0">
-    <a href="mailto:a91060603@gmail.com"
-       style="font-size:11px;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color 0.15s;user-select:all"
-       onmouseover="this.style.color='var(--accent)'"
-       onmouseout="this.style.color='var(--muted)'">
-      ✉ 歡迎合作 a91060603@gmail.com
+    <a href="/cdn-cgi/l/email-protection#d2b3ebe3e2e4e2e4e2e192b5bfb3bbbefcb1bdbf" style="font-size:11px;color:var(--muted);text-decoration:none;white-space:nowrap;transition:color 0.15s;user-select:all" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+      ✉ 歡迎合作 <span class="__cf_email__" data-cfemail="f495cdc5c4c2c4c2c4c7b49399959d98da979b99">[email&#160;protected]</span>
     </a>
   </div>
 </header>
@@ -197,14 +207,14 @@
       </div>
       <div class="ai-chat-msgs" id="chat-msgs" style="display:none"></div>
       <div class="ai-chat-input-row" id="chat-input-row" style="display:none">
-        <input class="ai-input" id="chat-input" placeholder="例：哪個里張博洋得票最高？" onkeydown="if(event.key==='Enter')sendChat()">
+        <input class="ai-input" id="chat-input" placeholder="例：哪個里得票最高？前5名催票率" onkeydown="if(event.key==='Enter')sendChat()">
         <button class="ai-send" id="chat-send" onclick="sendChat()">送出</button>
       </div>
     </div>
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════════════════════
 // 選舉資料登錄表
 // ═══════════════════════════════════════════════════════
@@ -303,7 +313,7 @@ const YEAR_ELECTIONS = {
 // 狀態變數
 // ═══════════════════════════════════════════════════════
 let RAW=null, EDATA_CACHE={};
-let curYear='2022', curElection='2022_council', curCandidate='tsp', curMetric='V';
+let curYear='2022', curElection='2022_council', curCandidate='tsp', curMetric='V', curPanelTab='V';
 let curVillageProps=null, curScale=null, geojsonLayer=null;
 let valueMap={}, _rankCache={}, _popRankCache={};
 let chatOpen=false, chatHistory=[], chatLoading=false;
@@ -519,7 +529,7 @@ function renderPopPanel(){
       onmouseenter="highlightVillage('${f.properties.village}',true)"
       onmouseleave="highlightVillage('${f.properties.village}',false)"
       onclick="goToVillage('${f.properties.village}')">
-      <span class="top-rank">${i+1}/86</span>
+      <span class="top-rank">第${i+1}名</span>
       <span class="top-village">${f.properties.village}</span>
       <span class="top-val" style="color:${r.color}">${r.val}</span>
     </div>`;
@@ -530,33 +540,71 @@ function renderPopPanel(){
     row7(byDiff,p=>{const d=p._pop_diff||0;return{val:(d>0?'+':'')+d.toLocaleString()+'人',color:d>0?'#22c55e':'#ef4444'};})+'</div>';
 }
 
+function setPanelTab(t){
+  curPanelTab=t;
+  renderPanel();
+}
+
 function renderElectionPanel(){
   const el=ELECTIONS[curElection];
   const cand=el?.candidates.find(c=>c.key===curCandidate);
   if(!el||!cand)return`<div class="sidebar-section"><div class="info-placeholder">請選擇候選人</div></div>`;
+
   const villages=RAW.features.map(f=>f.properties.village).filter(v=>valueMap[v]);
   const byV=[...villages].sort((a,b)=>(valueMap[b].V||0)-(valueMap[a].V||0));
   const byR=[...villages].sort((a,b)=>(valueMap[b].R||0)-(valueMap[a].R||0));
   const byT=[...villages].sort((a,b)=>(valueMap[b].T||0)-(valueMap[a].T||0));
-  const mkRow=(v,rk,val,color)=>`<div class="top-item top-item-interactive"
-    onmouseenter="highlightVillage('${v}',true)"
-    onmouseleave="highlightVillage('${v}',false)"
-    onclick="goToVillage('${v}')">
-    <span class="top-rank">${rk}/86</span>
-    <span class="top-village">${v}</span>
-    <span class="top-val" style="color:${color}">${val}</span>
-  </div>`;
-  const top7V=byV.slice(0,7).map((v,i)=>mkRow(v,i+1,(valueMap[v].V||0).toLocaleString()+'票',cand.dc||cand.color));
-  const top7R=byR.slice(0,7).map((v,i)=>mkRow(v,i+1,((valueMap[v].R||0)*100).toFixed(2)+'%','#a5b4fc'));
-  const top7T=byT.slice(0,7).map((v,i)=>mkRow(v,i+1,((valueMap[v].T||0)*100).toFixed(2)+'%','#fbbf24'));
-  return`<div class="sidebar-section" id="ai-section">
-    <div class="sidebar-title">${el.label}・${cand.name}</div>
-    <div id="ai-content"><div class="ai-loading"><div class="ai-spinner"></div>AI 分析中...</div></div>
+
+  // 預計算排名 map
+  const rkV={},rkR={},rkT={};
+  byV.forEach((v,i)=>rkV[v]=i+1);
+  byR.forEach((v,i)=>rkR[v]=i+1);
+  byT.forEach((v,i)=>rkT[v]=i+1);
+
+  const sorted=curPanelTab==='V'?byV:curPanelTab==='R'?byR:byT;
+
+  const rows=sorted.slice(0,10).map((v,i)=>{
+    const vd=valueMap[v];
+    const vpop=(vd.vpop||0).toLocaleString();
+    const hiV=curPanelTab==='V'?' class="ep-hi"':'';
+    const hiR=curPanelTab==='R'?' class="ep-hi"':'';
+    const hiT=curPanelTab==='T'?' class="ep-hi"':'';
+    return`<div class="ep-row"
+      onmouseenter="highlightVillage('${v}',true)"
+      onmouseleave="highlightVillage('${v}',false)"
+      onclick="goToVillage('${v}')">
+      <div class="ep-row-top">
+        <span class="ep-rank">第${i+1}名</span>
+        <span class="ep-village">${v}</span>
+        <span class="ep-vpop">選舉人 ${vpop}</span>
+      </div>
+      <div class="ep-row-bot">
+        <span${hiV}>${(vd.V||0).toLocaleString()}票(第${rkV[v]}名)</span>
+        <span${hiR}>${((vd.R||0)*100).toFixed(1)}%(第${rkR[v]}名)</span>
+        <span${hiT}>催${((vd.T||0)*100).toFixed(1)}%(第${rkT[v]}名)</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 全區加總摘要
+  const totV=villages.reduce((s,v)=>s+(valueMap[v].V||0),0);
+  const totVpop=villages.reduce((s,v)=>s+(valueMap[v].vpop||0),0);
+  const totValid=villages.reduce((s,v)=>s+(valueMap[v].valid||0),0);
+
+  const ts=(t)=>curPanelTab===t?'background:var(--accent);border-color:var(--accent);color:#fff':'';
+  return`<div class="sidebar-section">
+    <div class="sidebar-title">${el.label}</div>
+    <div class="cand-hero" style="color:${cand.dc||cand.color}">${cand.name}</div>
+    <div class="cand-total">全區合計 ${totV.toLocaleString()}票 · 得票率 ${(totV/totValid*100).toFixed(2)}% · 催票率 ${(totV/totVpop*100).toFixed(2)}%</div>
   </div>
   <div class="sidebar-section">
-    <div class="top-section"><div class="top-section-title">得票數</div>${top7V.join('')}</div>
-    <div class="top-section"><div class="top-section-title">得票率</div>${top7R.join('')}</div>
-    <div class="top-section"><div class="top-section-title">催票率</div>${top7T.join('')}</div>
+    <div class="ep-tab-bar">
+      <button class="fbtn" style="${ts('V')}" onclick="setPanelTab('V')">得票數</button>
+      <button class="fbtn" style="${ts('R')}" onclick="setPanelTab('R')">得票率</button>
+      <button class="fbtn" style="${ts('T')}" onclick="setPanelTab('T')">催票率</button>
+      <span style="font-size:11px;color:var(--muted);margin-left:3px">前10名</span>
+    </div>
+    ${rows}
   </div>`;
 }
 
@@ -584,6 +632,33 @@ function renderVillage(props){
         const rkV=getElectionRank('V',village);
         const rkR=getElectionRank('R',village);
         const rkT=getElectionRank('T',village);
+
+        // 個別候選人：顯示全區總票 + 名次
+        const isIndividual=selCand&&!selCand.name.includes('合計');
+        let candHeroHTML='';
+        if(isIndividual){
+          const totV=Object.values(valueMap).reduce((s,d)=>s+(d.V||0),0);
+          const totVpop=Object.values(valueMap).reduce((s,d)=>s+(d.vpop||0),0);
+          const totValid=Object.values(valueMap).reduce((s,d)=>s+(d.valid||0),0);
+          candHeroHTML=`<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:8px;border-left:4px solid ${selCand.color}">
+            <div style="font-size:20px;font-weight:700;color:${selCand.dc||selCand.color};margin-bottom:6px">${selCand.name}</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap">
+              <div style="text-align:center;flex:1;min-width:60px">
+                <div style="font-size:18px;font-weight:700;color:var(--text)">${totV.toLocaleString()}</div>
+                <div style="font-size:10px;color:var(--muted)">全區總票</div>
+              </div>
+              <div style="text-align:center;flex:1;min-width:60px">
+                <div style="font-size:18px;font-weight:700;color:var(--accent)">第${rkV}名</div>
+                <div style="font-size:10px;color:var(--muted)">得票數排名</div>
+              </div>
+              <div style="text-align:center;flex:1;min-width:60px">
+                <div style="font-size:18px;font-weight:700;color:var(--text)">${(totV/totValid*100).toFixed(1)}%</div>
+                <div style="font-size:10px;color:var(--muted)">全區得票率</div>
+              </div>
+            </div>
+          </div>`;
+        }
+
         const bars=el.candidates.map(c=>{
           const v2=c.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0);
           const pct=(v2/valid*100).toFixed(1);
@@ -596,26 +671,27 @@ function renderVillage(props){
           </div>`;
         }).join('');
         elHTML=`<div class="sidebar-section">
-          <div class="sidebar-title">🗳️ ${el.label}・${selCand?.name||''}</div>
+          <div class="sidebar-title">🗳️ ${el.label}</div>
+          ${candHeroHTML}
           <div class="stat-row">
             <span class="stat-label">得票數</span>
             <span class="stat-val-block">
               <span class="stat-value">${selVotes.toLocaleString()} 票</span>
-              <span class="stat-sub rank-badge">(${rkV}/86)</span>
+              <span class="stat-sub rank-badge">第${rkV}名</span>
             </span>
           </div>
           <div class="stat-row">
             <span class="stat-label">得票率</span>
             <span class="stat-val-block">
               <span class="stat-value">${(selVotes/valid*100).toFixed(2)}%</span>
-              <span class="stat-sub rank-badge">(${rkR}/86)</span>
+              <span class="stat-sub rank-badge">第${rkR}名</span>
             </span>
           </div>
           <div class="stat-row">
             <span class="stat-label">催票率</span>
             <span class="stat-val-block">
               <span class="stat-value">${(selVotes/vpop*100).toFixed(2)}%</span>
-              <span class="stat-sub rank-badge">(${rkT}/86)</span>
+              <span class="stat-sub rank-badge">第${rkT}名</span>
             </span>
           </div>
         </div>
@@ -636,14 +712,14 @@ function renderVillage(props){
       <span class="stat-label">最新人口</span>
       <span class="stat-val-block">
         <span class="stat-value">${pop26} 人</span>
-        <span class="stat-sub rank-badge">(${pop26rk}/86)</span>
+        <span class="stat-sub rank-badge">第${pop26rk}名</span>
       </span>
     </div>
     <div class="stat-row">
       <span class="stat-label">人口增減</span>
       <span class="stat-val-block">
         <span class="stat-value ${pdCls}">${pdStr} 人</span>
-        <span class="stat-sub rank-badge">(${pdrk}/86)</span>
+        <span class="stat-sub rank-badge">第${pdrk}名</span>
       </span>
     </div>
   </div>${elHTML}`;
@@ -652,32 +728,9 @@ function renderVillage(props){
 // ═══════════════════════════════════════════════════════
 // AI 分析
 // ═══════════════════════════════════════════════════════
-async function triggerAI(){
-  const aiEl=document.getElementById('ai-content');
-  if(!aiEl)return;
-  const el=ELECTIONS[curElection];
-  const cand=el?.candidates.find(c=>c.key===curCandidate);
-  if(!el||!cand)return;
-  const villages=Object.keys(valueMap);
-  if(!villages.length)return;
-  const byV=[...villages].sort((a,b)=>valueMap[b].V-valueMap[a].V);
-  const byR=[...villages].sort((a,b)=>valueMap[b].R-valueMap[a].R);
-  const byT=[...villages].sort((a,b)=>valueMap[b].T-valueMap[a].T);
-  const prompt=`你是高雄三民區選舉地圖助手，用繁體中文寫1-2句，指出三個指標第1名里名。不要列名單。
-選舉：${el.label}，候選人：${cand.name}
-得票數第1：${byV[0]}（${valueMap[byV[0]].V.toLocaleString()}票）
-得票率第1：${byR[0]}（${(valueMap[byR[0]].R*100).toFixed(2)}%）
-催票率第1：${byT[0]}（${(valueMap[byT[0]].T*100).toFixed(2)}%）`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
-    const d=await res.json();
-    const txt=d.content?.find(c=>c.type==='text')?.text||'';
-    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${txt||'（分析完成）'}</div>`;
-  }catch(e){
-    const fb=`得票數最高：<strong>${byV[0]}</strong>（${valueMap[byV[0]].V.toLocaleString()}票），得票率最高：<strong>${byR[0]}</strong>（${(valueMap[byR[0]].R*100).toFixed(2)}%），催票率最高：<strong>${byT[0]}</strong>（${(valueMap[byT[0]].T*100).toFixed(2)}%）`;
-    if(aiEl)aiEl.innerHTML=`<div class="ai-summary">${fb}。</div>`;
-  }
+function triggerAI(){
+  // AI API 無法在靜態網站直接呼叫（CORS/金鑰限制）
+  // 摘要已整合於面板標題，不再需要此函數
 }
 
 // ═══════════════════════════════════════════════════════
@@ -876,25 +929,80 @@ function appendMsg(role,text){
   div.className='msg '+role;div.textContent=text;
   box.appendChild(div);box.scrollTop=box.scrollHeight;
 }
-async function sendChat(){
+function sendChat(){
   if(chatLoading)return;
   const input=document.getElementById('chat-input');
   const q=input.value.trim();if(!q)return;
   input.value='';appendMsg('user',q);
   chatLoading=true;document.getElementById('chat-send').disabled=true;
-  chatHistory.push({role:'user',content:q});
-  const elInfo=curYear!=='pop'&&curElection?`當前選舉：${ELECTIONS[curElection]?.label}，候選人：${ELECTIONS[curElection]?.candidates.find(c=>c.key===curCandidate)?.name}`:'人口模式';
-  const topData=Object.entries(valueMap).sort((a,b)=>b[1].V-a[1].V).slice(0,20).map(([v,d])=>({里:v,得票:d.V,率:`${(d.R*100).toFixed(1)}%`,催:`${(d.T*100).toFixed(1)}%`}));
-  const sys=`你是高雄三民區選舉地圖助手。${elInfo}。只根據以下資料回答，繁體中文，簡短精確。\n資料(前20里)：${JSON.stringify(topData)}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:sys,messages:chatHistory.slice(-6)})});
-    const d=await res.json();
-    const txt=d.content?.find(c=>c.type==='text')?.text||'';
-    chatHistory.push({role:'assistant',content:txt});
-    appendMsg('assistant',txt||'抱歉，無法取得回答。');
-  }catch(e){appendMsg('assistant','連線失敗，請稍後再試。');}
+
+  // 本地資料查詢（靜態網站無法呼叫外部 AI API）
+  const ans=localQuery(q);
+  appendMsg('assistant',ans);
+
   chatLoading=false;document.getElementById('chat-send').disabled=false;
+}
+
+function localQuery(q){
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+  const candName=cand?.name||'';
+  const elLabel=el?.label||'';
+  const villages=Object.keys(valueMap);
+  if(!villages.length) return '請先選擇選舉與候選人。';
+
+  const byV=[...villages].sort((a,b)=>valueMap[b].V-valueMap[a].V);
+  const byR=[...villages].sort((a,b)=>valueMap[b].R-valueMap[a].R);
+  const byT=[...villages].sort((a,b)=>valueMap[b].T-valueMap[a].T);
+  const totV=villages.reduce((s,v)=>s+valueMap[v].V,0);
+  const totVpop=villages.reduce((s,v)=>s+valueMap[v].vpop,0);
+  const totValid=villages.reduce((s,v)=>s+valueMap[v].valid,0);
+
+  const Q=q.toLowerCase();
+
+  // 最高/第一
+  if(Q.match(/最高|第一|最多|冠軍|第1/)){
+    if(Q.match(/催票/)) return `${elLabel}・${candName} 催票率最高：${byT[0]}（${(valueMap[byT[0]].T*100).toFixed(2)}%）`;
+    if(Q.match(/得票率|比例/)) return `${elLabel}・${candName} 得票率最高：${byR[0]}（${(valueMap[byR[0]].R*100).toFixed(2)}%）`;
+    return `${elLabel}・${candName} 得票數最高：${byV[0]}（${valueMap[byV[0]].V.toLocaleString()}票）`;
+  }
+  // 最低/最差
+  if(Q.match(/最低|最少|最後|墊底/)){
+    if(Q.match(/催票/)) return `${elLabel}・${candName} 催票率最低：${byT[byT.length-1]}（${(valueMap[byT[byT.length-1]].T*100).toFixed(2)}%）`;
+    if(Q.match(/得票率/)) return `${elLabel}・${candName} 得票率最低：${byR[byR.length-1]}（${(valueMap[byR[byR.length-1]].R*100).toFixed(2)}%）`;
+    return `${elLabel}・${candName} 得票數最低：${byV[byV.length-1]}（${valueMap[byV[byV.length-1]].V.toLocaleString()}票）`;
+  }
+  // 前N名
+  const topMatch=Q.match(/前(\d+)/);
+  if(topMatch){
+    const n=Math.min(+topMatch[1],10);
+    if(Q.match(/催票/)) return `催票率前${n}名：`+byT.slice(0,n).map((v,i)=>`${i+1}.${v}(${(valueMap[v].T*100).toFixed(1)}%)`).join('、');
+    if(Q.match(/得票率/)) return `得票率前${n}名：`+byR.slice(0,n).map((v,i)=>`${i+1}.${v}(${(valueMap[v].R*100).toFixed(1)}%)`).join('、');
+    return `得票數前${n}名：`+byV.slice(0,n).map((v,i)=>`${i+1}.${v}(${valueMap[v].V.toLocaleString()}票)`).join('、');
+  }
+  // 特定里查詢
+  const villageMatch=RAW.features.find(f=>q.includes(f.properties.village));
+  if(villageMatch){
+    const v=villageMatch.properties.village;
+    const vd=valueMap[v];
+    if(!vd) return `${v} 目前沒有資料。`;
+    const rkV=byV.indexOf(v)+1;
+    const rkR=byR.indexOf(v)+1;
+    const rkT=byT.indexOf(v)+1;
+    return `${v}・${candName}：得票 ${vd.V.toLocaleString()}票（第${rkV}名）、得票率 ${(vd.R*100).toFixed(2)}%（第${rkR}名）、催票率 ${(vd.T*100).toFixed(2)}%（第${rkT}名）`;
+  }
+  // 總計
+  if(Q.match(/總計|合計|全區|總票/)){
+    return `${elLabel}・${candName} 全區合計 ${totV.toLocaleString()}票、得票率 ${(totV/totValid*100).toFixed(2)}%、催票率 ${(totV/totVpop*100).toFixed(2)}%`;
+  }
+  // 人口
+  if(Q.match(/人口|選舉人/)){
+    const sorted=[...RAW.features].sort((a,b)=>(b.properties['pop2026.02']||0)-(a.properties['pop2026.02']||0));
+    return `人口最多的里：${sorted.slice(0,3).map(f=>`${f.properties.village}(${(f.properties['pop2026.02']||0).toLocaleString()}人)`).join('、')}`;
+  }
+  // 預設回覆
+  return `目前顯示：${elLabel}・${candName}。
+可以問：「哪個里得票最高」「前5名催票率」「鼎泰里的數據」「全區合計」等。`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -963,11 +1071,4 @@ function onEachFeature(feature,layer){
   }catch(e){
     if(loadingEl.parentNode)loadingEl.parentNode.removeChild(loadingEl);
     const err=document.createElement('div');
-    err.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1rem;z-index:9999;background:rgba(180,0,0,.85);padding:1rem 2rem;border-radius:8px;text-align:center';
-    err.textContent='地圖資料載入失敗：'+e.message;
-    document.body.appendChild(err);
-  }
-})();
-</script>
-</body>
-</html>
+    err.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:1rem;z-index:
