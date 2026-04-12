@@ -124,9 +124,10 @@
     .top5-icon{background:transparent;border:none;}
     .top5-badge{
       background:#ffe500;color:#0f1117;font-size:10px;font-weight:900;
-      border-radius:50%;width:20px;height:20px;display:flex;align-items:center;
+      border-radius:50%;width:22px;height:22px;display:flex;align-items:center;
       justify-content:center;border:2px solid #fff;
-      box-shadow:0 2px 6px rgba(0,0,0,0.7);cursor:pointer;
+      box-shadow:0 0 0 2px #ffe500,0 2px 8px rgba(0,0,0,0.8);
+      cursor:pointer;pointer-events:auto;
     }
     .bld-popup{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#1a1d27;line-height:1.6;}
     .bld-popup b{color:#4f7cff;}
@@ -147,7 +148,7 @@
     .ep-rank{font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0;min-width:38px;}
     .ep-village{font-size:14px;font-weight:600;flex:1;color:var(--text);}
     .ep-vpop{font-size:10px;color:var(--muted);flex-shrink:0;}
-    .ep-bar-wrap{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin:3px 0 3px 43px;overflow:hidden;}
+    .ep-bar-wrap{height:7px;background:rgba(255,255,255,0.10);border-radius:3px;margin:3px 0 4px 43px;overflow:hidden;}
     .ep-bar-fill{height:100%;border-radius:2px;transition:width 0.4s;}
     .ep-row-bot{display:flex;gap:6px;font-size:11px;color:var(--muted);padding-left:43px;flex-wrap:wrap;}
     .ep-hi{color:var(--text);font-weight:700;}
@@ -205,6 +206,7 @@
     <button class="fbtn y-btn" data-year="2022" onclick="setYear('2022',this)">2022</button>
     <button class="fbtn y-btn" data-year="2020" onclick="setYear('2020',this)">2020</button>
     <button class="fbtn y-btn" data-year="pop"  onclick="setYear('pop',this)">人口資訊</button>
+    <button class="fbtn y-btn" data-year="overview" onclick="setYear('overview',this)">整體概況</button>
   </div>
   <div class="filter-row" id="row-election">
     <span class="filter-label">選舉</span>
@@ -428,6 +430,7 @@ function GRAY(){return{isOverview:true,displayField:'_pop_diff',breaks:[-9999],c
 
 function getActiveScale(){
   if(curYear==='pop')return POP_SCALE;
+  if(curYear==='overview')return GRAY();
   return buildScaleFromMap();
 }
 
@@ -536,6 +539,7 @@ function renderPanel(){
   }
   updateLegend(curScale,null);
   if(curYear==='pop'){el.innerHTML=renderPopPanel();return;}
+  if(curYear==='overview'){el.innerHTML=renderOverviewPanel();return;}
   if(!curElection||!curCandidate||!EDATA_CACHE[ELECTIONS[curElection]?.file]){
     el.innerHTML=`<div class="sidebar-section"><div class="info-placeholder">載入資料中...</div></div>`;
     return;
@@ -578,6 +582,63 @@ function renderPopPanel(){
     row7(byPop,p=>({val:(p['pop2026.02']||0).toLocaleString()+'人',color:'var(--accent)'}))+`</div>`+
     `<div class="sidebar-section"><div class="sidebar-title">人口增減 前7里</div>`+
     row7(byDiff,p=>{const d=p._pop_diff||0;return{val:(d>0?'+':'')+d.toLocaleString()+'人',color:d>0?'#22c55e':'#ef4444'};})+'</div>';
+}
+
+function renderOverviewPanel(){
+  // 聚合所有已載入選舉的全三民區統計
+  const rows=[];
+  const seenFile=new Set();
+  Object.entries(ELECTIONS).forEach(([elId,elDef])=>{
+    const cached=EDATA_CACHE[elDef.file];
+    if(!cached)return;
+    const fileKey=elId; // 每個 elId 對應一個獨立選舉
+    if(seenFile.has(fileKey))return;
+    seenFile.add(fileKey);
+    // 全區加總
+    let totVpop=0,totVoted=0,totValid=0;
+    Object.values(cached.villages||{}).forEach(vr=>{
+      let r=vr;
+      if(elDef.dataKey&&r)r=r[elDef.dataKey];
+      if(!r)return;
+      totVpop+=(r.vpop||0);
+      totVoted+=(r.voted||0);
+      totValid+=(r.valid||0);
+    });
+    if(!totVpop)return;
+    rows.push({
+      year:elDef.year,label:elDef.label,
+      vpop:totVpop,voted:totVoted,valid:totValid,
+      turnout:(totVoted/totVpop*100).toFixed(1),
+      validRate:(totValid/totVpop*100).toFixed(1)
+    });
+  });
+  rows.sort((a,b)=>b.year-a.year||0);
+  if(!rows.length){
+    return`<div class="sidebar-section"><div class="info-placeholder">請先點選各選舉載入資料。</div></div>`;
+  }
+  const maxValid=Math.max(...rows.map(r=>r.valid));
+  const items=rows.map((r,i)=>{
+    const barW=(r.valid/maxValid*100).toFixed(1);
+    return`<div style="padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${r.year} ${r.label}</span>
+        <span style="font-size:11px;color:var(--accent)">投票率 ${r.turnout}%</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:4px">
+        <div style="height:100%;width:${barW}%;background:var(--accent);border-radius:4px;opacity:0.85"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+        <span>有效票 ${r.valid.toLocaleString()}</span>
+        <span>選舉人 ${r.vpop.toLocaleString()}</span>
+        <span>有效票率 ${r.validRate}%</span>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="sidebar-section">
+    <div class="sidebar-title">📊 全三民區整體概況</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">長條圖以有效票數為基準。需先點選各年份選舉以載入資料。</div>
+    ${items}
+  </div>`;
 }
 
 function setPanelTab(t){
@@ -638,21 +699,6 @@ function renderElectionPanel(){
   const totVpop=villages.reduce((s,v)=>s+(valueMap[v].vpop||0),0);
   const totValid=villages.reduce((s,v)=>s+(valueMap[v].valid||0),0);
 
-  // 票倉：絕對得票前5名
-  const top5stronghold=byV.slice(0,5);
-  const strongholdHTML=top5stronghold.map((v,i)=>{
-    const vd=valueMap[v];
-    const barW=((vd.V||0)/(valueMap[byV[0]]?.V||1)*100).toFixed(1);
-    return`<div class="ep-row" onmouseenter="highlightVillage('${v}',true)" onmouseleave="highlightVillage('${v}',false)" onclick="goToVillage('${v}')">
-      <div class="ep-row-top">
-        <span class="ep-rank" style="color:#ffe500">🏆${i+1}</span>
-        <span class="ep-village">${v}</span>
-        <span class="ep-vpop">${(vd.V||0).toLocaleString()}票</span>
-      </div>
-      <div class="ep-bar-wrap"><div class="ep-bar-fill" style="width:${barW}%;background:${cand.color}"></div></div>
-    </div>`;
-  }).join('');
-
   const ts=(t)=>curPanelTab===t?'background:var(--accent);border-color:var(--accent);color:#fff':'';
   // 熱冷區分析（只在有資料時計算）
   const clusterHTML=curPanelTab==='C'?`<div class="sidebar-section">${renderClusterAnalysis()}</div>`:'';
@@ -671,10 +717,6 @@ function renderElectionPanel(){
     <div class="sidebar-title">${el.label}</div>
     <div class="cand-hero" style="color:${cand.dc||cand.color}">${cand.name}</div>
     <div class="cand-total">全區合計 ${totV.toLocaleString()}票 · 得票率 ${(totV/totValid*100).toFixed(2)}% · 催票率 ${(totV/totVpop*100).toFixed(2)}%</div>
-  </div>
-  <div class="sidebar-section">
-    <div class="sidebar-title" style="margin-bottom:6px">🏆 票倉（得票數前5名）</div>
-    ${strongholdHTML}
   </div>
   <div class="sidebar-section">
     <div class="ep-tab-bar">
@@ -791,37 +833,47 @@ function renderVillage(props){
     }
   }
 
-  // 歷史投票概況（從已載入的 EDATA_CACHE 取得）
+  // 歷次投票概況（遍歷所有 EDATA_CACHE，去除重複選舉）
   let histHTML='';
   const histRows=[];
+  const seenElId=new Set();
   Object.entries(ELECTIONS).forEach(([elId,elDef])=>{
     const cached=EDATA_CACHE[elDef.file];
     if(!cached)return;
+    // 同一 file 可能有 P/L 兩個選舉，用 elId 做 key
     let vRow=cached.villages?.[village];
     if(!vRow)return;
     if(elDef.dataKey)vRow=vRow[elDef.dataKey];
     if(!vRow||!vRow.vpop||!vRow.valid)return;
-    const turnout=(vRow.voted/vRow.vpop*100).toFixed(1);
-    // 催票率：以該選舉中得票最多的候選人為基準
+    const turnoutRate=vRow.voted?(vRow.voted/vRow.vpop*100).toFixed(1):'－';
+    // 用主要候選人計算催票率
     const mainCand=elDef.candidates[0];
     const mainVotes=mainCand?mainCand.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0):0;
-    const turnoutRate=(vRow.voted/vRow.vpop*100).toFixed(1);
-    histRows.push({label:elDef.label,year:elDef.year,valid:vRow.valid,vpop:vRow.vpop,voted:vRow.voted,turnout:turnoutRate});
+    const mainTurnout=(mainVotes/vRow.vpop*100).toFixed(1);
+    histRows.push({
+      key:elId,label:elDef.label,year:elDef.year,
+      valid:vRow.valid,vpop:vRow.vpop,voted:vRow.voted||0,
+      turnout:turnoutRate,mainTurnout,mainCandName:mainCand?.name||''
+    });
   });
+  // 依年份倒序排列
+  histRows.sort((a,b)=>b.year-a.year||0);
   if(histRows.length){
-    // 以 valid 為基準的長條
     const maxValid=Math.max(...histRows.map(r=>r.valid));
     const histItems=histRows.map(r=>{
       const barW=(r.valid/maxValid*100).toFixed(1);
-      return`<div style="padding:5px 0;border-bottom:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-          <span style="color:var(--text)">${r.year} ${r.label}</span>
-          <span style="color:var(--muted)">投票率 ${r.turnout}%</span>
+      return`<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:3px">
+          <span style="color:var(--text);font-weight:600">${r.year} ${r.label}</span>
+          <span style="color:var(--muted);font-size:11px">投票率 ${r.turnout}%</span>
         </div>
-        <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-bottom:2px">
-          <div style="height:100%;width:${barW}%;background:var(--accent);border-radius:2px"></div>
+        <div style="height:7px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:3px">
+          <div style="height:100%;width:${barW}%;background:var(--accent);border-radius:3px;opacity:0.85"></div>
         </div>
-        <div style="font-size:11px;color:var(--muted)">有效票 ${r.valid.toLocaleString()} ／ 選舉人 ${r.vpop.toLocaleString()}</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
+          <span>有效票 ${r.valid.toLocaleString()} ／ 選舉人 ${r.vpop.toLocaleString()}</span>
+          <span>${r.mainCandName} 催 ${r.mainTurnout}%</span>
+        </div>
       </div>`;
     }).join('');
     histHTML=`<div class="sidebar-section">
@@ -834,19 +886,9 @@ function renderVillage(props){
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
     <div class="info-village">${village||'-'}</div>
     <div class="info-area">${props.area||''} · ${props.district||''}</div>
-    <div class="stat-row" style="margin-top:6px">
-      <span class="stat-label">最新人口</span>
-      <span class="stat-val-block">
-        <span class="stat-value">${pop26} 人</span>
-        <span class="stat-sub rank-badge">第${pop26rk}名</span>
-      </span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-label">人口增減</span>
-      <span class="stat-val-block">
-        <span class="stat-value ${pdCls}">${pdStr} 人</span>
-        <span class="stat-sub rank-badge">第${pdrk}名</span>
-      </span>
+    <div style="display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--muted)">
+      <span>👥 ${pop26}人 <span style="color:var(--accent)">第${pop26rk}名</span></span>
+      <span class="${pdCls}">${pd>0?'▲':'▼'}${Math.abs(pd)}人 <span style="color:var(--accent)">第${pdrk}名</span></span>
     </div>
   </div>${elHTML}${histHTML}`;
 }
@@ -1030,9 +1072,15 @@ function setYear(year,btn){
       if(el?.candidates.length)curCandidate=el.candidates[0].key;
     }
   }
-  renderElectionRow(year);
-  if(year!=='pop'&&curElection)renderCandidateRow(ELECTIONS[curElection]?.candidates||[]);
-  else document.getElementById('row-candidate').innerHTML=`<span class="filter-label">候選人</span>`;
+  if(year==='overview'||year==='pop'){
+    document.getElementById('row-election').innerHTML=`<span class="filter-label">選舉</span>`;
+    document.getElementById('row-candidate').innerHTML=`<span class="filter-label">候選人</span>`;
+    document.querySelectorAll('.m-btn').forEach(b=>{b.disabled=true;});
+  }else{
+    renderElectionRow(year);
+    if(curElection)renderCandidateRow(ELECTIONS[curElection]?.candidates||[]);
+    document.querySelectorAll('.m-btn').forEach(b=>{b.disabled=false;});
+  }
   applyUpdate();
 }
 
@@ -1314,11 +1362,14 @@ function renderClusterAnalysis(){
   const n=villages.length;
   const sorted=[...villages].sort((a,b)=>(valueMap[b].V||0)-(valueMap[a].V||0));
 
-  // 熱區：前25%；冷區：後25%
+  // 熱冷區依當前「數據」指標（R=得票率 T=催票率，不用絕對票數）
+  const clusterMetric=(curMetric==='T')?'T':'R';
+  const sortedCluster=[...villages].sort((a,b)=>(valueMap[b][clusterMetric]||0)-(valueMap[a][clusterMetric]||0));
   const hotN=Math.max(3,Math.floor(n*0.25));
   const coldN=Math.max(3,Math.floor(n*0.25));
-  const hotSet=new Set(sorted.slice(0,hotN));
-  const coldSet=new Set(sorted.slice(n-coldN));
+  const hotSet=new Set(sortedCluster.slice(0,hotN));
+  const coldSet=new Set(sortedCluster.slice(n-coldN));
+  const metricLabel=clusterMetric==='T'?'催票率':'得票率';
 
   const adj=buildAdjacency();
   const hotClusters=findClusters(hotSet);
@@ -1377,7 +1428,7 @@ function renderClusterAnalysis(){
   }).join('');
 
   return`<div style="margin-bottom:10px;font-size:12px;color:var(--muted);line-height:1.7;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px">
-    定義：<b style="color:#ef4444">熱區</b> = 得票數前25%里（共${hotN}里），<b style="color:#3b82f6">冷區</b> = 後25%里（共${coldN}里）。<br>
+    定義：<b style="color:#ef4444">熱區</b> = ${metricLabel}前25%里（共${hotN}里），<b style="color:#3b82f6">冷區</b> = 後25%里（共${coldN}里）。<br>
     相連的同類里合併為一群，⚡交界里代表熱冷相鄰的邊界。
   </div>
   <div style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px">🔴 熱區（高票聚落）</div>
@@ -1407,9 +1458,9 @@ function updateTop5Icons(){
     const icon=L.divIcon({
       className:'top5-icon',
       html:`<div class="top5-badge">${i+1}</div>`,
-      iconSize:[20,20],iconAnchor:[10,10]
+      iconSize:[22,22],iconAnchor:[11,11]
     });
-    const marker=L.marker([lat,lng],{icon,zIndexOffset:1000});
+    const marker=L.marker([lat,lng],{icon,zIndexOffset:9999,pane:'tooltipPane'});
     const val=valueMap[v];
     const metricLabel=curMetric==='V'?`${(val.V||0).toLocaleString()}票`:curMetric==='R'?`${((val.R||0)*100).toFixed(1)}%`:`催${((val.T||0)*100).toFixed(1)}%`;
     marker.bindTooltip(`第${i+1}名 ${v}（${metricLabel}）`,{direction:'top',offset:[0,-5],className:'village-label'});
