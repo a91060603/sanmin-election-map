@@ -110,6 +110,24 @@
     .ai-send{padding:5px 11px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;}
     .ai-send:disabled{opacity:0.4;cursor:not-allowed;}
 
+    /* ── 熱冷區 ── */
+    .cluster-section{margin-bottom:14px;}
+    .cluster-header{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+    .cluster-badge{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+    .cluster-title{font-size:13px;font-weight:700;color:var(--text);}
+    .cluster-count{font-size:11px;color:var(--muted);}
+    .cluster-row{display:flex;align-items:center;gap:4px;padding:3px 0;font-size:12px;cursor:pointer;}
+    .cluster-row:hover{color:var(--accent);}
+    .cluster-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .boundary-row{font-size:11px;color:var(--muted);padding:2px 0 2px 12px;border-left:2px solid var(--border);margin-top:4px;}
+    /* ── Top5 icons ── */
+    .top5-icon{background:transparent;border:none;}
+    .top5-badge{
+      background:#ffe500;color:#0f1117;font-size:10px;font-weight:900;
+      border-radius:50%;width:20px;height:20px;display:flex;align-items:center;
+      justify-content:center;border:2px solid #fff;
+      box-shadow:0 2px 6px rgba(0,0,0,0.7);cursor:pointer;
+    }
     .bld-popup{font-family:'Noto Sans TC',sans-serif;font-size:13px;color:#1a1d27;line-height:1.6;}
     .bld-popup b{color:#4f7cff;}
     .bld-toggle{position:absolute;bottom:80px;left:10px;z-index:1000;background:rgba(22,25,43,0.93);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 9px;font-size:11px;color:var(--muted);cursor:pointer;display:none;white-space:nowrap;user-select:none;}
@@ -129,23 +147,40 @@
     .ep-rank{font-size:11px;color:var(--accent);font-weight:700;flex-shrink:0;min-width:38px;}
     .ep-village{font-size:14px;font-weight:600;flex:1;color:var(--text);}
     .ep-vpop{font-size:10px;color:var(--muted);flex-shrink:0;}
+    .ep-bar-wrap{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin:3px 0 3px 43px;overflow:hidden;}
+    .ep-bar-fill{height:100%;border-radius:2px;transition:width 0.4s;}
     .ep-row-bot{display:flex;gap:6px;font-size:11px;color:var(--muted);padding-left:43px;flex-wrap:wrap;}
     .ep-hi{color:var(--text);font-weight:700;}
     .ep-tab-bar{display:flex;gap:5px;margin-bottom:10px;align-items:center;}
     .ep-tab-bar .fbtn{flex:1;}
     .cand-hero{font-size:17px;font-weight:700;color:var(--text);margin:4px 0 2px;}
     .cand-total{font-size:12px;color:var(--muted);margin-bottom:8px;}
+    .filter-toggle{display:none;} /* 桌面隱藏 */
     @media(max-width:640px){
       .main{flex-direction:column;flex:1;min-height:0;overflow:hidden;}
-      #map{flex:none;height:38vh;width:100%;}
+      #map{flex:none;height:40vh;width:100%;}
       .sidebar{width:100%;max-width:none;min-width:0;flex:1;min-height:0;border-left:none;border-top:1px solid var(--border);flex-direction:column;overflow:hidden;}
       .sidebar-inner{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
       .sidebar-section{min-width:unset;max-width:none;border-right:none;border-bottom:1px solid var(--border);}
       .ai-chat-area{min-width:unset;border-right:none;border-top:2px solid var(--border);flex-shrink:0;max-height:120px;}
-      .locate-btn{bottom:42vh;left:8px;}
+      .locate-btn{bottom:44vh;left:8px;}
       #legend-overlay{bottom:auto;top:6px;right:6px;}
       .filter-row{padding:4px 10px;gap:4px;}
       .fbtn{padding:4px 8px;font-size:11px;}
+      /* 折疊按鈕：只在手機顯示 */
+      .filter-toggle{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:5px 14px;cursor:pointer;user-select:none;
+        font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);
+        background:var(--panel);flex-shrink:0;
+      }
+      .filter-toggle:hover{color:var(--text);}
+      .filter-toggle-arrow{font-size:10px;transition:transform 0.2s;}
+      /* 折疊狀態：只顯示 row-year，其他隱藏 */
+      .filter-area.collapsed .filter-row:not(#row-year){display:none;}
+      .filter-area.collapsed .filter-toggle .filter-toggle-arrow{transform:rotate(180deg);}
+      /* row-year 在折疊模式下也要顯示 */
+      .filter-area.collapsed #row-year{display:flex;}
     }
   </style>
 </head>
@@ -159,7 +194,11 @@
     </a>
   </div>
 </header>
-<div class="filter-area">
+<div class="filter-area" id="filter-area">
+  <div class="filter-toggle" onclick="toggleFilterArea()">
+    <span id="filter-toggle-label">▲ 篩選條件（點擊收起）</span>
+    <span class="filter-toggle-arrow" id="filter-arrow">▲</span>
+  </div>
   <div class="filter-row" id="row-year">
     <span class="filter-label">年分</span>
     <button class="fbtn y-btn" data-year="2024" onclick="setYear('2024',this)">2024</button>
@@ -176,7 +215,7 @@
     <!-- 動態產生 -->
   </div>
   <div class="filter-row" id="row-metric">
-    <span class="filter-label">熱力</span>
+    <span class="filter-label">數據</span>
     <button class="fbtn m-btn active" data-metric="V" onclick="setMetric('V',this)">得票數</button>
     <button class="fbtn m-btn" data-metric="R" onclick="setMetric('R',this)">得票率</button>
     <button class="fbtn m-btn" data-metric="T" onclick="setMetric('T',this)">催票率</button>
@@ -426,9 +465,9 @@ function tooltipHTML(props){
       const vd=valueMap[props.village];
       if(vd){
         const rkV=getElectionRank('V',props.village);
-        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${vd.V.toLocaleString()}(${rkV}/86)</span>`;
-        if(curMetric==='R'){const rkR=getElectionRank('R',props.village);lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${(vd.R*100).toFixed(1)}%(${rkR}/86)</span>`;}
-        if(curMetric==='T'){const rkT=getElectionRank('T',props.village);lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${(vd.T*100).toFixed(1)}%(${rkT}/86)</span>`;}
+        lines+=`<span style="display:block;font-size:${sfs}px">得票數 ${vd.V.toLocaleString()}(第${rkV}名)</span>`;
+        if(curMetric==='R'){const rkR=getElectionRank('R',props.village);lines+=`<span style="display:block;font-size:${sfs}px">得票率 ${(vd.R*100).toFixed(1)}%(第${rkR}名)</span>`;}
+        if(curMetric==='T'){const rkT=getElectionRank('T',props.village);lines+=`<span style="display:block;font-size:${sfs}px">催票率 ${(vd.T*100).toFixed(1)}%(第${rkT}名)</span>`;}
       }
     }
   }
@@ -543,6 +582,7 @@ function renderPopPanel(){
 
 function setPanelTab(t){
   curPanelTab=t;
+  if(t!=='C'&&clusterLayer){map.removeLayer(clusterLayer);clusterLayer=null;}
   renderPanel();
 }
 
@@ -564,12 +604,17 @@ function renderElectionPanel(){
 
   const sorted=curPanelTab==='V'?byV:curPanelTab==='R'?byR:byT;
 
+  // 長條圖：以第1名為基準
+  const maxForBar=curPanelTab==='V'?(valueMap[byV[0]]?.V||1):curPanelTab==='R'?(valueMap[byR[0]]?.R||1):(valueMap[byT[0]]?.T||1);
+  const el_color=el?.candidates.find(c=>c.key===curCandidate)?.color||'var(--accent)';
   const rows=sorted.slice(0,10).map((v,i)=>{
     const vd=valueMap[v];
     const vpop=(vd.vpop||0).toLocaleString();
     const hiV=curPanelTab==='V'?' class="ep-hi"':'';
     const hiR=curPanelTab==='R'?' class="ep-hi"':'';
     const hiT=curPanelTab==='T'?' class="ep-hi"':'';
+    const barVal=curPanelTab==='V'?(vd.V||0):curPanelTab==='R'?(vd.R||0):(vd.T||0);
+    const barW=(barVal/maxForBar*100).toFixed(1);
     return`<div class="ep-row"
       onmouseenter="highlightVillage('${v}',true)"
       onmouseleave="highlightVillage('${v}',false)"
@@ -579,6 +624,7 @@ function renderElectionPanel(){
         <span class="ep-village">${v}</span>
         <span class="ep-vpop">選舉人 ${vpop}</span>
       </div>
+      <div class="ep-bar-wrap"><div class="ep-bar-fill" style="width:${barW}%;background:${el_color}"></div></div>
       <div class="ep-row-bot">
         <span${hiV}>${(vd.V||0).toLocaleString()}票(第${rkV[v]}名)</span>
         <span${hiR}>${((vd.R||0)*100).toFixed(1)}%(第${rkR[v]}名)</span>
@@ -592,21 +638,54 @@ function renderElectionPanel(){
   const totVpop=villages.reduce((s,v)=>s+(valueMap[v].vpop||0),0);
   const totValid=villages.reduce((s,v)=>s+(valueMap[v].valid||0),0);
 
+  // 票倉：絕對得票前5名
+  const top5stronghold=byV.slice(0,5);
+  const strongholdHTML=top5stronghold.map((v,i)=>{
+    const vd=valueMap[v];
+    const barW=((vd.V||0)/(valueMap[byV[0]]?.V||1)*100).toFixed(1);
+    return`<div class="ep-row" onmouseenter="highlightVillage('${v}',true)" onmouseleave="highlightVillage('${v}',false)" onclick="goToVillage('${v}')">
+      <div class="ep-row-top">
+        <span class="ep-rank" style="color:#ffe500">🏆${i+1}</span>
+        <span class="ep-village">${v}</span>
+        <span class="ep-vpop">${(vd.V||0).toLocaleString()}票</span>
+      </div>
+      <div class="ep-bar-wrap"><div class="ep-bar-fill" style="width:${barW}%;background:${cand.color}"></div></div>
+    </div>`;
+  }).join('');
+
   const ts=(t)=>curPanelTab===t?'background:var(--accent);border-color:var(--accent);color:#fff':'';
+  // 熱冷區分析（只在有資料時計算）
+  const clusterHTML=curPanelTab==='C'?`<div class="sidebar-section">${renderClusterAnalysis()}</div>`:'';
+  const rankRows=curPanelTab==='C'?'':rows;
+  const rankSection=curPanelTab==='C'?'':`<div class="sidebar-section">
+    <div class="ep-tab-bar">
+      <button class="fbtn" style="${ts('V')}" onclick="setPanelTab('V')">得票數</button>
+      <button class="fbtn" style="${ts('R')}" onclick="setPanelTab('R')">得票率</button>
+      <button class="fbtn" style="${ts('T')}" onclick="setPanelTab('T')">催票率</button>
+      <button class="fbtn" style="${ts('C')}" onclick="setPanelTab('C')">🔴熱冷區</button>
+      <span style="font-size:11px;color:var(--muted);margin-left:3px">前10名</span>
+    </div>
+    ${rankRows}
+  </div>`;
   return`<div class="sidebar-section">
     <div class="sidebar-title">${el.label}</div>
     <div class="cand-hero" style="color:${cand.dc||cand.color}">${cand.name}</div>
     <div class="cand-total">全區合計 ${totV.toLocaleString()}票 · 得票率 ${(totV/totValid*100).toFixed(2)}% · 催票率 ${(totV/totVpop*100).toFixed(2)}%</div>
   </div>
   <div class="sidebar-section">
+    <div class="sidebar-title" style="margin-bottom:6px">🏆 票倉（得票數前5名）</div>
+    ${strongholdHTML}
+  </div>
+  <div class="sidebar-section">
     <div class="ep-tab-bar">
       <button class="fbtn" style="${ts('V')}" onclick="setPanelTab('V')">得票數</button>
       <button class="fbtn" style="${ts('R')}" onclick="setPanelTab('R')">得票率</button>
       <button class="fbtn" style="${ts('T')}" onclick="setPanelTab('T')">催票率</button>
-      <span style="font-size:11px;color:var(--muted);margin-left:3px">前10名</span>
+      <button class="fbtn" style="${ts('C')}" onclick="setPanelTab('C')">🔴熱冷區</button>
     </div>
-    ${rows}
-  </div>`;
+    ${rankRows}
+  </div>
+  ${clusterHTML}`;
 }
 
 function renderVillage(props){
@@ -660,14 +739,21 @@ function renderVillage(props){
           </div>`;
         }
 
-        const bars=el.candidates.map(c=>{
-          const v2=c.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0);
+        // 候選人得票由多到少排序
+        // isIndividual 模式下隱藏合計項目
+        const candWithVotes=el.candidates
+          .filter(c=>!isIndividual||!c.name.includes('合計'))
+          .map(c=>({c,v2:c.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0)}))
+          .sort((a,b)=>b.v2-a.v2);
+        const maxV2=candWithVotes[0]?.v2||1;
+        const bars=candWithVotes.map(({c,v2},rank)=>{
           const pct=(v2/valid*100).toFixed(1);
-          const w=(v2/valid*100).toFixed(1);
+          const barW=(v2/maxV2*100).toFixed(1); // 相對最大值的長條
           const isSel=c.key===curCandidate;
-          return`<div class="party-row${isSel?' sel':''}" onclick="setCandidate('${c.key}')">
-            <div class="pname" style="color:${c.dc||c.color}">${c.name}</div>
-            <div class="pbar-bg"><div class="pbar-fill" style="width:${w}%;background:${c.color}"></div></div>
+          return`<div class="party-row${isSel?' sel':''}" onclick="setCandidate('${c.key}')" style="${isSel?'outline:2px solid '+c.color+';outline-offset:2px;border-radius:5px':''}">
+            <div style="font-size:10px;color:var(--accent);width:22px;flex-shrink:0;font-weight:700">${rank+1}</div>
+            <div class="pname" style="color:${isSel?(c.dc||c.color):'var(--text)'};font-weight:${isSel?'700':'400'}">${c.name}</div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:${barW}%;background:${c.color}"></div></div>
             <div class="pstats">${v2.toLocaleString()} <span style="opacity:0.6">(${pct}%)</span></div>
           </div>`;
         }).join('');
@@ -705,6 +791,45 @@ function renderVillage(props){
     }
   }
 
+  // 歷史投票概況（從已載入的 EDATA_CACHE 取得）
+  let histHTML='';
+  const histRows=[];
+  Object.entries(ELECTIONS).forEach(([elId,elDef])=>{
+    const cached=EDATA_CACHE[elDef.file];
+    if(!cached)return;
+    let vRow=cached.villages?.[village];
+    if(!vRow)return;
+    if(elDef.dataKey)vRow=vRow[elDef.dataKey];
+    if(!vRow||!vRow.vpop||!vRow.valid)return;
+    const turnout=(vRow.voted/vRow.vpop*100).toFixed(1);
+    // 催票率：以該選舉中得票最多的候選人為基準
+    const mainCand=elDef.candidates[0];
+    const mainVotes=mainCand?mainCand.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0):0;
+    const turnoutRate=(vRow.voted/vRow.vpop*100).toFixed(1);
+    histRows.push({label:elDef.label,year:elDef.year,valid:vRow.valid,vpop:vRow.vpop,voted:vRow.voted,turnout:turnoutRate});
+  });
+  if(histRows.length){
+    // 以 valid 為基準的長條
+    const maxValid=Math.max(...histRows.map(r=>r.valid));
+    const histItems=histRows.map(r=>{
+      const barW=(r.valid/maxValid*100).toFixed(1);
+      return`<div style="padding:5px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+          <span style="color:var(--text)">${r.year} ${r.label}</span>
+          <span style="color:var(--muted)">投票率 ${r.turnout}%</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-bottom:2px">
+          <div style="height:100%;width:${barW}%;background:var(--accent);border-radius:2px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">有效票 ${r.valid.toLocaleString()} ／ 選舉人 ${r.vpop.toLocaleString()}</div>
+      </div>`;
+    }).join('');
+    histHTML=`<div class="sidebar-section">
+      <div class="sidebar-title">📊 歷次投票概況</div>
+      ${histItems}
+    </div>`;
+  }
+
   return`<div class="sidebar-section">
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
     <div class="info-village">${village||'-'}</div>
@@ -723,7 +848,7 @@ function renderVillage(props){
         <span class="stat-sub rank-badge">第${pdrk}名</span>
       </span>
     </div>
-  </div>${elHTML}`;
+  </div>${elHTML}${histHTML}`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -795,16 +920,30 @@ function highlightVillage(name,on){
     if(hoveredVillage===name)hoveredVillage=null;
   }
 }
-function goToVillage(name){
+async function goToVillage(name){
   const f=RAW.features.find(f=>f.properties.village===name);
   if(!f)return;
   curVillageProps=f.properties;
   selectVillage(name);
-  renderPanel();
+  renderPanel(); // 先顯示目前資料
   const layer=villageLayerMap[name];
   if(layer)map.fitBounds(layer.getBounds(),{maxZoom:16,padding:[40,40]});
+  // 背景預載所有選舉 JSON（讓歷次投票概況完整顯示）
+  const allFiles=[...new Set(Object.values(ELECTIONS).map(e=>e.file))];
+  const pending=allFiles.filter(f=>!EDATA_CACHE[f]);
+  if(pending.length){
+    await Promise.all(pending.map(async file=>{
+      try{const res=await fetch(file);if(res.ok)EDATA_CACHE[file]=await res.json();}catch(e){}
+    }));
+    // 重新渲染以顯示完整歷史資料
+    if(curVillageProps&&curVillageProps.village===name) renderPanel();
+  }
 }
-function goBack(){curVillageProps=null;selectVillage(null);renderPanel();}
+function goBack(){
+  curVillageProps=null;selectVillage(null);
+  // 清除熱冷區疊加（若切換到其他 tab）
+  renderPanel();
+}
 
 // ═══════════════════════════════════════════════════════
 // 控制項
@@ -862,6 +1001,23 @@ async function applyUpdate(){
   renderPanel();
 }
 
+function toggleFilterArea(){
+  const fa=document.getElementById('filter-area');
+  const lbl=document.getElementById('filter-toggle-label');
+  if(!fa)return;
+  fa.classList.toggle('collapsed');
+  const isCollapsed=fa.classList.contains('collapsed');
+  if(lbl)lbl.textContent=isCollapsed?'▼ 篩選條件（點擊展開）':'▲ 篩選條件（點擊收起）';
+}
+// 手機版預設折疊
+function initFilterCollapse(){
+  if(window.innerWidth<=640){
+    const fa=document.getElementById('filter-area');
+    const lbl=document.getElementById('filter-toggle-label');
+    if(fa){fa.classList.add('collapsed');if(lbl)lbl.textContent='▼ 篩選條件（點擊展開）';}
+  }
+}
+
 function setYear(year,btn){
   curYear=year;
   document.querySelectorAll('.y-btn').forEach(b=>b.classList.remove('active'));
@@ -903,6 +1059,7 @@ function setCandidate(key,btn){
   if(geojsonLayer)geojsonLayer.setStyle(styleFn);
   updateLegend(curScale,curVillageProps);
   updateAllTooltips();
+  updateTop5Icons();
   renderPanel();
 }
 
@@ -913,6 +1070,7 @@ function setMetric(metric,btn){
   if(geojsonLayer)geojsonLayer.setStyle(styleFn);
   updateLegend(curScale,curVillageProps);
   updateAllTooltips();
+  updateTop5Icons();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1070,6 +1228,7 @@ function onEachFeature(feature,layer){
     await applyUpdate();
     initBuildingLayer();
     initLocationLayer();
+    initFilterCollapse();
   }catch(e){
     if(loadingEl.parentNode)loadingEl.parentNode.removeChild(loadingEl);
     const err=document.createElement('div');
@@ -1084,6 +1243,181 @@ function onEachFeature(feature,layer){
 // ═══════════════════════════════════════════════════════
 let locationLayer=null;
 let locationsVisible=true;
+
+// ═══════════════════════════════════════════════════════
+// 熱冷區空間分析
+// ═══════════════════════════════════════════════════════
+let _adjacency=null;
+let clusterLayer=null;
+
+function buildAdjacency(){
+  if(_adjacency)return _adjacency;
+  _adjacency={};
+  RAW.features.forEach(f=>{_adjacency[f.properties.village]=new Set();});
+  const getCoords=f=>{
+    const g=f.geometry;
+    if(g.type==='Polygon')return g.coordinates[0];
+    if(g.type==='MultiPolygon')return g.coordinates.flat(2);
+    return [];
+  };
+  const features=RAW.features;
+  for(let i=0;i<features.length;i++){
+    const c1=new Set(getCoords(features[i]).map(c=>c[0].toFixed(6)+','+c[1].toFixed(6)));
+    for(let j=i+1;j<features.length;j++){
+      const c2=getCoords(features[j]);
+      let shared=0;
+      for(const pt of c2){
+        if(c1.has(pt[0].toFixed(6)+','+pt[1].toFixed(6))){
+          shared++;
+          if(shared>=2){
+            const v1=features[i].properties.village;
+            const v2=features[j].properties.village;
+            _adjacency[v1].add(v2);
+            _adjacency[v2].add(v1);
+            break;
+          }
+        }
+      }
+    }
+  }
+  return _adjacency;
+}
+
+function findClusters(villageSet){
+  const adj=buildAdjacency();
+  const visited=new Set();
+  const clusters=[];
+  villageSet.forEach(v=>{
+    if(visited.has(v))return;
+    const cluster=[];
+    const queue=[v];
+    while(queue.length){
+      const cur=queue.shift();
+      if(visited.has(cur))return;
+      visited.add(cur);
+      if(!villageSet.has(cur))return;
+      cluster.push(cur);
+      (adj[cur]||new Set()).forEach(nb=>{
+        if(!visited.has(nb)&&villageSet.has(nb))queue.push(nb);
+      });
+    }
+    if(cluster.length>0)clusters.push(cluster);
+  });
+  return clusters.sort((a,b)=>b.length-a.length);
+}
+
+function renderClusterAnalysis(){
+  if(curYear==='pop'||!Object.keys(valueMap).length)
+    return`<div class="info-placeholder">請先選擇選舉與候選人。</div>`;
+
+  const villages=Object.keys(valueMap);
+  const n=villages.length;
+  const sorted=[...villages].sort((a,b)=>(valueMap[b].V||0)-(valueMap[a].V||0));
+
+  // 熱區：前25%；冷區：後25%
+  const hotN=Math.max(3,Math.floor(n*0.25));
+  const coldN=Math.max(3,Math.floor(n*0.25));
+  const hotSet=new Set(sorted.slice(0,hotN));
+  const coldSet=new Set(sorted.slice(n-coldN));
+
+  const adj=buildAdjacency();
+  const hotClusters=findClusters(hotSet);
+  const coldClusters=findClusters(coldSet);
+
+  // 找邊界里（熱冷交界）
+  const getBoundary=(clusterVillages,oppositeSet)=>{
+    return clusterVillages.filter(v=>{
+      return [...(adj[v]||[])].some(nb=>oppositeSet.has(nb));
+    });
+  };
+
+  // 地圖疊加層
+  if(clusterLayer){map.removeLayer(clusterLayer);clusterLayer=null;}
+  clusterLayer=L.layerGroup();
+  const hotColors=['#ef4444','#f97316','#eab308'];
+  const coldColors=['#3b82f6','#06b6d4','#8b5cf6'];
+  hotClusters.slice(0,3).forEach((cluster,ci)=>{
+    const geoms=RAW.features.filter(f=>cluster.includes(f.properties.village));
+    L.geoJSON({type:'FeatureCollection',features:geoms},{
+      style:{fillColor:hotColors[ci],weight:2,color:hotColors[ci],opacity:0.7,fillOpacity:0.25,dashArray:null}
+    }).addTo(clusterLayer);
+  });
+  coldClusters.slice(0,3).forEach((cluster,ci)=>{
+    const geoms=RAW.features.filter(f=>cluster.includes(f.properties.village));
+    L.geoJSON({type:'FeatureCollection',features:geoms},{
+      style:{fillColor:coldColors[ci],weight:2,color:coldColors[ci],opacity:0.7,fillOpacity:0.25,dashArray:null}
+    }).addTo(clusterLayer);
+  });
+  clusterLayer.addTo(map);
+
+  const el=ELECTIONS[curElection];
+  const cand=el?.candidates.find(c=>c.key===curCandidate);
+
+  const mkClusterSection=(clusters,colors,label)=>clusters.slice(0,3).map((cluster,ci)=>{
+    const totV=cluster.reduce((s,v)=>s+(valueMap[v]?.V||0),0);
+    const boundary=getBoundary(cluster,ci===0?coldSet:hotSet);
+    const rows=cluster.map(v=>{
+      const rkV=sorted.indexOf(v)+1;
+      return`<div class="cluster-row" onclick="goToVillage('${v}')" onmouseenter="highlightVillage('${v}',true)" onmouseleave="highlightVillage('${v}',false)">
+        <div class="cluster-dot" style="background:${colors[ci]}"></div>
+        <span style="flex:1">${v}</span>
+        <span style="color:var(--muted);font-size:11px">${(valueMap[v]?.V||0).toLocaleString()}票 第${rkV}名</span>
+      </div>`;
+    }).join('');
+    const boundaryHTML=boundary.length?`<div class="boundary-row">⚡交界里：${boundary.join('、')}</div>`:'';
+    return`<div class="cluster-section">
+      <div class="cluster-header">
+        <div class="cluster-badge" style="background:${colors[ci]}"></div>
+        <span class="cluster-title">${label} 第${ci+1}群（${cluster.length}里）</span>
+        <span class="cluster-count">${totV.toLocaleString()}票</span>
+      </div>
+      ${rows}
+      ${boundaryHTML}
+    </div>`;
+  }).join('');
+
+  return`<div style="margin-bottom:10px;font-size:12px;color:var(--muted);line-height:1.7;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:6px">
+    定義：<b style="color:#ef4444">熱區</b> = 得票數前25%里（共${hotN}里），<b style="color:#3b82f6">冷區</b> = 後25%里（共${coldN}里）。<br>
+    相連的同類里合併為一群，⚡交界里代表熱冷相鄰的邊界。
+  </div>
+  <div style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:8px">🔴 熱區（高票聚落）</div>
+  ${mkClusterSection(hotClusters,hotColors,'熱區')}
+  <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:8px;margin-top:14px">🔵 冷區（低票聚落）</div>
+  ${mkClusterSection(coldClusters,coldColors,'冷區')}`;
+}
+let top5Layer=null;
+
+function updateTop5Icons(){
+  if(top5Layer){map.removeLayer(top5Layer);top5Layer=null;}
+  if(curYear==='pop'||!Object.keys(valueMap).length)return;
+  const villages=Object.keys(valueMap);
+  const sorted=[...villages].sort((a,b)=>(valueMap[b][curMetric]||0)-(valueMap[a][curMetric]||0));
+  const top5=sorted.slice(0,5);
+  top5Layer=L.layerGroup();
+  top5.forEach((v,i)=>{
+    const feature=RAW.features.find(f=>f.properties.village===v);
+    if(!feature)return;
+    // 計算里的中心點
+    const coords=feature.geometry.type==='Polygon'
+      ?feature.geometry.coordinates[0]
+      :feature.geometry.coordinates[0][0];
+    const lats=coords.map(c=>c[1]),lngs=coords.map(c=>c[0]);
+    const lat=lats.reduce((s,v)=>s+v,0)/lats.length;
+    const lng=lngs.reduce((s,v)=>s+v,0)/lngs.length;
+    const icon=L.divIcon({
+      className:'top5-icon',
+      html:`<div class="top5-badge">${i+1}</div>`,
+      iconSize:[20,20],iconAnchor:[10,10]
+    });
+    const marker=L.marker([lat,lng],{icon,zIndexOffset:1000});
+    const val=valueMap[v];
+    const metricLabel=curMetric==='V'?`${(val.V||0).toLocaleString()}票`:curMetric==='R'?`${((val.R||0)*100).toFixed(1)}%`:`催${((val.T||0)*100).toFixed(1)}%`;
+    marker.bindTooltip(`第${i+1}名 ${v}（${metricLabel}）`,{direction:'top',offset:[0,-5],className:'village-label'});
+    marker.on('click',()=>{goToVillage(v);});
+    top5Layer.addLayer(marker);
+  });
+  top5Layer.addTo(map);
+}
 
 // ── 地點資料：填入地址或座標 ──────────────────────────
 // 格式：{ name:'名稱', lat:緯度, lng:經度, note:'備註' }
