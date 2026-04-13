@@ -47,7 +47,7 @@
     .lg-bar{height:10px;border-radius:4px;width:100%;}
     .lg-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px;}
     .lg-needle{position:absolute;top:-4px;width:2px;height:18px;background:#fff;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.8);transform:translateX(-50%);transition:left 0.3s;}
-    .lg-needle-tip{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;white-space:nowrap;background:rgba(0,0,0,.7);border-radius:2px;padding:1px 4px;font-weight:600;}
+    .lg-needle-tip{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;white-space:nowrap;background:rgba(0,0,0,.8);border-radius:3px;padding:2px 5px;font-weight:600;text-align:center;line-height:1.5;}
 
     .sidebar{width:38%;max-width:480px;min-width:270px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
     .sidebar-inner{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;}
@@ -268,15 +268,14 @@ const ELECTIONS = {
   '2024_P': {
     label:'不分區', year:'2024',
     file:'data/2024_立委.json', dataKey:'P',
-    elected:[], // 不分區無「當選」概念（比例分配）
+    elected:[],
     candidates:[
-      {key:'dpp', name:'民進黨',   color:'#1B9431', aggKeys:['dpp']},
-      {key:'kmt', name:'國民黨',   color:'#1a6bc1', aggKeys:['kmt']},
-      {key:'tpp', name:'民眾黨',   color:'#28C8C8', aggKeys:['tpp']},
-      {key:'npp', name:'時代力量', color:'#FBBE01', aggKeys:['npp']},
-      {key:'tsp', name:'台灣基進', color:'#C00000', aggKeys:['tsp']},
-      {key:'gp',  name:'綠黨',     color:'#66BB6A', aggKeys:['gp']},
-      {key:'obs', name:'歐巴桑',   color:'#E91E8C', aggKeys:['obs']},
+      {key:'dpp',    name:'民進黨',   color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt',    name:'國民黨',   color:'#1a6bc1', aggKeys:['kmt']},
+      {key:'tpp',    name:'民眾黨',   color:'#28C8C8', aggKeys:['tpp']},
+      {key:'npp',    name:'時代力量', color:'#FBBE01', aggKeys:['npp']},
+      {key:'tsp',    name:'台灣基進', color:'#C00000', aggKeys:['tsp']},
+      {key:'others', name:'其他政黨', color:'#6b7280', aggKeys:['gp','obs','others']},
     ]
   },
   '2024_L': {
@@ -364,7 +363,7 @@ const YEAR_ELECTIONS = {
 // 狀態變數
 // ═══════════════════════════════════════════════════════
 let RAW=null, EDATA_CACHE={};
-let curYear='2022', curElection='2022_council', curCandidate='tsp', curMetric='V', curPanelTab='V';
+let curYear='2022', curElection='2022_council', curCandidate='tsp', curMetric='V', curPanelTab='V', curPopMetric='pop';
 let curVillageProps=null, curScale=null, geojsonLayer=null;
 let valueMap={}, _rankCache={}, _popRankCache={};
 let chatOpen=false, chatHistory=[], chatLoading=false;
@@ -429,16 +428,32 @@ function buildScaleFromMap(){
     breaks:q.slice(1,5),colors,isRate,candColor:cand.color,fmt,gMin:q[0],gMax:q[n-1]};
 }
 
-const POP_SCALE={
-  label:'人口增減（vs 2022）',isPop:true,displayField:'_pop_diff',
+const POP_SCALE_DIFF={
+  label:'人口增減（vs 2022）',isPop:true,popType:'diff',displayField:'_pop_diff',
   breaks:[-150,-50,0,100,300],
   colors:['#450a0a','#dc2626','#fca5a5','#d1fae5','#22c55e','#14532d'],
   legendColors:['#14532d','#22c55e','#d1fae5','#fca5a5','#dc2626','#450a0a'],
 };
+// 最新人口 scale：用分位數動態計算（在資料載入後初始化）
+let POP_SCALE_CUR=null;
+function buildPopCurScale(){
+  if(!RAW||POP_SCALE_CUR)return POP_SCALE_CUR;
+  const vals=[...RAW.features.map(f=>f.properties['pop2026.02']||0)].sort((a,b)=>a-b);
+  const n=vals.length;
+  const q=[vals[0],vals[Math.floor(n*.2)],vals[Math.floor(n*.4)],vals[Math.floor(n*.6)],vals[Math.floor(n*.8)],vals[n-1]];
+  POP_SCALE_CUR={
+    label:'最新人口（2026.02）',isPop:true,popType:'cur',displayField:'pop2026.02',
+    breaks:q.slice(1,5),
+    colors:['#dbeafe','#93c5fd','#3b82f6','#1d4ed8','#1e3a8a','#0f172a'],
+    legendColors:['#0f172a','#1e3a8a','#1d4ed8','#3b82f6','#93c5fd','#dbeafe'],
+    gMin:q[0],gMax:q[n-1]
+  };
+  return POP_SCALE_CUR;
+}
 function GRAY(){return{isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['#1e2235']};}
 
 function getActiveScale(){
-  if(curYear==='pop')return POP_SCALE;
+  if(curYear==='pop')return curPopMetric==='pop'?buildPopCurScale():POP_SCALE_DIFF;
   if(curYear==='overview')return GRAY();
   return buildScaleFromMap();
 }
@@ -454,12 +469,14 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
 function styleFn(f){
   if(!curScale) return{fillColor:'#1e2235',weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
   if(curCandidate==='_result'){
-    // 選舉結果模式：里界清楚，填色淡
     return{fillColor:'rgba(255,255,255,0.04)',weight:1.5,opacity:0.6,color:'#4f6080',fillOpacity:0.3};
   }
   const v=f.properties.village;
   let val;
-  if(curYear==='pop') val=f.properties._pop_diff||0;
+  if(curYear==='pop'){
+    if(curPopMetric==='pop') val=f.properties['pop2026.02']||0;
+    else val=f.properties._pop_diff||0;
+  }
   else val=valueMap[v]?.[curMetric]||0;
   return{fillColor:getColor(curScale,val),weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
 }
@@ -499,8 +516,31 @@ function updateLegend(scale,villageProps){
   const el=document.getElementById('legend-overlay');
   if(!scale||scale.isOverview){el.innerHTML='';return;}
   if(scale.isPop){
-    const bars=scale.legendColors.slice().reverse().map(c=>`<span style="flex:1;background:${c};height:100%;display:inline-block"></span>`).join('');
-    el.innerHTML=`<div class="lg-title">${scale.label}</div><div class="lg-bar-wrap"><div class="lg-bar" style="display:flex;overflow:hidden">${bars}</div><div class="lg-labels"><span>減少最多</span><span>增加最多</span></div></div>`;
+    if(scale.popType==='cur'){
+      // 最新人口：漸層長條 + 指針
+      const gMin=scale.gMin||0,gMax=scale.gMax||1;
+      const grad='linear-gradient(to right,#dbeafe,#1e3a8a)';
+      let needleHTML='';
+      if(villageProps){
+        const val=villageProps['pop2026.02']||0;
+        const pct=gMax>gMin?Math.max(0,Math.min(100,(val-gMin)/(gMax-gMin)*100)):0;
+        const rk=getPopRank('pop2026.02',villageProps.village,true);
+        needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${val.toLocaleString()}<br>第${rk}名</div></div>`;
+      }
+      el.innerHTML=`<div class="lg-title">${scale.label}</div><div class="lg-bar-wrap"><div class="lg-bar" style="background:${grad}"></div>${needleHTML}<div class="lg-labels"><span>${gMin.toLocaleString()}</span><span>${gMax.toLocaleString()}</span></div></div>`;
+    }else{
+      // 人口增減：分段色帶 + 指針
+      const bars=scale.legendColors.slice().reverse().map(c=>`<span style="flex:1;background:${c};height:100%;display:inline-block"></span>`).join('');
+      let needleHTML='';
+      if(villageProps){
+        const val=villageProps._pop_diff||0;
+        const mn=-300,mx=300;
+        const pct=Math.max(0,Math.min(100,(val-mn)/(mx-mn)*100));
+        const rk=getPopRank('_pop_diff',villageProps.village,true);
+        needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${val>0?'+':''}${val}<br>第${rk}名</div></div>`;
+      }
+      el.innerHTML=`<div class="lg-title">${scale.label}</div><div class="lg-bar-wrap" style="position:relative"><div class="lg-bar" style="display:flex;overflow:hidden">${bars}</div>${needleHTML}<div class="lg-labels"><span>減少最多</span><span>增加最多</span></div></div>`;
+    }
     return;
   }
   if(scale.isElection){
@@ -514,7 +554,7 @@ function updateLegend(scale,villageProps){
       const val=valueMap[villageProps.village][curMetric]||0;
       const pct=gMax>gMin?Math.max(0,Math.min(100,(val-gMin)/(gMax-gMin)*100)):0;
       const rk=getElectionRank(curMetric,villageProps.village);
-      needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${fmtV(val)} 第${rk}名</div></div>`;
+      needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${fmtV(val)}<br>第${rk}名</div></div>`;
     }
     el.innerHTML=`<div class="lg-title">${scale.label}（${scale.metricLabel}）</div><div class="lg-bar-wrap"><div class="lg-bar" style="background:${grad}"></div>${needleHTML}<div class="lg-labels"><span>${fmtV(gMin)}</span><span>${fmtV(gMax)}</span></div></div>`;
   }
@@ -577,6 +617,16 @@ function renderOverview(){
   <div class="sidebar-section"><div class="info-placeholder" style="font-size:12px;line-height:2">← 點選年分開始<br>或點擊地圖上的里查看詳細資料</div></div>`;
 }
 
+function setPopMetric(m){
+  curPopMetric=m;
+  POP_SCALE_CUR=null; // 重建 scale
+  curScale=getActiveScale();
+  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  updateLegend(curScale,curVillageProps);
+  updateAllTooltips();
+  renderPanel();
+}
+
 function renderPopPanel(){
   const fs=RAW.features;
   const byPop=[...fs].sort((a,b)=>(b.properties['pop2026.02']||0)-(a.properties['pop2026.02']||0));
@@ -592,10 +642,19 @@ function renderPopPanel(){
       <span class="top-val" style="color:${r.color}">${r.val}</span>
     </div>`;
   }).join('');
-  return`<div class="sidebar-section"><div class="sidebar-title">最新人口 前7里</div>`+
-    row7(byPop,p=>({val:(p['pop2026.02']||0).toLocaleString()+'人',color:'var(--accent)'}))+`</div>`+
-    `<div class="sidebar-section"><div class="sidebar-title">人口增減 前7里</div>`+
-    row7(byDiff,p=>{const d=p._pop_diff||0;return{val:(d>0?'+':'')+d.toLocaleString()+'人',color:d>0?'#22c55e':'#ef4444'};})+'</div>';
+  const tsPop=curPopMetric==='pop'?'background:var(--accent);border-color:var(--accent);color:#fff':'';
+  const tsDiff=curPopMetric==='diff'?'background:var(--accent);border-color:var(--accent);color:#fff':'';
+  const content=curPopMetric==='pop'
+    ?`<div class="sidebar-section"><div class="sidebar-title">最新人口 前7里</div>`+
+      row7(byPop,p=>({val:(p['pop2026.02']||0).toLocaleString()+'人',color:'var(--accent)'}))+`</div>`
+    :`<div class="sidebar-section"><div class="sidebar-title">人口增減 前7里</div>`+
+      row7(byDiff,p=>{const d=p._pop_diff||0;return{val:(d>0?'+':'')+d.toLocaleString()+'人',color:d>0?'#22c55e':'#ef4444'};})+'</div>';
+  return`<div class="sidebar-section">
+    <div class="ep-tab-bar">
+      <button class="fbtn" style="${tsPop}" onclick="setPopMetric('pop')">最新人口</button>
+      <button class="fbtn" style="${tsDiff}" onclick="setPopMetric('diff')">人口增減</button>
+    </div>
+  </div>${content}`;
 }
 
 function renderOverviewPanel(){
@@ -1387,6 +1446,7 @@ function onEachFeature(feature,layer){
 
     // 預載 2022_議員.json
     await applyUpdate();
+    buildPopCurScale();
     initBuildingLayer();
     initLocationLayer();
     initFilterCollapse();
