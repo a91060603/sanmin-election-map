@@ -260,87 +260,95 @@
 // ═══════════════════════════════════════════════════════
 // 選舉資料登錄表
 // ═══════════════════════════════════════════════════════
+// 政黨簡稱對照
+const PARTY_SHORT={'dpp':'民','kmt':'國','tpp':'仲','npp':'時','tsp':'基','gp':'綠','obs':'歐','ind':'無','agree':'同意','disagree':'不同意','others':'其他'};
+function getShort(key){return PARTY_SHORT[key]||'';}
+
 const ELECTIONS = {
   '2024_P': {
     label:'不分區', year:'2024',
     file:'data/2024_立委.json', dataKey:'P',
+    elected:[], // 不分區無「當選」概念（比例分配）
     candidates:[
-      {key:'dpp', name:'民進黨',    color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
-      {key:'kmt', name:'國民黨',    color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
-      {key:'tpp', name:'民眾黨',    color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
-      {key:'npp', name:'時代力量',  color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
-      {key:'tsp', name:'台灣基進',  color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
-      {key:'gp',  name:'綠黨',      color:'#66BB6A', dc:'#86efac', aggKeys:['gp']},
-      {key:'obs', name:'歐巴桑',    color:'#E91E8C', dc:'#f472b6', aggKeys:['obs']},
+      {key:'dpp', name:'民進黨',   color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt', name:'國民黨',   color:'#003F8E', aggKeys:['kmt']},
+      {key:'tpp', name:'民眾黨',   color:'#28C8C8', aggKeys:['tpp']},
+      {key:'npp', name:'時代力量', color:'#FBBE01', aggKeys:['npp']},
+      {key:'tsp', name:'台灣基進', color:'#C00000', aggKeys:['tsp']},
+      {key:'gp',  name:'綠黨',     color:'#66BB6A', aggKeys:['gp']},
+      {key:'obs', name:'歐巴桑',   color:'#E91E8C', aggKeys:['obs']},
     ]
   },
   '2024_L': {
     label:'區域立委', year:'2024',
     file:'data/2024_立委.json', dataKey:'L',
+    elected:['dpp'], // 黃捷（民進黨）當選
     candidates:[
-      {key:'dpp', name:'民進黨',  color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
-      {key:'kmt', name:'國民黨',  color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
-      {key:'obs', name:'歐巴桑', color:'#E91E8C', dc:'#f472b6', aggKeys:['obs']},
-      {key:'others', name:'其他', color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+      {key:'dpp',    name:'民進黨（黃捷）', color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt',    name:'國民黨',         color:'#003F8E', aggKeys:['kmt']},
+      {key:'obs',    name:'歐巴桑',         color:'#E91E8C', aggKeys:['obs']},
+      {key:'others', name:'其他',           color:'#6b7280', aggKeys:['others']},
     ]
   },
   '2024_president': {
     label:'總統', year:'2024',
     file:'data/2024_總統.json', dataKey:null,
+    elected:['dpp'], // 賴清德當選
     candidates:[
-      {key:'dpp', name:'賴清德', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
-      {key:'kmt', name:'侯友宜', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
-      {key:'tpp', name:'柯文哲', color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
+      {key:'dpp', name:'賴清德（民進黨）', color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt', name:'侯友宜（國民黨）', color:'#003F8E', aggKeys:['kmt']},
+      {key:'tpp', name:'柯文哲（民眾黨）', color:'#28C8C8', aggKeys:['tpp']},
     ]
   },
   '2022_council': {
     label:'市議員', year:'2022',
     file:'data/2022_議員.json', dataKey:null,
+    // 三民區第3選舉區，應選5名，當選：張博洋、康裕成、童燕珍、黃柏霖、黃香菽
+    elected:['tsp','dpp_康','kmt_童','kmt_黃柏','kmt_黃香'],
     candidates:[
-      // ── 第三勢力 ──
-      {key:'tsp',    name:'張博洋（基進）',  color:'#C00000', dc:'#f87171', aggKeys:['tsp']},
-      {key:'npp',    name:'林于凱（時力）',  color:'#FBBE01', dc:'#FBBE01', aggKeys:['npp']},
-      // ── 民進黨（合計 + 個別）──
-      {key:'dpp',    name:'民進黨合計',      color:'#1B9431', dc:'#4ade80', aggKeys:['dpp_何','dpp_鄭','dpp_林','dpp_康']},
-      {key:'dpp_何', name:'何權峰（民進）',  color:'#22863a', dc:'#6ee7a0', aggKeys:['dpp_何']},
-      {key:'dpp_康', name:'康裕成（民進）',  color:'#2ea84a', dc:'#86efac', aggKeys:['dpp_康']},
-      {key:'dpp_鄭', name:'鄭孟洳（民進）',  color:'#3dbd60', dc:'#a7f3c0', aggKeys:['dpp_鄭']},
-      {key:'dpp_林', name:'林武忠（民進）',  color:'#4fd375', dc:'#bbf7d0', aggKeys:['dpp_林']},
-      // ── 國民黨（合計 + 個別）──
-      {key:'kmt',      name:'國民黨合計',      color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt_曾','kmt_童','kmt_黃柏','kmt_黃香']},
-      {key:'kmt_童',   name:'童燕珍（國民）',  color:'#1254a5', dc:'#7eb8fb', aggKeys:['kmt_童']},
-      {key:'kmt_黃柏', name:'黃柏霖（國民）',  color:'#2467bc', dc:'#93c5fd', aggKeys:['kmt_黃柏']},
-      {key:'kmt_黃香', name:'黃香菽（國民）',  color:'#367ad3', dc:'#a8d4fe', aggKeys:['kmt_黃香']},
-      {key:'kmt_曾',   name:'曾俊傑（國民）',  color:'#488de8', dc:'#bde0ff', aggKeys:['kmt_曾']},
-      // ── 其他 ──
-      {key:'tpp',    name:'李佳玲（民眾）',  color:'#28C8C8', dc:'#28C8C8', aggKeys:['tpp']},
-      {key:'ind',    name:'無黨籍合計',      color:'#6b7280', dc:'#9ca3af', aggKeys:['ind_2','ind_4']},
+      {key:'tsp',    name:'張博洋', party:'台灣基進', color:'#C00000', aggKeys:['tsp']},
+      {key:'npp',    name:'林于凱', party:'時代力量', color:'#FBBE01', aggKeys:['npp']},
+      {key:'dpp',    name:'民進黨合計', party:'民進黨', color:'#1B9431', aggKeys:['dpp_何','dpp_鄭','dpp_林','dpp_康']},
+      {key:'dpp_何', name:'何權峰', party:'民進黨', color:'#1B9431', aggKeys:['dpp_何']},
+      {key:'dpp_康', name:'康裕成', party:'民進黨', color:'#1B9431', aggKeys:['dpp_康']},
+      {key:'dpp_鄭', name:'鄭孟洳', party:'民進黨', color:'#1B9431', aggKeys:['dpp_鄭']},
+      {key:'dpp_林', name:'林武忠', party:'民進黨', color:'#1B9431', aggKeys:['dpp_林']},
+      {key:'kmt',      name:'國民黨合計', party:'國民黨', color:'#003F8E', aggKeys:['kmt_曾','kmt_童','kmt_黃柏','kmt_黃香']},
+      {key:'kmt_童',   name:'童燕珍', party:'國民黨', color:'#003F8E', aggKeys:['kmt_童']},
+      {key:'kmt_黃柏', name:'黃柏霖', party:'國民黨', color:'#003F8E', aggKeys:['kmt_黃柏']},
+      {key:'kmt_黃香', name:'黃香菽', party:'國民黨', color:'#003F8E', aggKeys:['kmt_黃香']},
+      {key:'kmt_曾',   name:'曾俊傑', party:'國民黨', color:'#003F8E', aggKeys:['kmt_曾']},
+      {key:'tpp',    name:'李佳玲', party:'民眾黨', color:'#28C8C8', aggKeys:['tpp']},
+      {key:'ind',    name:'無黨籍合計', party:'無黨籍', color:'#6b7280', aggKeys:['ind_2','ind_4']},
     ]
   },
   '2022_mayor': {
     label:'市長', year:'2022',
     file:'data/2022_市長.json', dataKey:null,
+    elected:['dpp'],
     candidates:[
-      {key:'dpp',    name:'陳其邁', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
-      {key:'kmt',    name:'柯志恩', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
-      {key:'others', name:'其他',   color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+      {key:'dpp',    name:'陳其邁', party:'民進黨', color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt',    name:'柯志恩', party:'國民黨', color:'#003F8E', aggKeys:['kmt']},
+      {key:'others', name:'其他',   party:'無黨籍', color:'#6b7280', aggKeys:['others']},
     ]
   },
   '2020_recall': {
     label:'韓國瑜罷免', year:'2020',
     file:'data/2020_罷免.json', dataKey:null,
+    elected:['agree'], // 罷免成立
     candidates:[
-      {key:'agree',    name:'同意罷免', color:'#22c55e', dc:'#4ade80', aggKeys:['agree']},
-      {key:'disagree', name:'不同意',   color:'#ef4444', dc:'#f87171', aggKeys:['disagree']},
+      {key:'agree',    name:'同意罷免', color:'#22c55e', aggKeys:['agree']},
+      {key:'disagree', name:'不同意',   color:'#ef4444', aggKeys:['disagree']},
     ]
   },
   '2020_byelection': {
     label:'市長補選', year:'2020',
     file:'data/2020_市長補選.json', dataKey:null,
+    elected:['dpp'],
     candidates:[
-      {key:'dpp',    name:'陳其邁', color:'#1B9431', dc:'#4ade80', aggKeys:['dpp']},
-      {key:'kmt',    name:'李眉蓁', color:'#003F8E', dc:'#60a5fa', aggKeys:['kmt']},
-      {key:'others', name:'吳益政', color:'#6b7280', dc:'#9ca3af', aggKeys:['others']},
+      {key:'dpp',    name:'陳其邁', party:'民進黨', color:'#1B9431', aggKeys:['dpp']},
+      {key:'kmt',    name:'李眉蓁', party:'國民黨', color:'#003F8E', aggKeys:['kmt']},
+      {key:'others', name:'吳益政', party:'無黨籍', color:'#6b7280', aggKeys:['others']},
     ]
   },
 };
@@ -500,7 +508,8 @@ function updateLegend(scale,villageProps){
     if(villageProps&&valueMap[villageProps.village]){
       const val=valueMap[villageProps.village][curMetric]||0;
       const pct=gMax>gMin?Math.max(0,Math.min(100,(val-gMin)/(gMax-gMin)*100)):0;
-      needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${fmtV(val)}</div></div>`;
+      const rk=getElectionRank(curMetric,villageProps.village);
+      needleHTML=`<div class="lg-needle" style="left:${pct.toFixed(1)}%"><div class="lg-needle-tip">${fmtV(val)} 第${rk}名</div></div>`;
     }
     el.innerHTML=`<div class="lg-title">${scale.label}（${scale.metricLabel}）</div><div class="lg-bar-wrap"><div class="lg-bar" style="background:${grad}"></div>${needleHTML}<div class="lg-labels"><span>${fmtV(gMin)}</span><span>${fmtV(gMax)}</span></div></div>`;
   }
@@ -647,8 +656,61 @@ function setPanelTab(t){
   renderPanel();
 }
 
+function renderResultPanel(){
+  const el=ELECTIONS[curElection];
+  if(!el||!EDATA_CACHE[el.file])return`<div class="sidebar-section"><div class="info-placeholder">資料載入中...</div></div>`;
+  const eData=EDATA_CACHE[el.file];
+  const villages=RAW.features.map(f=>f.properties.village);
+  // 計算各候選人全區合計
+  const candStats=el.candidates.filter(c=>!c.name.includes('合計')).map(c=>{
+    let totV=0,totVpop=0,totValid=0;
+    villages.forEach(v=>{
+      let vRow=eData.villages[v];
+      if(el.dataKey&&vRow)vRow=vRow[el.dataKey];
+      if(!vRow)return;
+      totV+=c.aggKeys.reduce((s,k)=>s+(vRow[k]||0),0);
+      totVpop+=(vRow.vpop||0);
+      totValid+=(vRow.valid||0);
+    });
+    const elected=el.elected?.includes(c.key);
+    return{c,totV,totVpop,totValid,
+      rate:totValid>0?totV/totValid:0,
+      turnout:totVpop>0?totV/totVpop:0,
+      elected};
+  }).sort((a,b)=>b.totV-a.totV);
+  const maxV=candStats[0]?.totV||1;
+  const rows=candStats.map((s,i)=>{
+    const {c,totV,totVpop,totValid,rate,turnout,elected}=s;
+    const barW=(totV/maxV*100).toFixed(1);
+    const elBadge=elected?`<span style="color:#ffe500;font-weight:900;margin-right:4px">當</span>`:'';
+    const partyLabel=c.party?`<span style="font-size:10px;color:var(--muted)">${c.party}</span>`:'';
+    return`<div style="padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--accent);font-weight:700;width:20px">${i+1}</span>
+        ${elBadge}
+        <span style="font-size:14px;font-weight:700;color:${c.color};flex:1">${c.name}</span>
+        ${partyLabel}
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${totV.toLocaleString()}票</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin:3px 0 3px 26px">
+        <div style="height:100%;width:${barW}%;background:${c.color};border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:11px;color:var(--muted);padding-left:26px">
+        <span>得票率 <b style="color:var(--text)">${(rate*100).toFixed(2)}%</b></span>
+        <span>催票率 <b style="color:var(--text)">${(turnout*100).toFixed(2)}%</b></span>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="sidebar-section">
+    <div style="font-size:11px;color:var(--muted)">${el.year} 年</div>
+    <div class="sidebar-title" style="font-size:15px;color:var(--text)">${el.label} 選舉結果</div>
+  </div>
+  <div class="sidebar-section">${rows}</div>`;
+}
+
 function renderElectionPanel(){
   const el=ELECTIONS[curElection];
+  if(curCandidate==='_result')return renderResultPanel();
   const cand=el?.candidates.find(c=>c.key===curCandidate);
   if(!el||!cand)return`<div class="sidebar-section"><div class="info-placeholder">請選擇候選人</div></div>`;
 
@@ -675,7 +737,8 @@ function renderElectionPanel(){
     const hiR=curPanelTab==='R'?' class="ep-hi"':'';
     const hiT=curPanelTab==='T'?' class="ep-hi"':'';
     const barVal=curPanelTab==='V'?(vd.V||0):curPanelTab==='R'?(vd.R||0):(vd.T||0);
-    const barW=(barVal/maxForBar*100).toFixed(1);
+    // 用平方根拉大視覺差距，讓低值里也看得出差異
+    const barW=(Math.sqrt(barVal/maxForBar)*100).toFixed(1);
     return`<div class="ep-row"
       onmouseenter="highlightVillage('${v}',true)"
       onmouseleave="highlightVillage('${v}',false)"
@@ -708,22 +771,32 @@ function renderElectionPanel(){
       <button class="fbtn" style="${ts('V')}" onclick="setPanelTab('V')">得票數</button>
       <button class="fbtn" style="${ts('R')}" onclick="setPanelTab('R')">得票率</button>
       <button class="fbtn" style="${ts('T')}" onclick="setPanelTab('T')">催票率</button>
-      <button class="fbtn" style="${ts('C')}" onclick="setPanelTab('C')">🔴熱冷區</button>
+      <!-- 熱冷區暫時停用 -->
       <span style="font-size:11px;color:var(--muted);margin-left:3px">前10名</span>
     </div>
     ${rankRows}
   </div>`;
+  const byVAll=[...Object.keys(valueMap)].sort((a,b)=>valueMap[b].V-valueMap[a].V);
+  const overallRkV=byVAll.length; // 全區總排名基礎
   return`<div class="sidebar-section">
-    <div class="sidebar-title">${el.label}</div>
-    <div class="cand-hero" style="color:${cand.dc||cand.color}">${cand.name}</div>
-    <div class="cand-total">全區合計 ${totV.toLocaleString()}票 · 得票率 ${(totV/totValid*100).toFixed(2)}% · 催票率 ${(totV/totVpop*100).toFixed(2)}%</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:2px">${el.year} 年・${el.label}</div>
+    <div style="font-size:22px;font-weight:700;color:${cand.color};line-height:1.2;margin-bottom:2px">${cand.name}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${cand.party||''}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span style="font-size:26px;font-weight:700;color:var(--text)">${totV.toLocaleString()}</span>
+      <span style="font-size:13px;color:var(--muted)">票</span>
+    </div>
+    <div style="display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:4px">
+      <span>得票率 <b style="color:var(--text)">${(totV/totValid*100).toFixed(2)}%</b></span>
+      <span>催票率 <b style="color:var(--text)">${(totV/totVpop*100).toFixed(2)}%</b></span>
+    </div>
   </div>
   <div class="sidebar-section">
     <div class="ep-tab-bar">
       <button class="fbtn" style="${ts('V')}" onclick="setPanelTab('V')">得票數</button>
       <button class="fbtn" style="${ts('R')}" onclick="setPanelTab('R')">得票率</button>
       <button class="fbtn" style="${ts('T')}" onclick="setPanelTab('T')">催票率</button>
-      <button class="fbtn" style="${ts('C')}" onclick="setPanelTab('C')">🔴熱冷區</button>
+      <!-- 熱冷區暫時停用 -->
     </div>
     ${rankRows}
   </div>
@@ -790,11 +863,13 @@ function renderVillage(props){
         const maxV2=candWithVotes[0]?.v2||1;
         const bars=candWithVotes.map(({c,v2},rank)=>{
           const pct=(v2/valid*100).toFixed(1);
-          const barW=(v2/maxV2*100).toFixed(1); // 相對最大值的長條
+          const barW=(Math.sqrt(v2/maxV2)*100).toFixed(1); // sqrt scale 拉大視覺差距
           const isSel=c.key===curCandidate;
+          const isElected=el.elected?.includes(c.key);
           return`<div class="party-row${isSel?' sel':''}" onclick="setCandidate('${c.key}')" style="${isSel?'outline:2px solid '+c.color+';outline-offset:2px;border-radius:5px':''}">
             <div style="font-size:10px;color:var(--accent);width:22px;flex-shrink:0;font-weight:700">${rank+1}</div>
-            <div class="pname" style="color:${isSel?(c.dc||c.color):'var(--text)'};font-weight:${isSel?'700':'400'}">${c.name}</div>
+            ${isElected?'<span style="color:#ffe500;font-size:12px;flex-shrink:0" title="當選">當</span>':'<span style="width:16px;flex-shrink:0"></span>'}
+            <div class="pname" style="color:${isSel?c.color:'var(--text)'};font-weight:${isSel?'700':'400'}">${c.name}</div>
             <div class="pbar-bg"><div class="pbar-fill" style="width:${barW}%;background:${c.color}"></div></div>
             <div class="pstats">${v2.toLocaleString()} <span style="opacity:0.6">(${pct}%)</span></div>
           </div>`;
@@ -802,26 +877,22 @@ function renderVillage(props){
         elHTML=`<div class="sidebar-section">
           <div class="sidebar-title">🗳️ ${el.label}</div>
           ${candHeroHTML}
-          <div class="stat-row">
-            <span class="stat-label">得票數</span>
-            <span class="stat-val-block">
-              <span class="stat-value">${selVotes.toLocaleString()} 票</span>
-              <span class="stat-sub rank-badge">第${rkV}名</span>
-            </span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">得票率</span>
-            <span class="stat-val-block">
-              <span class="stat-value">${(selVotes/valid*100).toFixed(2)}%</span>
-              <span class="stat-sub rank-badge">第${rkR}名</span>
-            </span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">催票率</span>
-            <span class="stat-val-block">
-              <span class="stat-value">${(selVotes/vpop*100).toFixed(2)}%</span>
-              <span class="stat-sub rank-badge">第${rkT}名</span>
-            </span>
+          <div style="display:flex;gap:4px;margin:4px 0">
+            <div style="flex:1;text-align:center;background:rgba(255,255,255,0.04);border-radius:5px;padding:5px 2px">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${selVotes.toLocaleString()}</div>
+              <div style="font-size:9px;color:var(--muted)">得票數</div>
+              <div style="font-size:10px;color:var(--accent)">第${rkV}名</div>
+            </div>
+            <div style="flex:1;text-align:center;background:rgba(255,255,255,0.04);border-radius:5px;padding:5px 2px">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${(selVotes/valid*100).toFixed(1)}%</div>
+              <div style="font-size:9px;color:var(--muted)">得票率</div>
+              <div style="font-size:10px;color:var(--accent)">第${rkR}名</div>
+            </div>
+            <div style="flex:1;text-align:center;background:rgba(255,255,255,0.04);border-radius:5px;padding:5px 2px">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${(selVotes/vpop*100).toFixed(1)}%</div>
+              <div style="font-size:9px;color:var(--muted)">催票率</div>
+              <div style="font-size:10px;color:var(--accent)">第${rkT}名</div>
+            </div>
           </div>
         </div>
         <div class="sidebar-section">
@@ -882,13 +953,32 @@ function renderVillage(props){
     </div>`;
   }
 
+  // 候選人全區總票（右側顯示）
+  let heroRightHTML='';
+  if(curYear!=='pop'&&curCandidate!=='_result'){
+    const totVAll=Object.values(valueMap).reduce((s,d)=>s+(d.V||0),0);
+    const rkVAll=getElectionRank('V',village);
+    const selCandForHdr=ELECTIONS[curElection]?.candidates.find(c=>c.key===curCandidate);
+    if(selCandForHdr&&totVAll>0){
+      heroRightHTML=`<div style="text-align:right;flex-shrink:0">
+        <div style="font-size:18px;font-weight:700;color:${selCandForHdr.color}">${totVAll.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted)">全區總票</div>
+        <div style="font-size:11px;color:var(--accent)">此里第${rkVAll}名</div>
+      </div>`;
+    }
+  }
   return`<div class="sidebar-section">
     <button class="back-btn" onclick="goBack()">← 回上一層</button>
-    <div class="info-village">${village||'-'}</div>
-    <div class="info-area">${props.area||''} · ${props.district||''}</div>
-    <div style="display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--muted)">
-      <span>👥 ${pop26}人 <span style="color:var(--accent)">第${pop26rk}名</span></span>
-      <span class="${pdCls}">${pd>0?'▲':'▼'}${Math.abs(pd)}人 <span style="color:var(--accent)">第${pdrk}名</span></span>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div class="info-village">${village||'-'}</div>
+        <div class="info-area">${props.area||''} · ${props.district||''}</div>
+        <div style="display:flex;gap:10px;margin-top:4px;font-size:11px;color:var(--muted);flex-wrap:wrap">
+          <span>最新人口 ${pop26}人 <span style="color:var(--accent)">第${pop26rk}名</span></span>
+          <span class="${pdCls}">較2022年${pd>0?'+':''}${pd.toLocaleString()}人 <span style="color:var(--accent)">第${pdrk}名</span></span>
+        </div>
+      </div>
+      ${heroRightHTML}
     </div>
   </div>${elHTML}${histHTML}`;
 }
@@ -1010,13 +1100,23 @@ function renderElectionRow(year){
 
 function renderCandidateRow(candidates){
   const row=document.getElementById('row-candidate');
-  const btns=candidates.map(c=>{
+  const el=ELECTIONS[curElection];
+  // 最左邊加「選舉結果」總覽按鈕
+  const isResult=curCandidate==='_result';
+  const resultBtn=`<button class="fbtn c-btn" data-key="_result" data-color="var(--accent)" data-dc="var(--accent)"
+    style="${isResult?'background:var(--accent);border-color:var(--accent);color:#fff':'color:var(--accent)'}"
+    onclick="setCandidate('_result',this)">選舉結果</button>`;
+  const btns=candidates.filter(c=>!c.name.includes('合計')||candidates.length<=4).map(c=>{
     const isActive=c.key===curCandidate;
-    const style=isActive?`background:${c.color};border-color:${c.color};color:#fff`:`color:${c.dc||c.color}`;
-    return`<button class="fbtn c-btn" data-key="${c.key}" data-color="${c.color}" data-dc="${c.dc||c.color}"
-      style="${style}" onclick="setCandidate('${c.key}',this)">${c.name}</button>`;
+    // 簡稱：有 party 用 party 縮寫，否則從 key 取
+    const partyKey=c.party?Object.entries({民進黨:'dpp',國民黨:'kmt',民眾黨:'tpp',時代力量:'npp',台灣基進:'tsp',綠黨:'gp',歐巴桑:'obs',無黨籍:'ind'}||{}).find(([k,v])=>c.party.includes(k))?.[1]||c.key:c.key;
+    const short=PARTY_SHORT[partyKey]||PARTY_SHORT[c.key]||'';
+    const label=c.party?`${c.name}${short?'('+short+')':''}`:c.name;
+    const style=isActive?`background:${c.color};border-color:${c.color};color:${c.color==='#FBBE01'?'#0f1117':'#fff'}`:`color:${c.color}`;
+    return`<button class="fbtn c-btn" data-key="${c.key}" data-color="${c.color}"
+      style="${style}" onclick="setCandidate('${c.key}',this)">${label}</button>`;
   }).join('');
-  row.innerHTML=`<span class="filter-label">候選人</span>${btns}`;
+  row.innerHTML=`<span class="filter-label">候選人</span>${resultBtn}${btns}`;
 }
 
 async function applyUpdate(){
@@ -1099,15 +1199,21 @@ function setCandidate(key,btn){
     const isActive=b.dataset.key===key;
     b.style.background=isActive?b.dataset.color:'';
     b.style.borderColor=isActive?b.dataset.color:'';
-    b.style.color=isActive?'#fff':(b.dataset.dc||b.dataset.color);
+    b.style.color=isActive?'#fff':b.dataset.color;
   });
-  computeValueMap();
-  _rankCache={};
-  curScale=getActiveScale();
-  if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+  if(key!=='_result'){
+    computeValueMap();
+    _rankCache={};
+    curScale=getActiveScale();
+    if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+    updateAllTooltips();
+    updateTop5Icons();
+  }else{
+    curScale=GRAY();
+    if(geojsonLayer)geojsonLayer.setStyle(styleFn);
+    if(top5Layer){map.removeLayer(top5Layer);top5Layer=null;}
+  }
   updateLegend(curScale,curVillageProps);
-  updateAllTooltips();
-  updateTop5Icons();
   renderPanel();
 }
 
