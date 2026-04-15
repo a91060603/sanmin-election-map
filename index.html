@@ -370,7 +370,7 @@ let valueMap={}, _rankCache={}, _popRankCache={};
 let chatOpen=false, chatHistory=[], chatLoading=false;
 let selectedVillage=null, hoveredVillage=null;
 let priorityVillages=new Set(), priorityLayer=null;
-let buildingLayer=null, buildingsVisible=true;
+let buildingLayer=null, buildingsVisible=false; // 預設隱藏，進入管委會模式才顯示
 
 // ═══════════════════════════════════════════════════════
 // 顏色工具
@@ -595,7 +595,15 @@ function renderPanel(){
   updateLegend(curScale,null);
   if(curYear==='pop'){el.innerHTML=renderPopPanel();return;}
   if(curYear==='overview'){el.innerHTML=renderOverviewPanel();return;}
-  if(curYear==='bld'){el.innerHTML=renderBldPanel();return;}
+  if(curYear==='bld'){
+    // 進入管委會模式：自動顯示建物圖層
+    if(!buildingsVisible){
+      buildingsVisible=true;
+      renderBuildingLayer();
+    }
+    el.innerHTML=renderBldPanel();
+    return;
+  }
   if(!curElection||!curCandidate||!EDATA_CACHE[ELECTIONS[curElection]?.file]){
     el.innerHTML=`<div class="sidebar-section"><div class="info-placeholder">載入資料中...</div></div>`;
     return;
@@ -1183,58 +1191,69 @@ function toggleBuildings(){
   if(buildingsVisible&&!buildingLayer)renderBuildingLayer();
 }
 
-function toggleBldFilter(type,val,el){
-  if(bldFilter[type].has(val)){
-    if(bldFilter[type].size>1){bldFilter[type].delete(val);el.classList.remove('on');}
-  }else{bldFilter[type].add(val);el.classList.add('on');}
+function toggleBldFilter(type,val){
+  // 切換：有→移除，無→加入（允許全部取消 = 全部隱藏）
+  if(bldFilter[type].has(val)) bldFilter[type].delete(val);
+  else bldFilter[type].add(val);
   renderBuildingLayer();
   updateBldToggle();
-  // 重新渲染面板（更新 chip 狀態和計數）
+  // 重新渲染面板
   const panelEl=document.getElementById('main-panel');
   if(panelEl&&curYear==='bld') panelEl.innerHTML=renderBldPanel();
 }
 
 function renderBldPanel(){
-  const el=document.getElementById('main-panel');
   const filtered=filterBuildings();
-  const mkChips=(type,opts)=>opts.map(v=>{
-    const on=bldFilter[type].has(v);
-    return`<span class="bld-chip${on?' on':''}" onclick="toggleBldFilter('${type}','${v}',this)">${v}</span>`;
-  }).join('');
+  const total=BUILDINGS_RAW.length;
+
+  // 各類圓點顏色
+  const floorColor={'5樓以下':'#f97316','6-15樓':'#3b82f6','15樓以上':'#a855f7'};
+
+  const mkGroup=(type,opts,colors)=>{
+    const chips=opts.map(v=>{
+      const on=bldFilter[type].has(v);
+      const color=colors?colors[v]:'var(--accent)';
+      const bg=on?color:'rgba(255,255,255,0.04)';
+      const border=on?color:'var(--border)';
+      const txt=on?'#fff':'var(--muted)';
+      const dot=colors?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:4px;vertical-align:middle"></span>`:'';
+      return`<button onclick="toggleBldFilter('${type}','${v}')"
+        style="padding:4px 10px;border-radius:5px;border:1px solid ${border};background:${bg};color:${txt};
+               font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;
+               margin:2px;font-family:inherit"
+        data-type="${type}" data-val="${v}">${dot}${v}</button>`;
+    }).join('');
+    return chips;
+  };
+
   return`<div class="sidebar-section">
-    <div class="sidebar-title">🏢 管委會建物篩選</div>
-    <div class="bld-filter-bar">
-      <div class="bld-filter-group">
-        <div class="bld-filter-title">樓層</div>
-        ${mkChips('floor',['5樓以下','6-15樓','15樓以上'])}
-      </div>
-      <div class="bld-filter-group">
-        <div class="bld-filter-title">設立時間</div>
-        ${mkChips('year',['2022年以前','2022年以後'])}
-      </div>
-      <div class="bld-filter-group">
-        <div class="bld-filter-title">戶數</div>
-        ${mkChips('unit',['50戶以下','51-100戶','101-250戶','250戶以上'])}
-      </div>
+    <div class="sidebar-title">🏢 管委會建物</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+      顯示 <b style="color:var(--text);font-size:14px">${filtered.length}</b> / ${total} 棟
+      &nbsp;·&nbsp; 點擊圓點查看建物資訊
     </div>
-    <div class="bld-stats">
-      篩選結果：<b style="color:var(--text)">${filtered.length}</b> 棟
-      <span style="margin-left:10px">
-        <span style="color:#f97316">●</span>5樓以下
-        <span style="color:#3b82f6;margin-left:6px">●</span>6-15樓
-        <span style="color:#a855f7;margin-left:6px">●</span>15樓以上
-      </span>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 樓層</div>
+      ${mkGroup('floor',['5樓以下','6-15樓','15樓以上'],floorColor)}
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6">
-      點擊地圖上的圓點可查看建物資訊。<br>
-      點位座標已預載，地圖即時顯示。
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 管委會設立時間</div>
+      ${mkGroup('year',['2022年以前','2022年以後'],null)}
+    </div>
+
+    <div style="margin-bottom:4px">
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 戶數</div>
+      ${mkGroup('unit',['50戶以下','51-100戶','101-250戶','250戶以上'],null)}
     </div>
   </div>`;
 }
 
 function initBuildingLayer(){
-  updateBldToggle();
-  renderBuildingLayer();
+  // 初始化時不顯示圖層，等使用者進入「管委會」模式才顯示
+  const btn=document.getElementById('bldToggle');
+  if(btn) btn.style.display='none';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1397,6 +1416,13 @@ function setYear(year,btn){
       const el=ELECTIONS[curElection];
       if(el?.candidates.length)curCandidate=el.candidates[0].key;
     }
+  }
+  // 離開 bld 模式時隱藏建物圖層
+  if(year!=='bld'&&buildingsVisible){
+    buildingsVisible=false;
+    if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}
+    const bBtn=document.getElementById('bldToggle');
+    if(bBtn){bBtn.classList.remove('on');bBtn.style.display='none';}
   }
   if(year==='overview'||year==='pop'||year==='bld'){
     document.getElementById('row-election').innerHTML=`<span class="filter-label">選舉</span>`;
