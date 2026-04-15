@@ -1151,7 +1151,11 @@ function renderBuildingLayer(){
 function addBldMarker(b,lat,lng){
   if(!buildingLayer)return;
   const color=bldColor(b);
-  const m=L.circleMarker([lat,lng],{radius:5,fillColor:color,color:'#fff',weight:1,fillOpacity:0.85});
+  const m=L.circleMarker([lat,lng],{
+    radius:7,fillColor:color,color:'#fff',weight:1.5,fillOpacity:0.9,
+    pane:'markerPane',   // 高於里塊的 overlayPane（z-index 600 > 400）
+    interactive:true,bubblingMouseEvents:false
+  });
   const fc=floorCat(b.floors),uc=unitCat(b.units),yc=yearCat(b.year);
   m.bindPopup(`<div style="font-family:'Noto Sans TC',sans-serif;font-size:12px;min-width:160px">
     <b style="font-size:13px;color:#1a1d27">${b.name}</b><br>
@@ -1185,7 +1189,9 @@ function toggleBldFilter(type,val,el){
   }else{bldFilter[type].add(val);el.classList.add('on');}
   renderBuildingLayer();
   updateBldToggle();
-  renderBldPanel();
+  // 重新渲染面板（更新 chip 狀態和計數）
+  const panelEl=document.getElementById('main-panel');
+  if(panelEl&&curYear==='bld') panelEl.innerHTML=renderBldPanel();
 }
 
 function renderBldPanel(){
@@ -1555,15 +1561,17 @@ function onEachFeature(feature,layer){
   villageLayerMap[feature.properties.village]=layer;
   layer.on({
     mouseover:e=>{
+      if(curYear==='bld')return;
       if(hoveredVillage&&hoveredVillage!==selectedVillage&&villageLayerMap[hoveredVillage])geojsonLayer.resetStyle(villageLayerMap[hoveredVillage]);
       hoveredVillage=feature.properties.village;
       if(feature.properties.village!==selectedVillage){e.target.setStyle({weight:3.5,color:'#ffe500',fillOpacity:0.95,opacity:1});e.target.bringToFront();}
     },
     mouseout:e=>{
+      if(curYear==='bld')return;
       if(feature.properties.village!==selectedVillage)geojsonLayer.resetStyle(e.target);
       if(hoveredVillage===feature.properties.village)hoveredVillage=null;
     },
-    click:()=>{selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
+    click:()=>{if(curYear==='bld')return;selectVillage(feature.properties.village);curVillageProps=feature.properties;renderPanel();}
   });
   layer.bindTooltip('',{permanent:true,direction:'center',className:'village-label',interactive:false});
 }
