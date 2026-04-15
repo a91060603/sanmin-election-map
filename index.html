@@ -371,6 +371,7 @@ let chatOpen=false, chatHistory=[], chatLoading=false;
 let selectedVillage=null, hoveredVillage=null;
 let priorityVillages=new Set(), priorityLayer=null;
 let buildingLayer=null, buildingsVisible=false; // 預設隱藏，進入管委會模式才顯示
+let selectedBuilding=null; // 目前選中的建物
 
 // ═══════════════════════════════════════════════════════
 // 顏色工具
@@ -451,7 +452,7 @@ function buildPopCurScale(){
   };
   return POP_SCALE_CUR;
 }
-function GRAY(){return{isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['#1e2235']};}
+function GRAY(){return{isOverview:true,displayField:'_pop_diff',breaks:[-9999],colors:['rgba(255,255,255,0.02)']};}
 
 function getActiveScale(){
   if(curYear==='pop')return curPopMetric==='pop'?buildPopCurScale():POP_SCALE_DIFF;
@@ -468,7 +469,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
 }).addTo(map);
 
 function styleFn(f){
-  if(!curScale) return{fillColor:'#1e2235',weight:1,opacity:0.5,color:'#1a1d27',fillOpacity:0.88};
+  if(!curScale) return{fillColor:'rgba(255,255,255,0.02)',weight:1.5,opacity:0.8,color:'#4f6080',fillOpacity:0.1};
+  if(curScale.isOverview){
+    // 整體概況/管委會模式：透明填色＋清楚里界
+    return{fillColor:'rgba(255,255,255,0.02)',weight:1.5,opacity:0.85,color:'#5a7090',fillOpacity:0.08};
+  }
   if(curCandidate==='_result'){
     return{fillColor:'rgba(255,255,255,0.04)',weight:1.5,opacity:0.6,color:'#4f6080',fillOpacity:0.3};
   }
@@ -490,7 +495,7 @@ function tooltipHTML(props){
   const sfs=Math.max(9,Math.min(12,7+(z-10)));
   const showStats=z>=Z_STATS;
   let lines='';
-  if(showStats){
+  if(showStats&&curScale&&!curScale.isOverview){
     if(curYear==='pop'){
       const d=props._pop_diff||0;
       const c=d>0?'#22c55e':d<0?'#ef4444':'#aaa';
@@ -1165,23 +1170,22 @@ function addBldMarker(b,lat,lng){
     interactive:true,bubblingMouseEvents:false
   });
   const fc=floorCat(b.floors),uc=unitCat(b.units),yc=yearCat(b.year);
-  m.bindPopup(`<div style="font-family:'Noto Sans TC',sans-serif;font-size:12px;min-width:160px">
-    <b style="font-size:13px;color:#1a1d27">${b.name}</b><br>
-    <span style="color:#555">${b.addr}</span><br>
-    <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap">
-      <span style="background:${color};color:#fff;padding:1px 6px;border-radius:8px;font-size:11px">${fc}</span>
-      <span style="background:#e5e7eb;color:#374151;padding:1px 6px;border-radius:8px;font-size:11px">${uc}</span>
-      <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;font-size:11px">${yc}</span>
-    </div>
-    <div style="font-size:11px;color:#666;margin-top:4px">備查年份：${b.year}年</div>
-  </div>`,{maxWidth:240});
+  m.on('click',()=>{
+    selectedBuilding=b;
+    const panelEl=document.getElementById('main-panel');
+    if(panelEl) panelEl.innerHTML=renderBldPanel();
+  });
   buildingLayer.addLayer(m);
 }
 
 function updateBldToggle(){
   const btn=document.getElementById('bldToggle');
   const cnt=filterBuildings().length;
-  if(btn){btn.style.display='block';btn.textContent=`🏢 管委會 ${cnt}`;btn.classList.toggle('on',buildingsVisible);}
+  if(btn){
+    btn.style.display='block'; // 永遠顯示
+    btn.textContent=`🏢 ${cnt}棟`;
+    btn.classList.toggle('on',buildingsVisible);
+  }
 }
 
 function toggleBuildings(){
@@ -1205,55 +1209,67 @@ function toggleBldFilter(type,val){
 function renderBldPanel(){
   const filtered=filterBuildings();
   const total=BUILDINGS_RAW.length;
-
-  // 各類圓點顏色
   const floorColor={'5樓以下':'#f97316','6-15樓':'#3b82f6','15樓以上':'#a855f7'};
 
-  const mkGroup=(type,opts,colors)=>{
-    const chips=opts.map(v=>{
-      const on=bldFilter[type].has(v);
-      const color=colors?colors[v]:'var(--accent)';
-      const bg=on?color:'rgba(255,255,255,0.04)';
-      const border=on?color:'var(--border)';
-      const txt=on?'#fff':'var(--muted)';
-      const dot=colors?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:4px;vertical-align:middle"></span>`:'';
-      return`<button onclick="toggleBldFilter('${type}','${v}')"
-        style="padding:4px 10px;border-radius:5px;border:1px solid ${border};background:${bg};color:${txt};
-               font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;
-               margin:2px;font-family:inherit"
-        data-type="${type}" data-val="${v}">${dot}${v}</button>`;
-    }).join('');
-    return chips;
-  };
+  const mkGroup=(type,opts,colors)=>opts.map(v=>{
+    const on=bldFilter[type].has(v);
+    const color=colors?colors[v]:'var(--accent)';
+    const bg=on?color:'rgba(255,255,255,0.04)';
+    const bdr=on?color:'var(--border)';
+    const txt=on?'#fff':'var(--muted)';
+    const dot=colors?`<span style="width:8px;height:8px;border-radius:50%;background:${color};margin-right:4px;display:inline-block;vertical-align:middle;flex-shrink:0"></span>`:'';
+    return`<button onclick="toggleBldFilter('${type}','${v}')"
+      style="padding:4px 10px;border-radius:5px;border:1px solid ${bdr};background:${bg};color:${txt};
+             font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;
+             margin:2px;font-family:inherit">${dot}${v}</button>`;
+  }).join('');
+
+  // 選中建物詳細資訊
+  let bldDetailHTML='';
+  if(selectedBuilding){
+    const b=selectedBuilding;
+    const color=bldColor(b);
+    const fc=floorCat(b.floors),uc=unitCat(b.units),yc=yearCat(b.year);
+    bldDetailHTML=`<div class="sidebar-section">
+      <button class="back-btn" onclick="selectedBuilding=null;renderPanel()">← 回篩選</button>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">${b.name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${b.addr}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="background:${color};color:#fff;padding:3px 10px;border-radius:8px;font-size:12px">${fc}</span>
+        <span style="background:rgba(255,255,255,0.08);color:var(--text);padding:3px 10px;border-radius:8px;font-size:12px">${uc}</span>
+        <span style="background:rgba(255,229,0,0.15);color:#ffe500;padding:3px 10px;border-radius:8px;font-size:12px">${yc}</span>
+      </div>
+      <div class="stat-row"><span class="stat-label">樓層數</span><span class="stat-value">${b.floors} 樓</span></div>
+      <div class="stat-row"><span class="stat-label">總戶數</span><span class="stat-value">${b.units} 戶</span></div>
+      <div class="stat-row"><span class="stat-label">管委會備查年份</span><span class="stat-value">${b.year} 年</span></div>
+    </div>`;
+    return bldDetailHTML;
+  }
 
   return`<div class="sidebar-section">
     <div class="sidebar-title">🏢 管委會建物</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
       顯示 <b style="color:var(--text);font-size:14px">${filtered.length}</b> / ${total} 棟
-      &nbsp;·&nbsp; 點擊圓點查看建物資訊
+      &nbsp;·&nbsp; 點擊地圖圓點查看詳細資訊
     </div>
-
     <div style="margin-bottom:10px">
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 樓層</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px">▍ 樓層</div>
       ${mkGroup('floor',['5樓以下','6-15樓','15樓以上'],floorColor)}
     </div>
-
     <div style="margin-bottom:10px">
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 管委會設立時間</div>
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px">▍ 設立時間</div>
       ${mkGroup('year',['2022年以前','2022年以後'],null)}
     </div>
-
-    <div style="margin-bottom:4px">
-      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;letter-spacing:.05em">▍ 戶數</div>
+    <div>
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px">▍ 戶數</div>
       ${mkGroup('unit',['50戶以下','51-100戶','101-250戶','250戶以上'],null)}
     </div>
   </div>`;
 }
 
 function initBuildingLayer(){
-  // 初始化時不顯示圖層，等使用者進入「管委會」模式才顯示
-  const btn=document.getElementById('bldToggle');
-  if(btn) btn.style.display='none';
+  // 初始化：toggle 按鈕顯示，圖層預設關閉
+  updateBldToggle();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1417,13 +1433,12 @@ function setYear(year,btn){
       if(el?.candidates.length)curCandidate=el.candidates[0].key;
     }
   }
-  // 離開 bld 模式時隱藏建物圖層
+  // 離開 bld 模式時關閉建物圖層（但 toggle 按鈕保留可用）
   if(year!=='bld'&&buildingsVisible){
     buildingsVisible=false;
     if(buildingLayer){map.removeLayer(buildingLayer);buildingLayer=null;}
-    const bBtn=document.getElementById('bldToggle');
-    if(bBtn){bBtn.classList.remove('on');bBtn.style.display='none';}
   }
+  selectedBuilding=null;
   if(year==='overview'||year==='pop'||year==='bld'){
     document.getElementById('row-election').innerHTML=`<span class="filter-label">選舉</span>`;
     document.getElementById('row-candidate').innerHTML=`<span class="filter-label">候選人</span>`;
